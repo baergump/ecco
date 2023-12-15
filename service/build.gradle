@@ -22,4 +22,5 @@ dependencies {
 	testImplementation project(':ecco-adapter-cpp')
 	testImplementation project(':ecco-adapter-runtime')
 
+	testImplementation 'commons-io:commons-io:2.15.1'
 }

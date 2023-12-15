@@ -340,6 +340,7 @@ public interface Node extends Persistable {
 			Trees.checkConsistency(this);
 		}
 
+		Op copy();
 	}
 
 }

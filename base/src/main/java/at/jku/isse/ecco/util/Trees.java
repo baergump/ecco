@@ -193,6 +193,39 @@ public class Trees {
 		}
 	}
 
+	public static void mergePartialOrderGraphs(Node.Op left, Node.Op right) {
+		if (!left.equals(right))
+			throw new EccoException("Merging partial order graphs of non-equal nodes is not allowed!");
+
+		if (left.getArtifact() != null && right.getArtifact() != null) {
+			if (left.getArtifact().isOrdered()) {
+				if (left.getArtifact().isSequenced() && right.getArtifact().isSequenced() && left.getArtifact().getPartialOrderGraph() != right.getArtifact().getPartialOrderGraph()) {
+					left.getArtifact().getPartialOrderGraph().merge(right.getArtifact().getPartialOrderGraph());
+					right.getArtifact().setPartialOrderGraph(left.getArtifact().getPartialOrderGraph());
+				} else if (!left.getArtifact().isSequenced() && !right.getArtifact().isSequenced()) {
+					left.getArtifact().setPartialOrderGraph(left.getArtifact().createSequenceGraph());
+					left.getArtifact().getPartialOrderGraph().merge(left.getChildrenArtifacts());
+				}
+
+				if (left.getArtifact().isSequenced() && !right.getArtifact().isSequenced()) {
+					left.getArtifact().getPartialOrderGraph().merge(right.getChildrenArtifacts());
+				} else if (!left.getArtifact().isSequenced() && right.getArtifact().isSequenced()) {
+					right.getArtifact().getPartialOrderGraph().merge(left.getChildrenArtifacts());
+					left.getArtifact().setPartialOrderGraph(right.getArtifact().getPartialOrderGraph());
+					throw new EccoException("Left node was not sequenced but right node was!");
+				}
+			}
+		}
+
+		for (Node.Op leftChild : left.getChildren()) {
+			int ri = right.getChildren().indexOf(leftChild);
+			if (ri == -1)
+				continue;
+			Node.Op rightChild = right.getChildren().get(ri);
+			mergePartialOrderGraphs(leftChild, rightChild);
+		}
+	}
+
 
 	/**
 	 * Merges the right node into the left node. The right node is modified!
@@ -369,7 +402,7 @@ public class Trees {
 	 * @param left  The left tree to be subtracted from, which is modified.
 	 * @param right The right tree to subtract, which is not modified.
 	 */
-	public void subtract(Node.Op left, Node.Op right) {
+	public static void subtract(Node.Op left, Node.Op right) {
 		// do some basic checks
 		if (left.getArtifact() != null && !left.getArtifact().equals(right.getArtifact()))
 			throw new EccoException("Artifacts must be equal.");

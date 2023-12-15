@@ -6,6 +6,7 @@ import at.jku.isse.ecco.core.Variant;
 import at.jku.isse.ecco.dao.EntityFactory;
 import at.jku.isse.ecco.feature.Configuration;
 import at.jku.isse.ecco.feature.Feature;
+import at.jku.isse.ecco.featuretracerecording.FeatureTrace;
 import at.jku.isse.ecco.module.Module;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.storage.mem.dao.MemEntityFactory;
@@ -28,6 +29,7 @@ public final class MemRepository implements Repository, Repository.Op {
 	private List<Map<MemModule, MemModule>> modules;
 	private Collection<Commit> commits;
 	private int maxOrder;
+	private List<FeatureTrace> featureTraces;
 
 	public MemRepository() {
 		this.features = Maps.mutable.empty();
@@ -35,6 +37,7 @@ public final class MemRepository implements Repository, Repository.Op {
 		this.modules = new ArrayList<>();
 		this.commits = new ArrayList<>();
 		this.setMaxOrder(2);
+		this.featureTraces = new LinkedList<>();
 	}
 
 	@Override
@@ -218,5 +221,10 @@ public final class MemRepository implements Repository, Repository.Op {
 			return null;
 		this.modules.get(module.getOrder()).put(module, module);
 		return module;
+	}
+
+	@Override
+	public Collection<FeatureTrace> getFeatureTraces(){
+		return this.featureTraces;
 	}
 }

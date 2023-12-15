@@ -26,6 +26,15 @@ public class MemNode implements Node, Node.Op {
 	private Op parent = null;
 
 
+	public Op copy(){
+		MemNode newNode = new MemNode(this.artifact);
+		for (Op child : this.children){
+			newNode.addChild(child.copy());
+		}
+		return newNode;
+	}
+
+
 	@Deprecated
 	public MemNode() {
 	}

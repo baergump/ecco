@@ -1545,6 +1545,8 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
      * @return The resulting commit object or null in case of an error.
      */
     public synchronized Commit commit(String commitMessage, Configuration configuration, String committer) {
+        // TODO: extend with Feature Trace Recording (use respective information if present)
+
         this.checkInitialized();
 
         checkNotNull(configuration);
@@ -1560,6 +1562,8 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
             long extractTime = System.currentTimeMillis();
             Commit commit = repository.extract(configuration, nodes, committer);
             extractTime = System.currentTimeMillis() - extractTime;
+
+            // TODO: update Feature Traces in the repository
 
             //storing new variant
             boolean hasConfiguration = false;
