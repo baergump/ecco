@@ -4,4 +4,5 @@ dependencies {
 	implementation 'com.github.javaparser:javaparser-symbol-solver-core:3.25.8'
 
 	implementation project(':ecco-service')
+	testImplementation 'commons-io:commons-io:2.15.1'
 }
