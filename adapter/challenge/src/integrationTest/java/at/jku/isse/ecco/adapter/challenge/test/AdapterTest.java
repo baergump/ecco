@@ -1,5 +1,6 @@
 package at.jku.isse.ecco.adapter.challenge.test;
 
+import at.jku.isse.ecco.adapter.ReadResult;
 import at.jku.isse.ecco.adapter.challenge.*;
 import at.jku.isse.ecco.storage.mem.dao.*;
 import at.jku.isse.ecco.tree.Node;
@@ -20,9 +21,9 @@ public class AdapterTest {
 		JavaChallengeReader reader = new JavaChallengeReader(new MemEntityFactory());
 
 		System.out.println("READ");
-		Set<Node.Op> nodes = reader.read(BASE_DIR, FILES);
+		ReadResult result = reader.read(BASE_DIR, FILES);
 
-		System.out.println(nodes);
+		System.out.println(result);
 	}
 
 	@Test

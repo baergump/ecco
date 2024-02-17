@@ -2,6 +2,7 @@ package at.jku.isse.ecco.adapter.challenge;
 
 import at.jku.isse.ecco.EccoException;
 import at.jku.isse.ecco.adapter.ArtifactReader;
+import at.jku.isse.ecco.adapter.ReadResult;
 import at.jku.isse.ecco.adapter.challenge.data.*;
 import at.jku.isse.ecco.adapter.dispatch.DispatchWriter;
 import at.jku.isse.ecco.adapter.dispatch.PluginArtifactData;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>> {
+public class JavaChallengeReader implements ArtifactReader<Path, ReadResult> {
 
 	protected static final Logger LOGGER = Logger.getLogger(DispatchWriter.class.getName());
 
@@ -57,12 +58,12 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>> {
 	}
 
 	@Override
-	public Set<Node.Op> read(Path[] input) {
+	public ReadResult read(Path[] input) {
 		return this.read(Paths.get("."), input);
 	}
 
 	@Override
-	public Set<Node.Op> read(Path base, Path[] input) {
+	public ReadResult read(Path base, Path[] input) {
 		Set<Node.Op> nodes = new HashSet<>();
 
 		long totalJavaParserTime = 0;
@@ -126,7 +127,8 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>> {
 
 		LOGGER.fine(JavaParser.class + ".parse(): " + totalJavaParserTime + "ms");
 
-		return nodes;
+		// TODO: change method to return ReadResult
+		return null;
 	}
 
 
