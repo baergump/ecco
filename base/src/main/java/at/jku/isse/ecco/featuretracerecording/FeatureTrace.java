@@ -8,6 +8,9 @@ import at.jku.isse.ecco.tree.Node;
 
 import java.util.Collection;
 
+// TODO: make it possible to transform arbitrary logical formulas of first order to feature traces
+// TODO: (work directly with logical formulas and not sets of modules/features etc.)
+
 /**
  *
  */

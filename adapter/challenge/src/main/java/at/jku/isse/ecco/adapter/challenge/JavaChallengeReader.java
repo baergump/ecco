@@ -3,11 +3,13 @@ package at.jku.isse.ecco.adapter.challenge;
 import at.jku.isse.ecco.EccoException;
 import at.jku.isse.ecco.adapter.ArtifactReader;
 import at.jku.isse.ecco.adapter.challenge.data.*;
+import at.jku.isse.ecco.adapter.challenge.vevos.LogicToModuleTransformer;
+import at.jku.isse.ecco.adapter.challenge.vevos.VEVOSConditionHandler;
+import at.jku.isse.ecco.adapter.challenge.vevos.VEVOSPresenceCondition;
 import at.jku.isse.ecco.adapter.dispatch.DispatchWriter;
 import at.jku.isse.ecco.adapter.dispatch.PluginArtifactData;
 import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.dao.EntityFactory;
-import at.jku.isse.ecco.featuretracerecording.FeatureTrace;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.listener.ReadListener;
 import at.jku.isse.ecco.tree.Node;
@@ -60,13 +62,15 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>> {
 
 	@Override
 	public Set<Node.Op> read(Path[] input, Repository.Op repository) {
-		// TODO: create VEVOSConditionHandler
 		return this.read(Paths.get("."), input, repository);
 	}
 
 	@Override
 	public Set<Node.Op> read(Path base, Path[] input, Repository.Op repository) {
 		// TODO: refactor method (make it shorter, less procedural, more oo)
+		// TODO: refactor: feature traces are created as a side-effect, which is bad practice
+		LogicToModuleTransformer logicToModuleTransformer = new LogicToModuleTransformer(repository);
+		VEVOSConditionHandler vevosConditionHandler = new VEVOSConditionHandler(base, logicToModuleTransformer);
 
 		Set<Node.Op> nodes = new HashSet<>();
 
@@ -81,9 +85,9 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>> {
 			// parser results seem to offer the possibility to get the respective line numbers in the source code
 			// -> connect vevos line numbers to parser result line numbers to recognize feature traces
 
-			// what if lines don't match? -> handle cases as they come
-			// TODO: handle cases where lines don't match
+			// TODO: handle cases where lines don't match (overlap)
 
+			Collection<VEVOSPresenceCondition> fileSpecificConditions = vevosConditionHandler.getFileSpecificPresenceConditions(path);
 
 			Path resolvedPath = base.resolve(path);
 
@@ -317,6 +321,21 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>> {
 		}
 	}
 
+	private VEVOSPresenceCondition getMatchingPresenceCondition(Node.Op node, List<VEVOSPresenceCondition> orderedPresenceConditions){
+		Collection<VEVOSPresenceCondition> matchingPresenceConditions = new HashSet<>();
+		// search for the first list entry with startLine < nodeStartLine
+		// collect all conditions with endLine > nodeEndLine
+		// more than 1 -> exception (how should this be handled?) (most specific one?)
+		// are there entries with nodeStartLine < startLine < nodeEndLine AND endLine > nodeEndLine?
+		// are there entries with startLine < nodeStartLine AND nodeStartLine < endLine < nodeEndLine?
+
+		// create feature trace if there is a result
+
+
+		// maybe iterate all presence-conditions and search for matching node instead (there must be one) (no misses)
+	}
+	
+	// TODO: method/function to prepare node for feature trace (remove everything but path to root and make everything not unique except one node)
 
 	private Collection<ReadListener> listeners = new ArrayList<>();
 
@@ -329,9 +348,5 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>> {
 	public void removeListener(ReadListener listener) {
 		this.listeners.remove(listener);
 	}
-
-
-	// creating a feature trace:
-	// TODO: how do I get the modules in the feature trace at this point?
 
 }
