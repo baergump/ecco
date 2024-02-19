@@ -2,12 +2,13 @@ package at.jku.isse.ecco.adapter.challenge;
 
 import at.jku.isse.ecco.EccoException;
 import at.jku.isse.ecco.adapter.ArtifactReader;
-import at.jku.isse.ecco.adapter.ReadResult;
 import at.jku.isse.ecco.adapter.challenge.data.*;
 import at.jku.isse.ecco.adapter.dispatch.DispatchWriter;
 import at.jku.isse.ecco.adapter.dispatch.PluginArtifactData;
 import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.dao.EntityFactory;
+import at.jku.isse.ecco.featuretracerecording.FeatureTrace;
+import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.listener.ReadListener;
 import at.jku.isse.ecco.tree.Node;
 import com.github.javaparser.*;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class JavaChallengeReader implements ArtifactReader<Path, ReadResult> {
+public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>> {
 
 	protected static final Logger LOGGER = Logger.getLogger(DispatchWriter.class.getName());
 
@@ -58,17 +59,32 @@ public class JavaChallengeReader implements ArtifactReader<Path, ReadResult> {
 	}
 
 	@Override
-	public ReadResult read(Path[] input) {
-		return this.read(Paths.get("."), input);
+	public Set<Node.Op> read(Path[] input, Repository.Op repository) {
+		// TODO: create VEVOSConditionHandler
+		return this.read(Paths.get("."), input, repository);
 	}
 
 	@Override
-	public ReadResult read(Path base, Path[] input) {
+	public Set<Node.Op> read(Path base, Path[] input, Repository.Op repository) {
+		// TODO: refactor method (make it shorter, less procedural, more oo)
+
 		Set<Node.Op> nodes = new HashSet<>();
 
 		long totalJavaParserTime = 0;
 
 		for (Path path : input) {
+			// Using comments by Couto et al. would mean looking at line numbers in VEVOS files, looking at
+			// Couto et al. comment and connecting granularity to adapter artifact
+			// Couto et al.: Package, Class, ClassSignature, InterfaceMethod, Method, MethodBody, Attribute, Statement, Expression
+
+			// Should be possible without using Couto et al. comments.
+			// parser results seem to offer the possibility to get the respective line numbers in the source code
+			// -> connect vevos line numbers to parser result line numbers to recognize feature traces
+
+			// what if lines don't match? -> handle cases as they come
+			// TODO: handle cases where lines don't match
+
+
 			Path resolvedPath = base.resolve(path);
 
 			// create plugin artifact/node
@@ -80,16 +96,8 @@ public class JavaChallengeReader implements ArtifactReader<Path, ReadResult> {
 				// read raw file contents
 				String fileContent = new String(Files.readAllBytes(resolvedPath), StandardCharsets.UTF_8);
 				String[] lines = fileContent.split("\\r?\\n");
-//				List<String> lines = new ArrayList<>();
-//				try (BufferedReader br = new BufferedReader(new InputStreamReader(Files.newInputStream(resolvedPath), StandardCharsets.UTF_8))) {
-//					String line;
-//					while ((line = br.readLine()) != null) {
-//						lines.add(line);
-//					}
-//				}
 
 				long localStartTime = System.currentTimeMillis();
-				//CompilationUnit cu = JavaParser.parse(resolvedPath);
 				CompilationUnit cu = StaticJavaParser.parse(fileContent);
 				totalJavaParserTime += (System.currentTimeMillis() - localStartTime);
 
@@ -104,6 +112,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, ReadResult> {
 					Artifact.Op<ClassArtifactData> classArtifact = this.entityFactory.createArtifact(new ClassArtifactData(packageName + "." + className));
 					Node.Op classNode = this.entityFactory.createNode(classArtifact);
 					pluginNode.addChild(classNode);
+					// TODO: check for feature traces for class
 
 					// imports
 					Artifact.Op<AbstractArtifactData> importsGroupArtifact = this.entityFactory.createArtifact(new AbstractArtifactData("IMPORTS"));
@@ -114,6 +123,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, ReadResult> {
 						Artifact.Op<ImportArtifactData> importArtifact = this.entityFactory.createArtifact(new ImportArtifactData(importName));
 						Node.Op importNode = this.entityFactory.createNode(importArtifact);
 						importsGroupNode.addChild(importNode);
+						// TODO: check for feature traces for import
 					}
 					ArrayList<String> methods =  new ArrayList<>();
 					this.addClassChildren(typeDeclaration, classNode, lines, methods);
@@ -122,16 +132,11 @@ public class JavaChallengeReader implements ArtifactReader<Path, ReadResult> {
 				e.printStackTrace();
 				throw new EccoException("Error parsing java file.", e);
 			}
-
 		}
 
 		LOGGER.fine(JavaParser.class + ".parse(): " + totalJavaParserTime + "ms");
-
-		// TODO: change method to return ReadResult
-		return null;
+		return nodes;
 	}
-
-
 
 	public Set<Node.Op> read(Path base, Path[] input, ArrayList<String> methods) {
 		Set<Node.Op> nodes = new HashSet<>();
@@ -150,13 +155,6 @@ public class JavaChallengeReader implements ArtifactReader<Path, ReadResult> {
 				// read raw file contents
 				String fileContent = new String(Files.readAllBytes(resolvedPath), StandardCharsets.UTF_8);
 				String[] lines = fileContent.split("\\r?\\n");
-//				List<String> lines = new ArrayList<>();
-//				try (BufferedReader br = new BufferedReader(new InputStreamReader(Files.newInputStream(resolvedPath), StandardCharsets.UTF_8))) {
-//					String line;
-//					while ((line = br.readLine()) != null) {
-//						lines.add(line);
-//					}
-//				}
 
 				long localStartTime = System.currentTimeMillis();
 				//CompilationUnit cu = JavaParser.parse(resolvedPath);
@@ -201,6 +199,8 @@ public class JavaChallengeReader implements ArtifactReader<Path, ReadResult> {
 	}
 
 	private void addClassChildren(TypeDeclaration<?> typeDeclaration, Node.Op classNode, String[] lines, ArrayList<String> methods) {
+		// TODO: refactor method (shorten, less procedural, more oo)
+
 		// create methods artifact/node
 		Artifact.Op<AbstractArtifactData> methodsGroupArtifact = this.entityFactory.createArtifact(new AbstractArtifactData("METHODS"));
 		Node.Op methodsGroupNode = this.entityFactory.createNode(methodsGroupArtifact);
@@ -219,6 +219,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, ReadResult> {
 				Artifact.Op<ClassArtifactData> nestedClassArtifact = this.entityFactory.createArtifact(new ClassArtifactData(classNode.toString() + "." + ((ClassOrInterfaceDeclaration) node).getName().toString()));
 				Node.Op nestedClassNode = this.entityFactory.createNode(nestedClassArtifact);
 				classNode.addChild(nestedClassNode);
+				// TODO: check for feature trace
 				addClassChildren((ClassOrInterfaceDeclaration) node, nestedClassNode, lines, methods);
 			}
 			// enumerations
@@ -232,6 +233,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, ReadResult> {
 						Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(lines[i]));
 						Node.Op lineNode = this.entityFactory.createNode(lineArtifact);
 						enumsGroupNode.addChild(lineNode);
+						// TODO: check for feature trace
 					}
 					i++;
 				}
@@ -248,6 +250,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, ReadResult> {
 						Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(lines[i]));
 						Node.Op lineNode = this.entityFactory.createNode(lineArtifact);
 						fieldsGroupNode.addChild(lineNode);
+						// TODO: check for feature trace
 					}
 					i++;
 				}
@@ -262,6 +265,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, ReadResult> {
 				Artifact.Op<MethodArtifactData> methodArtifact = this.entityFactory.createArtifact(new MethodArtifactData(methodSignature));
 				Node.Op methodNode = this.entityFactory.createOrderedNode(methodArtifact);
 				methodsGroupNode.addChild(methodNode);
+				// TODO: check for feature trace
 				if (((ConstructorDeclaration) node).getBody().getStatements().isNonEmpty()) {
 					int beginLine = node.getRange().get().begin.line;
 					int endLine = node.getRange().get().end.line;
@@ -272,26 +276,12 @@ public class JavaChallengeReader implements ArtifactReader<Path, ReadResult> {
 							Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(lines[i]));
 							Node.Op lineNode = this.entityFactory.createNode(lineArtifact);
 							methodNode.addChild(lineNode);
+							// TODO: check for feature trace
 						}
 						i++;
 					}
 				}
 			}
-//			// methods
-//			else if (node instanceof MethodDeclaration) {
-//				String methodSignature = ((MethodDeclaration) node).getName().toString() + "(";
-//				for (int j = 0; j < ((MethodDeclaration) node).getParameters().size(); j++) {
-//					if (j < ((MethodDeclaration) node).getParameters().size() - 1)
-//						methodSignature += ((MethodDeclaration) node).getParameters().get(j).getType().toString() + ",";
-//					else
-//						methodSignature += ((MethodDeclaration) node).getParameters().get(j).getType().toString();
-//				}
-//				methodSignature += ")";
-//				Artifact.Op<MethodArtifactData> methodArtifact = this.entityFactory.createArtifact(new MethodArtifactData(methodSignature));
-//				Node.Op methodNode = this.entityFactory.createOrderedNode(methodArtifact);
-//				methodsGroupNode.addChild(methodNode);
-//				addMethodChildren((MethodDeclaration) node, methodNode, lines);
-//			}
 		}
 
 		// methods
@@ -303,6 +293,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, ReadResult> {
 			Artifact.Op<MethodArtifactData> methodArtifact = this.entityFactory.createArtifact(new MethodArtifactData(methodSignature));
 			Node.Op methodNode = this.entityFactory.createOrderedNode(methodArtifact);
 			methodsGroupNode.addChild(methodNode);
+			// TODO: check for feature trace
 			addMethodChildren(methodDeclaration, methodNode, lines);
 		}
 	}
@@ -319,6 +310,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, ReadResult> {
 					Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(lines[i]));
 					Node.Op lineNode = this.entityFactory.createNode(lineArtifact);
 					methodNode.addChild(lineNode);
+					// TODO: check for feature trace
 				}
 				i++;
 			}
@@ -337,5 +329,9 @@ public class JavaChallengeReader implements ArtifactReader<Path, ReadResult> {
 	public void removeListener(ReadListener listener) {
 		this.listeners.remove(listener);
 	}
+
+
+	// creating a feature trace:
+	// TODO: how do I get the modules in the feature trace at this point?
 
 }

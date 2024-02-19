@@ -5,6 +5,7 @@ import at.jku.isse.ecco.adapter.ArtifactPlugin;
 import at.jku.isse.ecco.adapter.ArtifactReader;
 import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.dao.EntityFactory;
+import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.EccoService;
 import at.jku.isse.ecco.service.listener.ReadListener;
 import at.jku.isse.ecco.tree.Node;
@@ -206,11 +207,11 @@ public class DispatchReader implements ArtifactReader<Path, Set<Node.Op>> {
 	}
 
 
-	public Set<Node.Op> readSpecificFiles(Path[] input) {
-		return this.readSpecificFiles(Paths.get("."), input);
+	public Set<Node.Op> readSpecificFiles(Path[] input, Repository.Op repository) {
+		return this.readSpecificFiles(Paths.get("."), input, repository);
 	}
 
-	public Set<Node.Op> readSpecificFiles(Path base, Path[] input) {
+	public Set<Node.Op> readSpecificFiles(Path base, Path[] input, Repository.Op repository) {
 		long startTime = System.currentTimeMillis();
 
 		// for every file in paths add all parent directories and parse the file using the appropriate plugin
@@ -242,7 +243,7 @@ public class DispatchReader implements ArtifactReader<Path, Set<Node.Op>> {
 				if (reader == null)
 					throw new EccoException("No reader found for file " + path);
 				//long localStartTime = System.currentTimeMillis();
-				Set<Node.Op> nodes = reader.read(base, new Path[]{path});
+				Set<Node.Op> nodes = reader.read(base, new Path[]{path}, repository);
 				//LOGGER.info(reader.getClass() + ".read(): " + (System.currentTimeMillis() - localStartTime) + "ms");
 				if (!nodes.isEmpty()) {
 					for (Node.Op node : nodes) {
@@ -291,12 +292,12 @@ public class DispatchReader implements ArtifactReader<Path, Set<Node.Op>> {
 
 
 	@Override
-	public Set<Node.Op> read(Path[] input) {
-		return this.read(Paths.get("."), input);
+	public Set<Node.Op> read(Path[] input, Repository.Op repository) {
+		return this.read(Paths.get("."), input, repository);
 	}
 
 	@Override
-	public Set<Node.Op> read(Path base, Path[] input) {
+	public Set<Node.Op> read(Path base, Path[] input, Repository.Op repository) {
 		if (!Files.exists(base)) {
 			throw new EccoException("Base directory does not exist.");
 		} else if (!Files.isDirectory(base)) {
@@ -338,7 +339,7 @@ public class DispatchReader implements ArtifactReader<Path, Set<Node.Op>> {
 					Path[] pluginInput = filesList.toArray(new Path[0]);
 
 					long localStartTime = System.currentTimeMillis();
-					Set<Node.Op> pluginNodes = reader.read(base, pluginInput);
+					Set<Node.Op> pluginNodes = reader.read(base, pluginInput, repository);
 					LOGGER.info(reader.getClass() + ".read(): " + (System.currentTimeMillis() - localStartTime) + "ms");
 					for (Node.Op pluginNode : pluginNodes) {
 						if (!(pluginNode.getArtifact().getData() instanceof PluginArtifactData))

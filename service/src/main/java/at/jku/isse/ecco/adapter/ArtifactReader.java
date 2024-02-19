@@ -1,5 +1,6 @@
 package at.jku.isse.ecco.adapter;
 
+import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.listener.ReadListener;
 
 import java.util.Map;
@@ -18,9 +19,9 @@ public interface ArtifactReader<I, O> {
 	public Map<Integer, String[]> getPrioritizedPatterns();
 
 
-	public O read(I base, I[] input);
+	public O read(I base, I[] input, Repository.Op repository);
 
-	public O read(I[] input);
+	public O read(I[] input, Repository.Op repository);
 
 
 	public void addListener(ReadListener listener);

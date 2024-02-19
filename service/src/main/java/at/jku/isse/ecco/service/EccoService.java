@@ -1554,8 +1554,8 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
         try {
             this.transactionStrategy.begin(TransactionStrategy.TRANSACTION.READ_WRITE);
 
-            Set<Node.Op> nodes = readFiles();
             Repository.Op repository = this.repositoryDao.load();
+            Set<Node.Op> nodes = readFiles(repository);
 
             ArrayList<Variant> variants = repository.getVariants();
 
@@ -1853,8 +1853,8 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
     }
 
 
-    public synchronized Set<Node.Op> readFiles() {
-        return this.reader.read(this.baseDir, new Path[]{Paths.get("")});
+    public synchronized Set<Node.Op> readFiles(Repository.Op repository) {
+        return this.reader.read(this.baseDir, new Path[]{Paths.get("")}, repository);
     }
 
 
@@ -2013,17 +2013,17 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
         checkNotNull(paths);
         checkArgument(!paths.isEmpty());
 
-        Set<Node.Op> nodes = this.reader.readSpecificFiles(this.baseDir, paths.toArray(new Path[0]));
-
-        RootNode.Op rootNode = this.entityFactory.createRootNode();
-        for (Node.Op node : nodes) {
-            rootNode.addChild(node);
-        }
-
         try {
             this.transactionStrategy.begin(TransactionStrategy.TRANSACTION.READ_ONLY);
 
             Repository.Op repository = this.repositoryDao.load();
+
+            Set<Node.Op> nodes = this.reader.readSpecificFiles(this.baseDir, paths.toArray(new Path[0]), repository);
+
+            RootNode.Op rootNode = this.entityFactory.createRootNode();
+            for (Node.Op node : nodes) {
+                rootNode.addChild(node);
+            }
 
             repository.map(rootNode);
 
