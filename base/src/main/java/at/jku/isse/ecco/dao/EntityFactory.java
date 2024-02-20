@@ -8,6 +8,8 @@ import at.jku.isse.ecco.core.Remote;
 import at.jku.isse.ecco.feature.Configuration;
 import at.jku.isse.ecco.feature.Feature;
 import at.jku.isse.ecco.feature.FeatureRevision;
+import at.jku.isse.ecco.featuretracerecording.FeatureTrace;
+import at.jku.isse.ecco.featuretracerecording.FeatureTraceCondition;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.tree.Node;
 import at.jku.isse.ecco.tree.RootNode;
@@ -118,5 +120,7 @@ public interface EntityFactory {
 	public Node.Op createOrderedNode(final Artifact.Op<?> artifact);
 
 	public Node.Op createOrderedNode(final ArtifactData artifactData);
+
+	FeatureTrace createFeatureTrace(Node node, FeatureTraceCondition presenceCondition);
 
 }

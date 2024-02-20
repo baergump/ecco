@@ -49,9 +49,9 @@ public class VEVOSConditionHandler {
         }
     }
 
-    public Collection<VEVOSPresenceCondition> getFileSpecificPresenceConditions(Path filePath){
+    public List<VEVOSPresenceCondition> getFileSpecificPresenceConditions(Path filePath){
         // result is ordered according to line start
-        Collection<VEVOSPresenceCondition> specificPresenceConditions = new HashSet<>();
+        List<VEVOSPresenceCondition> specificPresenceConditions = new LinkedList<>();
         for (VEVOSPresenceCondition vevosPresenceCondition : this.vevosPresenceConditions){
             if (vevosPresenceCondition.getFilePath().compareTo(filePath) == 0){
                 specificPresenceConditions.add(vevosPresenceCondition);
