@@ -272,6 +272,10 @@ public interface Node extends Persistable {
 		 */
 		public void removeChild(Op child);
 
+		/**
+		 * Removes all children from the node.
+		 */
+		void removeChildren();
 
 		/**
 		 * Creates a new instance of this type of node.
@@ -340,7 +344,45 @@ public interface Node extends Persistable {
 			Trees.checkConsistency(this);
 		}
 
-		Op copy();
+		default Op copyTree(){
+			Op copy = copyTreeDownwards();
+			if (!(this instanceof RootNode)) {
+				Op parentCopy = copyTreeUpwards();
+				if (!(parentCopy == null)){ parentCopy.addChild(copy); }
+			}
+			return copy;
+		}
+
+		Op copySingleNode();
+
+		default Op copyTreeDownwards(){
+			// copy this node and all descendants
+			Op node = this.copySingleNode();
+			for (Op child : this.getChildren()){
+				node.addChild(child.copyTreeDownwards());
+			}
+			return node;
+		}
+
+		default Op copyTreeUpwards(){
+			// copy the parent of this node as well as all ancestors and siblings
+			Op parent = this.getParent();
+			if (parent == null) { return parent; }
+			Op parentCopy = parent.copySingleNode();
+			for (Node.Op node : parent.getChildren()){
+				if (node != this){
+					parentCopy.addChild(node.copySingleNode());
+				}
+			}
+			if(parent instanceof RootNode){ return parentCopy; }
+			Op grandParentCopy = parent.copyTreeUpwards();
+			if (!(grandParentCopy == null)){ grandParentCopy.addChild(parentCopy); }
+			return parentCopy;
+		}
+
+		default Node.Op createPathSkeleton(){
+			return Trees.createSkeletonPath(this);
+		}
 	}
 
 }

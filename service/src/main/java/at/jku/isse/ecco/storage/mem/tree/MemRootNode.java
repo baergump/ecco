@@ -2,6 +2,7 @@ package at.jku.isse.ecco.storage.mem.tree;
 
 import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.core.Association;
+import at.jku.isse.ecco.tree.Node;
 import at.jku.isse.ecco.tree.RootNode;
 
 public class MemRootNode extends MemNode implements RootNode, RootNode.Op {
@@ -43,6 +44,12 @@ public class MemRootNode extends MemNode implements RootNode, RootNode.Op {
 	@Override
 	public Association.Op getContainingAssociation() {
 		return this.containingAssociation;
+	}
+
+	@Override
+	public Node.Op copySingleNode(){
+		MemRootNode newNode = new MemRootNode();
+		return newNode;
 	}
 
 }

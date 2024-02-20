@@ -4,6 +4,7 @@ import at.jku.isse.ecco.EccoException;
 import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.core.Association;
 import at.jku.isse.ecco.tree.Node;
+import at.jku.isse.ecco.tree.RootNode;
 import org.eclipse.collections.impl.factory.Maps;
 
 import java.util.ArrayList;
@@ -25,15 +26,10 @@ public class MemNode implements Node, Node.Op {
 
 	private Op parent = null;
 
-
-	public Op copy(){
+	public Op copySingleNode(){
 		MemNode newNode = new MemNode(this.artifact);
-		for (Op child : this.children){
-			newNode.addChild(child.copy());
-		}
 		return newNode;
 	}
-
 
 	@Deprecated
 	public MemNode() {
@@ -126,6 +122,12 @@ public class MemNode implements Node, Node.Op {
 			throw new EccoException("Attempted to remove child that does not exist.");
 	}
 
+	@Override
+	public void removeChildren(){
+		for (int i = 0; i < this.children.size(); i++){
+			this.children.remove(i);
+		}
+	}
 
 	@Override
 	public List<Op> getChildren() {
@@ -169,5 +171,4 @@ public class MemNode implements Node, Node.Op {
 			this.properties = Maps.mutable.empty();
 		return this.properties;
 	}
-
 }

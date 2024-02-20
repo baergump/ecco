@@ -19,9 +19,9 @@ public interface ArtifactReader<I, O> {
 	public Map<Integer, String[]> getPrioritizedPatterns();
 
 
-	public O read(I base, I[] input, Repository.Op repository);
+	public O read(I base, I[] input);
 
-	public O read(I[] input, Repository.Op repository);
+	public O read(I[] input);
 
 
 	public void addListener(ReadListener listener);

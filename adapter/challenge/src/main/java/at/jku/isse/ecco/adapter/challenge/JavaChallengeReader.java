@@ -2,6 +2,7 @@ package at.jku.isse.ecco.adapter.challenge;
 
 import at.jku.isse.ecco.EccoException;
 import at.jku.isse.ecco.adapter.ArtifactReader;
+import at.jku.isse.ecco.adapter.FeatureTraceReader;
 import at.jku.isse.ecco.adapter.challenge.data.*;
 import at.jku.isse.ecco.adapter.challenge.vevos.LogicToModuleTransformer;
 import at.jku.isse.ecco.adapter.challenge.vevos.VEVOSConditionHandler;
@@ -32,7 +33,18 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>> {
+/*
+TODO:
+tests:
+		- Node utility functions
+		- VEVOS file parsing (paths, presence conditions)
+		- Adapter test (are read feature traces correct?)
+		- Variant creation with feature traces (do feature traces get used correctly?)
+
+ */
+
+
+public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>, FeatureTraceReader<Path, Set<Node.Op>>{
 
 	protected static final Logger LOGGER = Logger.getLogger(DispatchWriter.class.getName());
 
@@ -60,6 +72,16 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>> {
 	@Override
 	public Map<Integer, String[]> getPrioritizedPatterns() {
 		return Collections.unmodifiableMap(prioritizedPatterns);
+	}
+
+	@Override
+	public Set<Node.Op> read(Path base, Path[] input) {
+		return null;
+	}
+
+	@Override
+	public Set<Node.Op> read(Path[] input) {
+		return null;
 	}
 
 	@Override
@@ -116,7 +138,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>> {
 					Artifact.Op<ClassArtifactData> classArtifact = this.entityFactory.createArtifact(new ClassArtifactData(packageName + "." + className));
 					Node.Op classNode = this.entityFactory.createNode(classArtifact);
 					pluginNode.addChild(classNode);
-					// TODO: use file conditions to create feature traces for classes
+					// TODO: use file conditions to create feature traces for classes?
 
 					// imports
 					Artifact.Op<AbstractArtifactData> importsGroupArtifact = this.entityFactory.createArtifact(new AbstractArtifactData("IMPORTS"));
@@ -142,6 +164,11 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>> {
 
 		LOGGER.fine(JavaParser.class + ".parse(): " + totalJavaParserTime + "ms");
 		return nodes;
+	}
+
+	// TODO: clean up here
+	public Set<Node.Op> read(Path base, Path[] input, ArrayList<String> methods) {
+		return null;
 	}
 
 	/*
@@ -204,7 +231,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>> {
 
 		return nodes;
 	}
-	*/
+	 */
 
 	private void addClassChildren(TypeDeclaration<?> typeDeclaration,
 								  Node.Op classNode,
@@ -398,12 +425,9 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>> {
 	}
 
 	private Node.Op createFeatureTraceNode(Node.Op eccoNode){
-		// TODO: copy node and only make dedicated node unique
-		// TODO: remove all nodes except path from dedicated node to root
-		// TODO: add the new feature trace to the repository
-		Node.Op newNode = eccoNode.createPathSceleton();
+		Node.Op newNode = eccoNode.copyTree();
+		newNode.createPathSkeleton();
 		return newNode;
-		
 	}
 
 	private Collection<ReadListener> listeners = new ArrayList<>();

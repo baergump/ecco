@@ -6,7 +6,7 @@ import at.jku.isse.ecco.tree.*;
 import at.jku.isse.ecco.util.*;
 import org.junit.jupiter.api.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class TreesTest {
 
@@ -50,6 +50,40 @@ public class TreesTest {
 
 		// TODO: other operations
 
+	}
+
+	@Test
+	public void testCopy(){
+		Node.Op tree = this.createTestTree1();
+		Node.Op copyTree = tree.copyTree();
+		assertTrue(Trees.equals(tree, copyTree));
+	}
+
+	@Test
+	public void testCopyWithMiddleNode(){
+		Node.Op tree = this.createTestTree1();
+		Node.Op middleNode = tree.getChildren().get(0).getChildren().get(1);
+		Node.Op copyMiddleNode = middleNode.copyTree();
+		Node.Op copyRoot = copyMiddleNode;
+		while (!(copyRoot instanceof RootNode)){
+			copyRoot = copyRoot.getParent();
+		}
+		assertTrue(Trees.equals(tree, copyRoot));
+	}
+
+	@Test
+	public void testCreatePathSkeleton(){
+		Node.Op tree = this.createTestTree1();
+		Node.Op middleNode = tree.getChildren().get(0).getChildren().get(1);
+		Node.Op pathSkeleton = middleNode.createPathSkeleton();
+
+		assertTrue(pathSkeleton.isUnique());
+		assertFalse(pathSkeleton.getParent().isUnique());
+		// root nodes are always true
+		assertTrue(pathSkeleton.getParent().getParent().isUnique());
+		assertTrue(pathSkeleton.getChildren().isEmpty());
+        assertEquals(1, pathSkeleton.getParent().getChildren().size());
+		assertEquals(1, pathSkeleton.getParent().getParent().getChildren().size());
 	}
 
 

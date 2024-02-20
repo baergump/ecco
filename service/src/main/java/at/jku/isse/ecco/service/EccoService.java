@@ -1854,7 +1854,8 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
 
 
     public synchronized Set<Node.Op> readFiles(Repository.Op repository) {
-        return this.reader.read(this.baseDir, new Path[]{Paths.get("")}, repository);
+        // TODO: feature trace reading?
+        return this.reader.read(this.baseDir, new Path[]{Paths.get("")});
     }
 
 
@@ -2018,7 +2019,7 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
 
             Repository.Op repository = this.repositoryDao.load();
 
-            Set<Node.Op> nodes = this.reader.readSpecificFiles(this.baseDir, paths.toArray(new Path[0]), repository);
+            Set<Node.Op> nodes = this.reader.readSpecificFiles(this.baseDir, paths.toArray(new Path[0]));
 
             RootNode.Op rootNode = this.entityFactory.createRootNode();
             for (Node.Op node : nodes) {

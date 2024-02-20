@@ -737,4 +737,33 @@ public class Trees {
 		}
 	}
 
+	/**
+	 * Copies the node and removes all nodes from the tree except the given and those leading to the root node.
+	 * Makes all nodes non-unique except the given node, which it makes unique.
+	 */
+	public static Node.Op createSkeletonPath(Node.Op node){
+		Node.Op nodeCopy = node.copyTree();
+		nodeCopy.setUnique(true);
+		preparePath(nodeCopy.getParent());
+		node.removeChildren();
+		return nodeCopy;
+	}
+
+	private static void preparePath(Node.Op node){
+		// set non-unique and remove siblings along path to root
+		node.setUnique(false);
+		if (node instanceof RootNode){ return; }
+		removeSiblings(node);
+		preparePath(node.getParent());
+	}
+
+	private static void removeSiblings(Node.Op node) {
+		Node.Op parentNode = node.getParent();
+		for (Node.Op parentsChildNode : parentNode.getChildren()) {
+			// check for equal identity on purpose (equal siblings should be removed as well)
+			if (!(parentsChildNode == node)) {
+				parentNode.removeChild(parentsChildNode);
+			}
+		}
+	}
 }
