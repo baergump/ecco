@@ -54,6 +54,7 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
     public static final Path CONFIG_FILE_NAME = Paths.get(".config");
     public static final Path WARNINGS_FILE_NAME = Paths.get(".warnings");
     public static final Path HASHES_FILE_NAME = Paths.get(".hashes");
+    public static final Path VEVOS_FILE = Paths.get("pcs.variant.csv");
 
 
     private final Properties properties = new Properties();
@@ -1855,6 +1856,7 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
 
     public synchronized Set<Node.Op> readFiles(Repository.Op repository) {
         // TODO: feature trace reading?
+        this.reader.setRepository(repository);
         return this.reader.read(this.baseDir, new Path[]{Paths.get("")});
     }
 

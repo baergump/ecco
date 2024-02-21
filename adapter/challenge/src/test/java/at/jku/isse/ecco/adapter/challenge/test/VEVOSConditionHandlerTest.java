@@ -1,5 +1,7 @@
 package at.jku.isse.ecco.adapter.challenge.test;
 
+import at.jku.isse.ecco.adapter.challenge.vevos.LogicToModuleTransformer;
+import at.jku.isse.ecco.adapter.challenge.vevos.VEVOSConditionHandler;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.EccoService;
 import org.apache.commons.io.FileUtils;
@@ -9,22 +11,23 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
-public class FeatureTraceTest {
-
+public class VEVOSConditionHandlerTest {
     private final Path REPOSITORY_PATH = Paths.get("src", "test","resources", "test_repository");
     private final Path VARIANT_PATH = Paths.get("src", "test", "resources", "test_variant", "Variant_5");
     private EccoService eccoService;
     private Repository.Op repository;
 
+    private LogicToModuleTransformer logicToModuleTransformer;
+
     @BeforeEach
     public void setup() throws IOException {
         this.deleteRepository();
         this.createRepository();
+        this.logicToModuleTransformer = new LogicToModuleTransformer(this.repository);
     }
 
     @AfterEach
@@ -53,8 +56,8 @@ public class FeatureTraceTest {
     }
 
     @Test
-    public void readFeatureTracesTest(){
-        this.eccoService.commit();
-       // assertFalse(this.repository.getFeatureTraces().isEmpty());
+    public void parseFileTest() throws IOException {
+        VEVOSConditionHandler handler = new VEVOSConditionHandler(this.VARIANT_PATH.toAbsolutePath(), this.logicToModuleTransformer);
+        // TODO
     }
 }

@@ -2,7 +2,6 @@ package at.jku.isse.ecco.adapter.challenge;
 
 import at.jku.isse.ecco.EccoException;
 import at.jku.isse.ecco.adapter.ArtifactReader;
-import at.jku.isse.ecco.adapter.FeatureTraceReader;
 import at.jku.isse.ecco.adapter.challenge.data.*;
 import at.jku.isse.ecco.adapter.challenge.vevos.LogicToModuleTransformer;
 import at.jku.isse.ecco.adapter.challenge.vevos.VEVOSConditionHandler;
@@ -33,28 +32,24 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-/*
-TODO:
-tests:
-		- Node utility functions
-		- VEVOS file parsing (paths, presence conditions)
-		- Adapter test (are read feature traces correct?)
-		- Variant creation with feature traces (do feature traces get used correctly?)
-
- */
-
-
-public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>, FeatureTraceReader<Path, Set<Node.Op>>{
+public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 
 	protected static final Logger LOGGER = Logger.getLogger(DispatchWriter.class.getName());
 
 	private final EntityFactory entityFactory;
+
+	private Repository.Op repository;
 
 	@Inject
 	public JavaChallengeReader(EntityFactory entityFactory) {
 		checkNotNull(entityFactory);
 
 		this.entityFactory = entityFactory;
+	}
+
+	@Override
+	public void setRepository(Repository.Op repository){
+		this.repository = repository;
 	}
 
 	@Override
@@ -75,22 +70,12 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>, 
 	}
 
 	@Override
-	public Set<Node.Op> read(Path base, Path[] input) {
-		return null;
-	}
-
-	@Override
 	public Set<Node.Op> read(Path[] input) {
-		return null;
+		return this.read(Paths.get("."), input);
 	}
 
 	@Override
-	public Set<Node.Op> read(Path[] input, Repository.Op repository) {
-		return this.read(Paths.get("."), input, repository);
-	}
-
-	@Override
-	public Set<Node.Op> read(Path base, Path[] input, Repository.Op repository) {
+	public Set<Node.Op> read(Path base, Path[] input) {
 		// TODO: refactor method (make it shorter, less procedural, more oo)
 		// TODO: refactor: feature traces are created as a side-effect, which is bad practice
 		LogicToModuleTransformer logicToModuleTransformer = new LogicToModuleTransformer(repository);
@@ -149,12 +134,12 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>, 
 						Artifact.Op<ImportArtifactData> importArtifact = this.entityFactory.createArtifact(new ImportArtifactData(importName));
 						Node.Op importNode = this.entityFactory.createNode(importArtifact);
 						importsGroupNode.addChild(importNode);
-						// check for feature traces
+						// check for feature trace
 						VEVOSPresenceCondition matchingCondition = this.getMatchingPresenceCondition(importDeclaration, fileSpecificConditions);
-						this.addFeatureTrace(matchingCondition, importNode, repository);
+						importNode.setFeatureTraceCondition(matchingCondition.getFeatureTraceConditions());
 					}
 					ArrayList<String> methods =  new ArrayList<>();
-					this.addClassChildren(typeDeclaration, classNode, lines, methods, fileSpecificConditions, repository);
+					this.addClassChildren(typeDeclaration, classNode, lines, methods, fileSpecificConditions);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -237,8 +222,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>, 
 								  Node.Op classNode,
 								  String[] lines,
 								  ArrayList<String> methods,
-								  List<VEVOSPresenceCondition> fileSpecificConditions,
-								  Repository.Op repository) {
+								  List<VEVOSPresenceCondition> fileSpecificConditions) {
 		// TODO: refactor method (shorten, less procedural, more oo, less arguments)
 
 		// create methods artifact/node
@@ -261,8 +245,8 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>, 
 				classNode.addChild(nestedClassNode);
 				// check for feature trace
 				VEVOSPresenceCondition matchingCondition = this.getMatchingPresenceCondition(node, fileSpecificConditions);
-				this.addFeatureTrace(matchingCondition, nestedClassNode, repository);
-				addClassChildren((ClassOrInterfaceDeclaration) node, nestedClassNode, lines, methods, fileSpecificConditions, repository);
+				nestedClassNode.setFeatureTraceCondition(matchingCondition.getFeatureTraceConditions());
+				addClassChildren((ClassOrInterfaceDeclaration) node, nestedClassNode, lines, methods, fileSpecificConditions);
 			}
 			// enumerations
 			else if (node instanceof EnumDeclaration) {
@@ -277,7 +261,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>, 
 						enumsGroupNode.addChild(lineNode);
 						// check for feature trace
 						VEVOSPresenceCondition matchingCondition = this.getMatchingPresenceCondition(i, fileSpecificConditions);
-						this.addFeatureTrace(matchingCondition, lineNode, repository);
+						lineNode.setFeatureTraceCondition(matchingCondition.getFeatureTraceConditions());
 					}
 					i++;
 				}
@@ -296,7 +280,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>, 
 						fieldsGroupNode.addChild(lineNode);
 						// check for feature trace
 						VEVOSPresenceCondition matchingCondition = this.getMatchingPresenceCondition(i, fileSpecificConditions);
-						this.addFeatureTrace(matchingCondition, lineNode, repository);
+						lineNode.setFeatureTraceCondition(matchingCondition.getFeatureTraceConditions());
 					}
 					i++;
 				}
@@ -312,7 +296,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>, 
 				Node.Op methodNode = this.entityFactory.createOrderedNode(methodArtifact);
 				// check for feature trace
 				VEVOSPresenceCondition matchingCondition = this.getMatchingPresenceCondition(node, fileSpecificConditions);
-				this.addFeatureTrace(matchingCondition, methodNode, repository);
+				methodNode.setFeatureTraceCondition(matchingCondition.getFeatureTraceConditions());
 
 				methodsGroupNode.addChild(methodNode);
 				if (((ConstructorDeclaration) node).getBody().getStatements().isNonEmpty()) {
@@ -327,7 +311,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>, 
 							methodNode.addChild(lineNode);
 							// check for feature trace
 							matchingCondition = this.getMatchingPresenceCondition(i, fileSpecificConditions);
-							this.addFeatureTrace(matchingCondition, lineNode, repository);
+							lineNode.setFeatureTraceCondition(matchingCondition.getFeatureTraceConditions());
 						}
 						i++;
 					}
@@ -345,16 +329,15 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>, 
 			Node.Op methodNode = this.entityFactory.createOrderedNode(methodArtifact);
 			// check for feature trace
 			VEVOSPresenceCondition matchingCondition = this.getMatchingPresenceCondition(methodDeclaration, fileSpecificConditions);
-			this.addFeatureTrace(matchingCondition, methodNode, repository);
+			methodNode.setFeatureTraceCondition(matchingCondition.getFeatureTraceConditions());
 
 			methodsGroupNode.addChild(methodNode);
-			addMethodChildren(methodDeclaration, methodNode, lines, fileSpecificConditions, repository);
+			addMethodChildren(methodDeclaration, methodNode, lines, fileSpecificConditions);
 		}
 	}
 
 	private void addMethodChildren(MethodDeclaration methodDeclaration, Node.Op methodNode, String[] lines,
-								   List<VEVOSPresenceCondition> fileSpecificConditions,
-								   Repository.Op repository) {
+								   List<VEVOSPresenceCondition> fileSpecificConditions) {
 		// lines inside method
 		if (methodDeclaration.getBody().isPresent()) {
 			int beginLine = methodDeclaration.getBody().get().getRange().get().begin.line;
@@ -368,7 +351,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>, 
 					methodNode.addChild(lineNode);
 					// check for feature trace
 					VEVOSPresenceCondition matchingCondition = this.getMatchingPresenceCondition(i, fileSpecificConditions);
-					this.addFeatureTrace(matchingCondition, methodNode, repository);
+					methodNode.setFeatureTraceCondition(matchingCondition.getFeatureTraceConditions());
 				}
 				i++;
 			}
@@ -396,7 +379,12 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>, 
 					nodeEndLineNumber));
 		}
 
-		return matchingPresenceConditions.iterator().next();
+		// TODO: make return value optional?
+		if (matchingPresenceConditions.isEmpty()){
+			return null;
+		} else {
+			return matchingPresenceConditions.iterator().next();
+		}
 	}
 
 	// TODO: iterate all presence-conditions and search for matching node instead of searching for presence-condition with node
@@ -413,15 +401,18 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>, 
 			throw new RuntimeException(String.format("There are more than one matching presence-condition for line number %d.", lineNumber));
 		}
 
-		return matchingPresenceConditions.iterator().next();
+		if (matchingPresenceConditions.isEmpty()){
+			return null;
+		} else {
+			return matchingPresenceConditions.iterator().next();
+		}
 	}
 
 	private void addFeatureTrace(VEVOSPresenceCondition vevosPresenceCondition, Node.Op eccoNode, Repository.Op repository){
 		Node newNode = this.createFeatureTraceNode(eccoNode);
-		for (FeatureTraceCondition featureTraceCondition : vevosPresenceCondition.getFeatureTraceConditions()){
-			FeatureTrace featureTrace = entityFactory.createFeatureTrace(newNode, featureTraceCondition);
-			repository.addFeatureTrace(featureTrace);
-		}
+		FeatureTraceCondition featureTraceCondition = vevosPresenceCondition.getFeatureTraceConditions();
+		FeatureTrace featureTrace = entityFactory.createFeatureTrace(newNode, featureTraceCondition);
+		repository.addFeatureTrace(featureTrace);
 	}
 
 	private Node.Op createFeatureTraceNode(Node.Op eccoNode){

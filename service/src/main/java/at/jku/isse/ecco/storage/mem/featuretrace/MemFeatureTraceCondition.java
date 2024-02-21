@@ -21,17 +21,17 @@ public class MemFeatureTraceCondition implements FeatureTraceCondition {
 
     @Override
     public boolean holds(Configuration configuration){
-        for(ModuleRevision moduleRevision : positiveModuleRevisions){
-            if (!moduleRevision.holds(configuration)){
-                return false;
-            }
-        }
         for(ModuleRevision moduleRevision : negativeModuleRevisions){
             if (moduleRevision.holds(configuration)){
                 return false;
             }
         }
-        return true;
+        for(ModuleRevision moduleRevision : positiveModuleRevisions){
+            if (moduleRevision.holds(configuration)){
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -40,5 +40,15 @@ public class MemFeatureTraceCondition implements FeatureTraceCondition {
         allModuleRevisions.addAll(this.positiveModuleRevisions);
         allModuleRevisions.addAll(this.negativeModuleRevisions);
         return allModuleRevisions;
+    }
+
+    @Override
+    public Collection<ModuleRevision> getPositiveModuleRevisions(){
+        return this.positiveModuleRevisions;
+    }
+
+    @Override
+    public Collection<ModuleRevision> getNegativeModuleRevisions(){
+        return this.negativeModuleRevisions;
     }
 }

@@ -7,7 +7,7 @@ import java.util.*;
 
 public class VEVOSConditionHandler {
 
-    private final String PRESENCE_CONDITION_FILENAME = "pc.variant.csv";
+    private final String PRESENCE_CONDITION_FILENAME = "pcs.variant.csv";
     private final Path vevosFilePath;
     private boolean vevosFileExists;
     private List<VEVOSPresenceCondition> vevosPresenceConditions;

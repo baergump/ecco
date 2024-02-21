@@ -3,6 +3,7 @@ package at.jku.isse.ecco.storage.mem.tree;
 import at.jku.isse.ecco.EccoException;
 import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.core.Association;
+import at.jku.isse.ecco.featuretracerecording.FeatureTraceCondition;
 import at.jku.isse.ecco.tree.Node;
 import at.jku.isse.ecco.tree.RootNode;
 import org.eclipse.collections.impl.factory.Maps;
@@ -20,11 +21,13 @@ public class MemNode implements Node, Node.Op {
 
 	private boolean unique = true;
 
-	private final List<Op> children = new ArrayList<>();
+	private List<Op> children = new ArrayList<>();
 
 	private Artifact.Op<?> artifact = null;
 
 	private Op parent = null;
+
+	private FeatureTraceCondition featureTraceCondition;
 
 	public Op copySingleNode(){
 		MemNode newNode = new MemNode(this.artifact);
@@ -38,7 +41,6 @@ public class MemNode implements Node, Node.Op {
 	public MemNode(Artifact.Op<?> artifact) {
 		this.artifact = artifact;
 	}
-
 
 	@Override
 	public Op createNode(Artifact.Op<?> artifact) {
@@ -124,9 +126,7 @@ public class MemNode implements Node, Node.Op {
 
 	@Override
 	public void removeChildren(){
-		for (int i = 0; i < this.children.size(); i++){
-			this.children.remove(i);
-		}
+		this.children = new ArrayList<>();
 	}
 
 	@Override
@@ -170,5 +170,15 @@ public class MemNode implements Node, Node.Op {
 		if (this.properties == null)
 			this.properties = Maps.mutable.empty();
 		return this.properties;
+	}
+
+	@Override
+	public void setFeatureTraceCondition(FeatureTraceCondition featureTraceCondition){
+		this.featureTraceCondition = featureTraceCondition;
+	}
+
+	@Override
+	public FeatureTraceCondition getFeatureTraceCondition(){
+		return this.featureTraceCondition;
 	}
 }

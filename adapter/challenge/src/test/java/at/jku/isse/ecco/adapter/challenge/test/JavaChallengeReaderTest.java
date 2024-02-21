@@ -1,7 +1,12 @@
 package at.jku.isse.ecco.adapter.challenge.test;
 
+import at.jku.isse.ecco.adapter.challenge.JavaChallengeReader;
+import at.jku.isse.ecco.adapter.challenge.vevos.LogicToModuleTransformer;
+import at.jku.isse.ecco.adapter.challenge.vevos.VEVOSConditionHandler;
+import at.jku.isse.ecco.dao.EntityFactory;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.EccoService;
+import at.jku.isse.ecco.storage.mem.dao.MemEntityFactory;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,19 +17,21 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-
-public class FeatureTraceTest {
+public class JavaChallengeReaderTest {
 
     private final Path REPOSITORY_PATH = Paths.get("src", "test","resources", "test_repository");
     private final Path VARIANT_PATH = Paths.get("src", "test", "resources", "test_variant", "Variant_5");
+    private final Path TEST_FILE_PATH = Paths.get("argouml-app", "src", "org", "argouml", "application", "Main.java");
     private EccoService eccoService;
     private Repository.Op repository;
+    private JavaChallengeReader reader;
 
     @BeforeEach
     public void setup() throws IOException {
         this.deleteRepository();
         this.createRepository();
+        EntityFactory factory = new MemEntityFactory();
+        this.reader = new JavaChallengeReader(factory);
     }
 
     @AfterEach
@@ -53,8 +60,10 @@ public class FeatureTraceTest {
     }
 
     @Test
-    public void readFeatureTracesTest(){
-        this.eccoService.commit();
-       // assertFalse(this.repository.getFeatureTraces().isEmpty());
+    public void parseFileTest() throws IOException {
+        Path[] filesToRead = {this.TEST_FILE_PATH};
+        this.reader.read(this.VARIANT_PATH, filesToRead
+                //, this.repository
+                );
     }
 }

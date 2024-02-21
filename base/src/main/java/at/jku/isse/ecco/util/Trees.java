@@ -742,10 +742,12 @@ public class Trees {
 	 * Makes all nodes non-unique except the given node, which it makes unique.
 	 */
 	public static Node.Op createSkeletonPath(Node.Op node){
+		// TODO: make sure there is a root at the top
 		Node.Op nodeCopy = node.copyTree();
 		nodeCopy.setUnique(true);
 		preparePath(nodeCopy.getParent());
-		node.removeChildren();
+		removeSiblings(nodeCopy);
+		nodeCopy.removeChildren();
 		return nodeCopy;
 	}
 

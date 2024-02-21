@@ -8,8 +8,7 @@ import java.util.Collection;
 
 public class VEVOSPresenceCondition {
     private final Path filePath;
-    private String presenceCondition;
-    private Collection<FeatureTraceCondition> featureTraceConditions;
+    private FeatureTraceCondition featureTraceConditions;
     private final int startLineNumber;
     private final int endLineNumber;
 
@@ -39,7 +38,7 @@ public class VEVOSPresenceCondition {
         return this.endLineNumber;
     }
 
-    public Collection<FeatureTraceCondition> getFeatureTraceConditions(){
+    public FeatureTraceCondition getFeatureTraceConditions(){
         return this.featureTraceConditions;
     }
 }

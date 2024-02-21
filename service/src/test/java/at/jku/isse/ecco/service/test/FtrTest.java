@@ -85,7 +85,7 @@ public class FtrTest {
 
         this.eccoService.store();
 
-        Node.Op ftrTreeRootNode = associations.iterator().next().getRootNode().copy();
+        Node.Op ftrTreeRootNode = associations.iterator().next().getRootNode().copySingleNode();
         ftrTreeRootNode.setUnique(false);
         Node.Op pluginNode = ftrTreeRootNode.getChildren().get(0);
         pluginNode.setUnique(false);
@@ -134,7 +134,7 @@ public class FtrTest {
 
         this.eccoService.store();
 
-        Node.Op ftrTreeRootNode = associations.iterator().next().getRootNode().copy();
+        Node.Op ftrTreeRootNode = associations.iterator().next().getRootNode().copySingleNode();
         ftrTreeRootNode.setUnique(false);
         Node.Op pluginNode = ftrTreeRootNode.getChildren().get(0);
         pluginNode.setUnique(false);
@@ -298,7 +298,7 @@ public class FtrTest {
         this.eccoService.store();
 
         // create feature trace for one line to one feature
-        Node.Op ftrTreeRootNode = associations.iterator().next().getRootNode().copy();
+        Node.Op ftrTreeRootNode = associations.iterator().next().getRootNode().copySingleNode();
         ftrTreeRootNode.setUnique(false);
         Node.Op pluginNode = ftrTreeRootNode.getChildren().get(0);
         pluginNode.setUnique(false);

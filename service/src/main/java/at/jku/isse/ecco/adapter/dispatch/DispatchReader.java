@@ -21,10 +21,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-// TODO: make a setter for repository
-// TODO: call normal read or read with repository depending on whether reader is feature trace reader
-
-public class DispatchReader implements ArtifactReader<Path, Set<Node.Op>> {
+public class DispatchReader implements ArtifactReader<Path, Set<Node.Op>>{
 
 	protected static final Logger LOGGER = Logger.getLogger(DispatchWriter.class.getName());
 
@@ -64,6 +61,8 @@ public class DispatchReader implements ArtifactReader<Path, Set<Node.Op>> {
 	 */
 	private List<Mapping> adapterMappings;
 
+	private Repository.Op repository;
+
 	/**
 	 * @param entityFactory The entity factory used by this reader for creating nodes and artifacts.
 	 * @param readers       The collection of readers to which should be dispatched.
@@ -84,6 +83,13 @@ public class DispatchReader implements ArtifactReader<Path, Set<Node.Op>> {
 		this.adapterMappings = new ArrayList<>();
 
 		this.prioritizedPatterns = new HashMap<>();
+	}
+
+	@Override
+	public void setRepository(Repository.Op repository){
+		for(ArtifactReader<Path, Set<Node.Op>> reader : this.readers){
+			reader.setRepository(repository);
+		}
 	}
 
 	public void addAdapterMappings(String pattern, ArtifactReader<Path, Set<Node.Op>> reader) {
@@ -256,6 +262,7 @@ public class DispatchReader implements ArtifactReader<Path, Set<Node.Op>> {
 			}
 		}
 
+
 		// return set of nodes containing only the node representing the base directory
 		Set<Node.Op> nodes = new HashSet<>();
 		nodes.add(directoryNodes.get(Paths.get("")));
@@ -386,6 +393,8 @@ public class DispatchReader implements ArtifactReader<Path, Set<Node.Op>> {
 
 		}
 
+		this.createFeatureTraces(nodes);
+
 		LOGGER.info(this.getClass() + ".read(): " + (System.currentTimeMillis() - startTime) + "ms");
 
 		// return produced nodes
@@ -458,6 +467,15 @@ public class DispatchReader implements ArtifactReader<Path, Set<Node.Op>> {
 		}
 
 		return null;
+	}
+
+	private void createFeatureTraces(Set<Node.Op> nodes){
+		// for every node
+		//		traverse the tree
+		//			if there is a feature trace condition
+		//				create a pathskeleton
+		//				create a feature trace
+		// 				add the feature trace to the repository
 	}
 
 

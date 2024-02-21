@@ -9,6 +9,7 @@ import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.storage.mem.featuretrace.MemFeatureTraceCondition;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 // TODO: handle feature revisions!
 
@@ -20,7 +21,7 @@ public class LogicToModuleTransformer {
         this.repository = repository;
     }
 
-    public Collection<FeatureTraceCondition> transformLogicalConditionToFeatureTraceCondition(String logicalCondition){
+    public FeatureTraceCondition transformLogicalConditionToFeatureTraceCondition(String logicalCondition){
         // elements in the expressions are features
         // string may contain not(!), and(&&), or(||)
 
@@ -38,23 +39,17 @@ public class LogicToModuleTransformer {
         // a || b || ... -> feature traces a, b, ... respectively
         // everything else is not supported yet
 
-        Collection<FeatureTraceCondition> featureTraceConditions = new HashSet<>();
-        Collection<ModuleRevision> positiveModuleRevisions = new HashSet<>();
-        Collection<ModuleRevision> negativeModuleRevisions = new HashSet<>();
-
         logicalCondition = logicalCondition.trim();
 
         if (logicalCondition.startsWith("!")){
-            featureTraceConditions.add(this.transformNegation(logicalCondition));
+            return this.transformNegation(logicalCondition);
         } else if (logicalCondition.contains("&&")) {
-            featureTraceConditions.add(this.transformConjunction(logicalCondition));
+            return this.transformConjunction(logicalCondition);
         } else if (logicalCondition.contains("||")) {
-            featureTraceConditions = this.transformDisjunction(logicalCondition);
+            return this.transformDisjunction(logicalCondition);
         } else {
-            featureTraceConditions.add(this.transformFeature(logicalCondition));
+            return this.transformFeature(logicalCondition);
         }
-
-        return featureTraceConditions;
     }
 
     private FeatureTraceCondition transformNegation(String logicalCondition){
@@ -62,12 +57,17 @@ public class LogicToModuleTransformer {
         this.checkSingleFeatureString(logicalCondition);
         Feature feature = this.featureNameToFeature(logicalCondition);
         // create a feature-revision if it does not exist yet
-        this.getOrCreateLatestFeatureRevision(feature);
+        FeatureRevision featureRevision = this.getOrCreateLatestFeatureRevision(feature);
 
-        Feature[] positiveFeatures = {};
-        Feature[] negativeFeatures = {feature};
-        FeatureRevision[] positiveFeatureRevisions = {};
-        return this.arraysToFeatureTraceCondition(positiveFeatures, negativeFeatures, positiveFeatureRevisions);
+        Feature[] positiveFeatures = {feature};
+        Feature[] negativeFeatures = {};
+        FeatureRevision[] positiveFeatureRevisions = {featureRevision};
+
+        ModuleRevision moduleRevision = this.createModuleRevision(positiveFeatures, negativeFeatures, positiveFeatureRevisions);
+        Collection<ModuleRevision> positiveModuleRevisions = new HashSet<>();
+        Collection<ModuleRevision> negativeModuleRevisions = new HashSet<>();
+        negativeModuleRevisions.add(moduleRevision);
+        return new MemFeatureTraceCondition(positiveModuleRevisions, negativeModuleRevisions);
     }
 
     private FeatureTraceCondition transformConjunction(String logicalCondition){
@@ -88,18 +88,27 @@ public class LogicToModuleTransformer {
             featureStrings.add(strings[i]);
         }
 
-        List<Feature> positiveFeatureList = new LinkedList<>();
-        List<FeatureRevision> positiveFeatureRevisionList = new LinkedList<>();
+        List<Feature> positiveFeatureList = featureStrings.stream()
+                .map(this::featureNameToFeature)
+                .collect(Collectors.toList());
+        List<FeatureRevision> positiveFeatureRevisionList = positiveFeatureList.stream()
+                .map(this::getOrCreateLatestFeatureRevision)
+                .collect(Collectors.toList());
 
-        Feature[] positiveFeatures = new Feature[positiveFeatureList.size()];
+        Feature[] positiveFeatures = new Feature[featureStrings.size()];
         positiveFeatureList.toArray(positiveFeatures);
         Feature[] negativeFeatures = {};
         FeatureRevision[] positiveFeatureRevisions = new FeatureRevision[positiveFeatureRevisionList.size()];
         positiveFeatureRevisionList.toArray(positiveFeatureRevisions);
-        return this.arraysToFeatureTraceCondition(positiveFeatures, negativeFeatures, positiveFeatureRevisions);
+
+        ModuleRevision moduleRevision = this.createModuleRevision(positiveFeatures, negativeFeatures, positiveFeatureRevisions);
+        Collection<ModuleRevision> positiveModuleRevisions = new HashSet<>();
+        Collection<ModuleRevision> negativeModuleRevisions = new HashSet<>();
+        positiveModuleRevisions.add(moduleRevision);
+        return new MemFeatureTraceCondition(positiveModuleRevisions, negativeModuleRevisions);
     }
 
-    private Collection<FeatureTraceCondition> transformDisjunction(String logicalCondition){
+    private FeatureTraceCondition transformDisjunction(String logicalCondition){
         if (!(logicalCondition.startsWith("(") && logicalCondition.endsWith(")"))){
             throw new RuntimeException("The structure of the given logical expression seems to be faulty: " + logicalCondition);
         }
@@ -116,13 +125,23 @@ public class LogicToModuleTransformer {
             if (i % 2 == 1){ continue; }
             featureStrings.add(strings[i]);
         }
-        // create distinct feature-trace-conditions using the remaining strings
-        Collection<FeatureTraceCondition> featureTraceConditions = new HashSet<>();
-        for(String featureString : featureStrings){
-            Collection<FeatureTraceCondition> additionalFeatureTraceCondition = this.transformLogicalConditionToFeatureTraceCondition(featureString);
-            featureTraceConditions.addAll(additionalFeatureTraceCondition);
+
+        Collection<ModuleRevision> positiveModuleRevisions = new HashSet<>();
+        Collection<ModuleRevision> negativeModuleRevisions = new HashSet<>();
+
+        for (String featureString : featureStrings){
+            Feature feature = this.featureNameToFeature(featureString);
+            FeatureRevision featureRevision = this.getOrCreateLatestFeatureRevision(feature);
+
+            Feature[] positiveFeatures = {feature};
+            Feature[] negativeFeatures = {};
+            FeatureRevision[] positiveFeatureRevisions = {featureRevision};
+
+            ModuleRevision moduleRevision = this.createModuleRevision(positiveFeatures, negativeFeatures, positiveFeatureRevisions);
+            positiveModuleRevisions.add(moduleRevision);
         }
-        return featureTraceConditions;
+
+        return new MemFeatureTraceCondition(positiveModuleRevisions, negativeModuleRevisions);
     }
 
     private boolean unevenIndicesMatchString(String[] stringArray, String matchingString){
@@ -142,7 +161,12 @@ public class LogicToModuleTransformer {
         Feature[] positiveFeatures = {feature};
         Feature[] negativeFeatures = {};
         FeatureRevision[] positiveFeatureRevisions = {featureRevision};
-        return this.arraysToFeatureTraceCondition(positiveFeatures, negativeFeatures, positiveFeatureRevisions);
+
+        ModuleRevision moduleRevision = this.createModuleRevision(positiveFeatures, negativeFeatures, positiveFeatureRevisions);
+        Collection<ModuleRevision> positiveModuleRevisions = new HashSet<>();
+        Collection<ModuleRevision> negativeModuleRevisions = new HashSet<>();
+        positiveModuleRevisions.add(moduleRevision);
+        return new MemFeatureTraceCondition(positiveModuleRevisions, negativeModuleRevisions);
     }
 
     private Feature featureNameToFeature(String featureName){
@@ -169,23 +193,14 @@ public class LogicToModuleTransformer {
         return featureRevision;
     }
 
-    private FeatureTraceCondition arraysToFeatureTraceCondition(
-            Feature[] positiveFeatures,
-            Feature[] negativeFeatures,
-            FeatureRevision[] positiveFeatureRevisions){
-
+    private ModuleRevision createModuleRevision(Feature[] positiveFeatures,
+                                                Feature[] negativeFeatures,
+                                                FeatureRevision[] positiveFeatureRevisions){
         Module module = this.repository.getModule(positiveFeatures, negativeFeatures);
         if (module == null) { module = this.repository.addModule(positiveFeatures, negativeFeatures); }
         ModuleRevision moduleRevision = module.getRevision(positiveFeatureRevisions, negativeFeatures);
         if (moduleRevision == null) { moduleRevision = module.addRevision(positiveFeatureRevisions, negativeFeatures); }
-
-        Collection<ModuleRevision> positiveModuleRevisions = new HashSet<>();
-        Collection<ModuleRevision> negativeModuleRevisions = new HashSet<>();
-        positiveModuleRevisions.add(moduleRevision);
-
-        // TODO: use "!" to add feature as negative feature or to add a module with positive feature in negative module collection?
-
-        return new MemFeatureTraceCondition(positiveModuleRevisions, negativeModuleRevisions);
+        return moduleRevision;
     }
 
     private void checkSingleFeatureString(String featureName){
