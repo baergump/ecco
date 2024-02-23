@@ -68,14 +68,53 @@ public class LogicToModuleTransformer {
     }
 
     private FeatureTraceCondition hackySolution(String logicalCondition){
+        // TODO: make a regex check
         // structure ((a || b) && c && ...)
         // remove parentheses
+        String trimmedString = logicalCondition.replace("(", "");
+        trimmedString = trimmedString.replace(")", "");
         // split by space
+        String[] strings = trimmedString.split(" ");
         // (check if first operator is "||" and all the others are "&&"
+        if (!strings[1].equals("||")){
+            throw new RuntimeException(String.format("Structure of logical expression not supported: %s", logicalCondition));
+        }
         // remove operators
+        // TODO: refactor this monstrosity
+        Set<String> andFeatureStrings = new HashSet<>();
+        Set<String> orFeatureStrings = new HashSet<>();
+        for (int i = 0; i < strings.length; i++){
+            if (i == 0 || i == 2){
+                orFeatureStrings.add(strings[i]);
+                continue;
+            } else if (i == 1){
+                continue;
+            } else if (i % 2 == 1){
+                if (!strings[i].equals("&&")){
+                    throw new RuntimeException(String.format("Structure of logical expression not supported: %s", logicalCondition));
+                }
+                continue;
+            }
+            andFeatureStrings.add(strings[i]);
+        }
         // make modules for the first two operators and put one feature in each positive feature collection
+        Set<String> featureCombination1 = new HashSet<>();
+        Set<String> featureCombination2 = new HashSet<>();
+
+        Iterator<String> iterator = orFeatureStrings.iterator();
+        featureCombination1.add(iterator.next());
+        featureCombination2.add(iterator.next());
+        featureCombination1.addAll(andFeatureStrings);
+        featureCombination2.addAll(andFeatureStrings);
+
         // put all other features in each module in positive feature collection
-        return null;
+        ModuleRevision moduleRevision1 = positiveFeatureNamesToModuleRevision(featureCombination1);
+        ModuleRevision moduleRevision2 = positiveFeatureNamesToModuleRevision(featureCombination2);
+        Collection<ModuleRevision> positiveModuleRevisions = new HashSet<>();
+        Collection<ModuleRevision> negativeModuleRevisions = new HashSet<>();
+        positiveModuleRevisions.add(moduleRevision1);
+        positiveModuleRevisions.add(moduleRevision2);
+        return new MemFeatureTraceCondition(positiveModuleRevisions, negativeModuleRevisions);
     }
 
     private FeatureTraceCondition transformNegation(String logicalCondition){
@@ -109,31 +148,35 @@ public class LogicToModuleTransformer {
             System.out.println("The given format of logical expression is not supported yet: " + logicalCondition);
             return null;
         }
-        List<String> featureStrings = new LinkedList<>();
+        Set<String> featureStrings = new HashSet<>();
         // remove all "&&" strings
         for (int i = 0; i < strings.length; i++){
             if (i % 2 == 1){ continue; }
             featureStrings.add(strings[i]);
         }
 
-        List<Feature> positiveFeatureList = featureStrings.stream()
+        ModuleRevision moduleRevision = positiveFeatureNamesToModuleRevision(featureStrings);
+        Collection<ModuleRevision> positiveModuleRevisions = new HashSet<>();
+        Collection<ModuleRevision> negativeModuleRevisions = new HashSet<>();
+        positiveModuleRevisions.add(moduleRevision);
+        return new MemFeatureTraceCondition(positiveModuleRevisions, negativeModuleRevisions);
+    }
+
+    private ModuleRevision positiveFeatureNamesToModuleRevision(Set<String> featureNames){
+        List<Feature> positiveFeatureList = featureNames.stream()
                 .map(this::featureNameToFeature)
                 .collect(Collectors.toList());
         List<FeatureRevision> positiveFeatureRevisionList = positiveFeatureList.stream()
                 .map(this::getOrCreateLatestFeatureRevision)
                 .collect(Collectors.toList());
 
-        Feature[] positiveFeatures = new Feature[featureStrings.size()];
+        Feature[] positiveFeatures = new Feature[featureNames.size()];
         positiveFeatureList.toArray(positiveFeatures);
         Feature[] negativeFeatures = {};
         FeatureRevision[] positiveFeatureRevisions = new FeatureRevision[positiveFeatureRevisionList.size()];
         positiveFeatureRevisionList.toArray(positiveFeatureRevisions);
 
-        ModuleRevision moduleRevision = this.createModuleRevision(positiveFeatures, negativeFeatures, positiveFeatureRevisions);
-        Collection<ModuleRevision> positiveModuleRevisions = new HashSet<>();
-        Collection<ModuleRevision> negativeModuleRevisions = new HashSet<>();
-        positiveModuleRevisions.add(moduleRevision);
-        return new MemFeatureTraceCondition(positiveModuleRevisions, negativeModuleRevisions);
+        return this.createModuleRevision(positiveFeatures, negativeFeatures, positiveFeatureRevisions);
     }
 
     private FeatureTraceCondition transformDisjunction(String logicalCondition){

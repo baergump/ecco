@@ -21,7 +21,12 @@ public class VEVOSPresenceCondition {
         }
 
         this.filePath = Paths.get(lineParts[0]);
-        this.featureTraceConditions = logicToModuleTransformer.transformLogicalConditionToFeatureTraceCondition(lineParts[3]);
+
+        try {
+            this.featureTraceConditions = logicToModuleTransformer.transformLogicalConditionToFeatureTraceCondition(lineParts[3]);
+        } catch (Exception e){
+            throw new RuntimeException("failed for line: " + vevosFileLine);
+        }
         this.startLine = Integer.parseInt(lineParts[4]);
         this.endLine = Integer.parseInt(lineParts[5]);
     }

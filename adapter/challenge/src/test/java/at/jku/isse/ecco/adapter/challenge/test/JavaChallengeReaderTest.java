@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 public class JavaChallengeReaderTest {
 
     private final Path REPOSITORY_PATH = Paths.get("src", "test","resources", "test_repository");
-    private final Path VARIANT_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\ArgoUMLExtractor\\variants\\Variant_2");
+    private final Path VARIANT_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Tools\\ArgoUMLExtractor\\variants\\Variant_0");
     private EccoService eccoService;
     private Repository.Op repository;
     private JavaChallengeReader reader;
@@ -35,12 +35,19 @@ public class JavaChallengeReaderTest {
     @BeforeEach
     public void setup() throws IOException {
         this.deleteRepository();
-        this.createRepository();
+        this.createRepository(this.VARIANT_PATH);
         EntityFactory factory = new MemEntityFactory();
         this.reader = new JavaChallengeReader(factory);
     }
 
-    @AfterEach
+    private void setup(Path variantPath) throws IOException {
+        this.deleteRepository();
+        this.createRepository(variantPath);
+        EntityFactory factory = new MemEntityFactory();
+        this.reader = new JavaChallengeReader(factory);
+    }
+
+    //@AfterEach
     public void teardown() throws IOException {
         if (this.eccoService != null){
             this.eccoService.close();
@@ -48,10 +55,10 @@ public class JavaChallengeReaderTest {
         this.deleteRepository();
     }
 
-    private void createRepository(){
+    private void createRepository(Path variantPath){
         this.eccoService = new EccoService();
         this.eccoService.setRepositoryDir(this.REPOSITORY_PATH.resolve(".ecco").toAbsolutePath());
-        this.eccoService.setBaseDir(this.VARIANT_PATH.toAbsolutePath());
+        this.eccoService.setBaseDir(variantPath.toAbsolutePath());
         this.eccoService.init();
         this.repository = (Repository.Op) this.eccoService.getRepository();
     }
@@ -73,8 +80,20 @@ public class JavaChallengeReaderTest {
 
         long timeElapsed = finish - start;
         System.out.printf("took %d milliseconds (%d seconds).%n", timeElapsed, timeElapsed / 1000);
+    }
 
-
+    @Test
+    public void logicalExpressionsTest() throws IOException {
+        for(int i = 0; i <= 255; i++){
+            Path variantPath = Paths.get("C:\\Users\\Bernhard\\Work\\Tools\\ArgoUMLExtractor\\variants\\Variant_" + i);
+            this.setup(variantPath);
+            long start = System.currentTimeMillis();
+            Set<Node.Op> nodes = this.eccoService.readFiles(this.repository);
+            long finish = System.currentTimeMillis();
+            long timeElapsed = finish - start;
+            System.out.printf("took %d milliseconds (%d seconds).%n", timeElapsed, timeElapsed / 1000);
+            this.teardown();
+        }
     }
 
     @Test

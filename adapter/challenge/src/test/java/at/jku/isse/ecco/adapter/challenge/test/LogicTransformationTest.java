@@ -22,8 +22,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class LogicTransformationTest {
 
@@ -176,6 +175,42 @@ public class LogicTransformationTest {
 
         feature = positiveFeatures[0].getFeature();
         assertEquals("FEATUREA", feature.getName());
+    }
+
+    @Test
+    public void hackySolutionTest(){
+        FeatureTraceCondition featureTraceCondition = this.logicToModuleTransformer.transformLogicalConditionToFeatureTraceCondition("((FEATUREA || FEATUREB) && FEATUREC && FEATURED)");
+
+        Collection<ModuleRevision> positiveModuleRevisions = featureTraceCondition.getPositiveModuleRevisions();
+        Collection<ModuleRevision> negativeModuleRevisions = featureTraceCondition.getNegativeModuleRevisions();
+        assertEquals(2, positiveModuleRevisions.size());
+        assertEquals(0, negativeModuleRevisions.size());
+
+        Iterator<ModuleRevision> iterator = positiveModuleRevisions.iterator();
+        ModuleRevision moduleRevision1 = iterator.next();
+        ModuleRevision moduleRevision2 = iterator.next();
+
+        FeatureRevision[] positiveFeatures = moduleRevision1.getPos();
+        Feature[] negativeFeatures = moduleRevision1.getNeg();
+        assertEquals(3, positiveFeatures.length);
+        assertEquals(0, negativeFeatures.length);
+
+        List<String> nameList = Arrays.stream(positiveFeatures).map(FeatureRevision::getFeature).map(Feature::getName).collect(Collectors.toList());
+        assertTrue(nameList.contains("FEATUREA") || nameList.contains("FEATUREB"));
+
+        assertTrue(nameList.contains("FEATUREB"));
+        assertTrue(nameList.contains("FEATUREC"));
+        assertTrue(nameList.contains("FEATURED"));
+
+        positiveFeatures = moduleRevision2.getPos();
+        negativeFeatures = moduleRevision2.getNeg();
+        assertEquals(3, positiveFeatures.length);
+        assertEquals(0, negativeFeatures.length);
+
+        nameList = Arrays.stream(positiveFeatures).map(FeatureRevision::getFeature).map(Feature::getName).collect(Collectors.toList());
+        assertTrue(nameList.contains("FEATUREA"));
+        assertTrue(nameList.contains("FEATUREC"));
+        assertTrue(nameList.contains("FEATURED"));
     }
 
     @Test
