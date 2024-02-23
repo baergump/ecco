@@ -754,14 +754,15 @@ public class Trees {
 	private static void preparePath(Node.Op node){
 		// set non-unique and remove siblings along path to root
 		node.setUnique(false);
-		if (node instanceof RootNode){ return; }
+		if (node instanceof RootNode || node.getParent() == null){ return; }
 		removeSiblings(node);
 		preparePath(node.getParent());
 	}
 
 	private static void removeSiblings(Node.Op node) {
 		Node.Op parentNode = node.getParent();
-		for (Node.Op parentsChildNode : parentNode.getChildren()) {
+		List<Node.Op> children = new LinkedList<>(parentNode.getChildren());
+		for (Node.Op parentsChildNode : children) {
 			// check for equal identity on purpose (equal siblings should be removed as well)
 			if (!(parentsChildNode == node)) {
 				parentNode.removeChild(parentsChildNode);

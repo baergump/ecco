@@ -5,12 +5,11 @@ import at.jku.isse.ecco.featuretracerecording.FeatureTraceCondition;
 import at.jku.isse.ecco.module.ModuleRevision;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 
 public class MemFeatureTraceCondition implements FeatureTraceCondition {
-    // modules that must hold
     private final Collection<ModuleRevision> positiveModuleRevisions;
-    // modules that must not hold
     private final Collection<ModuleRevision> negativeModuleRevisions;
 
     public MemFeatureTraceCondition(Collection<ModuleRevision> positiveModules, Collection<ModuleRevision> negativeModules){
@@ -51,4 +50,23 @@ public class MemFeatureTraceCondition implements FeatureTraceCondition {
     public Collection<ModuleRevision> getNegativeModuleRevisions(){
         return this.negativeModuleRevisions;
     }
+
+    @Override
+    public FeatureTraceCondition copy() {
+        Collection<ModuleRevision> newPositiveModuleRevisions = new HashSet<>(this.positiveModuleRevisions);
+        Collection<ModuleRevision> newNegativeModuleRevisions = new HashSet<>(this.negativeModuleRevisions);
+        return new MemFeatureTraceCondition(newPositiveModuleRevisions, newNegativeModuleRevisions);
+    }
+
+    @Override
+    public void addAllPositiveModuleRevisions(Collection<ModuleRevision> moduleRevisions) {
+        this.positiveModuleRevisions.addAll(moduleRevisions);
+    }
+
+    @Override
+    public void addAllNegativeModuleRevisions(Collection<ModuleRevision> moduleRevisions) {
+        this.negativeModuleRevisions.addAll(moduleRevisions);
+    }
+
+
 }

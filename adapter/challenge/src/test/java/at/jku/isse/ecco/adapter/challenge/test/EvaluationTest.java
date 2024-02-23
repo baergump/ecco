@@ -1,10 +1,7 @@
 package at.jku.isse.ecco.adapter.challenge.test;
 
 import at.jku.isse.ecco.adapter.challenge.JavaChallengeReader;
-import at.jku.isse.ecco.adapter.challenge.vevos.LogicToModuleTransformer;
-import at.jku.isse.ecco.adapter.challenge.vevos.VEVOSConditionHandler;
 import at.jku.isse.ecco.dao.EntityFactory;
-import at.jku.isse.ecco.feature.Configuration;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.EccoService;
 import at.jku.isse.ecco.storage.mem.dao.MemEntityFactory;
@@ -16,18 +13,14 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class JavaChallengeReaderTest {
-
+public class EvaluationTest {
     private final Path REPOSITORY_PATH = Paths.get("src", "test","resources", "test_repository");
-    private final Path VARIANT_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\ArgoUMLExtractor\\variants\\Variant_2");
+    private final Path VARIANT_PATH = Paths.get("src", "test", "resources", "test_variant", "Variant_5");
+    private final Path TEST_FILE_PATH = Paths.get("argouml-app", "src", "org", "argouml", "application", "Main.java");
     private EccoService eccoService;
     private Repository.Op repository;
     private JavaChallengeReader reader;
@@ -67,31 +60,8 @@ public class JavaChallengeReaderTest {
 
     @Test
     public void parseFileTest(){
-        long start = System.currentTimeMillis();
-        Set<Node.Op> nodes = this.eccoService.readFiles(this.repository);
-        long finish = System.currentTimeMillis();
-
-        long timeElapsed = finish - start;
-        System.out.printf("took %d milliseconds (%d seconds).%n", timeElapsed, timeElapsed / 1000);
-
-
+        // train ecco
     }
 
-    @Test
-    public void listAllLogicalExpressions(){
-        Path VARIANTS_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\ArgoUMLExtractor\\variants");
 
-        try {
-            Stream<Path> folderStream = Files.walk(VARIANTS_PATH)
-                    .filter(Files::isDirectory);
-            List<Path> paths = folderStream.collect(Collectors.toList());
-            for (Path path : paths){
-
-            }
-
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 }

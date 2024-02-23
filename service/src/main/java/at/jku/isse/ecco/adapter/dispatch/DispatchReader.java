@@ -87,6 +87,7 @@ public class DispatchReader implements ArtifactReader<Path, Set<Node.Op>>{
 
 	@Override
 	public void setRepository(Repository.Op repository){
+		this.repository = repository;
 		for(ArtifactReader<Path, Set<Node.Op>> reader : this.readers){
 			reader.setRepository(repository);
 		}
@@ -470,14 +471,11 @@ public class DispatchReader implements ArtifactReader<Path, Set<Node.Op>>{
 	}
 
 	private void createFeatureTraces(Set<Node.Op> nodes){
-		// for every node
-		//		traverse the tree
-		//			if there is a feature trace condition
-		//				create a pathskeleton
-		//				create a feature trace
-		// 				add the feature trace to the repository
+		FeatureTraceCreatorVisitor visitor = new FeatureTraceCreatorVisitor(this.repository, this.entityFactory);
+		for(Node.Op node : nodes){
+			node.traverse(visitor);
+		}
 	}
-
 
 	private Collection<ReadListener> listeners = new ArrayList<>();
 

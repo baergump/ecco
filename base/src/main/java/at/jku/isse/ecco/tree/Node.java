@@ -6,10 +6,7 @@ import at.jku.isse.ecco.dao.Persistable;
 import at.jku.isse.ecco.featuretracerecording.FeatureTraceCondition;
 import at.jku.isse.ecco.util.Trees;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -385,8 +382,13 @@ public interface Node extends Persistable {
 			return Trees.createSkeletonPath(this);
 		}
 
-		void setFeatureTraceCondition(FeatureTraceCondition featureTraceCondition);
+		void setFeatureTraceConditions(Collection<FeatureTraceCondition> featureTraceConditions);
 
-		FeatureTraceCondition getFeatureTraceCondition();
+		void removeAllFeatureTraceConditions();
+
+		void addFeatureTraceCondition(FeatureTraceCondition featureTraceCondition);
+
+		Collection<FeatureTraceCondition> getFeatureTraceConditions();
+
 	}
 }

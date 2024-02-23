@@ -8,9 +8,7 @@ import at.jku.isse.ecco.tree.Node;
 import at.jku.isse.ecco.tree.RootNode;
 import org.eclipse.collections.impl.factory.Maps;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -27,11 +25,30 @@ public class MemNode implements Node, Node.Op {
 
 	private Op parent = null;
 
-	private FeatureTraceCondition featureTraceCondition;
+	private Collection<FeatureTraceCondition> featureTraceConditions;
 
 	public Op copySingleNode(){
-		MemNode newNode = new MemNode(this.artifact);
-		return newNode;
+		return new MemNode(this.artifact);
+	}
+
+	@Override
+	public Collection<FeatureTraceCondition> getFeatureTraceConditions(){
+		return this.featureTraceConditions;
+	}
+
+	@Override
+	public void setFeatureTraceConditions(Collection<FeatureTraceCondition> featureTraceConditions) {
+		this.featureTraceConditions = featureTraceConditions;
+	}
+
+	@Override
+	public void removeAllFeatureTraceConditions() {
+		this.featureTraceConditions = new HashSet<>();
+	}
+
+	@Override
+	public void addFeatureTraceCondition(FeatureTraceCondition featureTraceCondition) {
+		this.featureTraceConditions.add(featureTraceCondition);
 	}
 
 	@Deprecated
@@ -40,6 +57,7 @@ public class MemNode implements Node, Node.Op {
 
 	public MemNode(Artifact.Op<?> artifact) {
 		this.artifact = artifact;
+		this.featureTraceConditions = new HashSet<>();
 	}
 
 	@Override
@@ -170,15 +188,5 @@ public class MemNode implements Node, Node.Op {
 		if (this.properties == null)
 			this.properties = Maps.mutable.empty();
 		return this.properties;
-	}
-
-	@Override
-	public void setFeatureTraceCondition(FeatureTraceCondition featureTraceCondition){
-		this.featureTraceCondition = featureTraceCondition;
-	}
-
-	@Override
-	public FeatureTraceCondition getFeatureTraceCondition(){
-		return this.featureTraceCondition;
 	}
 }

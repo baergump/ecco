@@ -9,8 +9,8 @@ import java.util.Collection;
 public class VEVOSPresenceCondition {
     private final Path filePath;
     private FeatureTraceCondition featureTraceConditions;
-    private final int startLineNumber;
-    private final int endLineNumber;
+    private final int startLine;
+    private final int endLine;
 
     public VEVOSPresenceCondition(String vevosFileLine, LogicToModuleTransformer logicToModuleTransformer){
         // VEVOS file entry structure: Path;File Condition;Block Condition;Presence Condition;start;end
@@ -22,20 +22,20 @@ public class VEVOSPresenceCondition {
 
         this.filePath = Paths.get(lineParts[0]);
         this.featureTraceConditions = logicToModuleTransformer.transformLogicalConditionToFeatureTraceCondition(lineParts[3]);
-        this.startLineNumber = Integer.parseInt(lineParts[4]);
-        this.endLineNumber = Integer.parseInt(lineParts[5]);
+        this.startLine = Integer.parseInt(lineParts[4]);
+        this.endLine = Integer.parseInt(lineParts[5]);
     }
 
     public Path getFilePath(){
         return this.filePath;
     }
 
-    public int getStartLineNumber(){
-        return this.startLineNumber;
+    public int getStartLine(){
+        return this.startLine;
     }
 
-    public int getEndLineNumber(){
-        return this.endLineNumber;
+    public int getEndLine(){
+        return this.endLine;
     }
 
     public FeatureTraceCondition getFeatureTraceConditions(){

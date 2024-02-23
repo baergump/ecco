@@ -179,6 +179,11 @@ public class LogicTransformationTest {
     }
 
     @Test
+    public void testMultipleParentheses(){
+        FeatureTraceCondition featureTraceCondition = this.logicToModuleTransformer.transformLogicalConditionToFeatureTraceCondition("((FEATUREA || FEATUREB) && FEATUREC)");
+    }
+
+    @Test
     public void negationOfDisjunctionThrowsExceptionTest(){
         assertThrows(RuntimeException.class, () -> this.logicToModuleTransformer.transformLogicalConditionToFeatureTraceCondition("!(FEATUREA || FEATUREB)"));
     }

@@ -24,4 +24,31 @@ public interface FeatureTraceCondition extends Persistable {
     Collection<ModuleRevision> getPositiveModuleRevisions();
 
     Collection<ModuleRevision> getNegativeModuleRevisions();
+
+    FeatureTraceCondition copy();
+
+    void addAllPositiveModuleRevisions(Collection<ModuleRevision> moduleRevisions);
+
+    void addAllNegativeModuleRevisions(Collection<ModuleRevision> moduleRevisions);
+
+    static FeatureTraceCondition merge(FeatureTraceCondition condition1, FeatureTraceCondition condition2) {
+        if (condition1 == null && condition2 == null){
+            return null;
+        } else if (condition1 == null){
+            return condition2.copy();
+        } else if (condition2 == null){
+            return condition1.copy();
+        }
+
+        // any positive module revision of either feature trace condition must hold in order to hold
+        // neither negative module revision of either feature trace condition must hold in order to hold
+        // (merging means merging the conditions of nested artifacts in the nested artifact)
+        // (if the outer artifact condition is not met, the inner is not as well)
+        // (if the inner artifact condition is not met, the inner one is not met) (duh)
+
+        FeatureTraceCondition condition = condition1.copy();
+        condition.addAllPositiveModuleRevisions(condition2.getPositiveModuleRevisions());
+        condition.addAllNegativeModuleRevisions(condition2.getNegativeModuleRevisions());
+        return condition;
+    }
 }

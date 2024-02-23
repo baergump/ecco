@@ -761,7 +761,6 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
                 feature = this.entityFactory.createFeature(UUID.randomUUID().toString(), featureName);
             } else if (features.size() == 1) {
                 feature = features.iterator().next();
-                feature = this.entityFactory.createFeature(feature.getId(), feature.getName());
             } else {
                 throw new EccoException("Feature name is not unique. Use feature id instead.");
             }
@@ -1887,6 +1886,7 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
     public synchronized Checkout checkout(String configurationString) {
         return this.checkout(this.parseConfigurationString(configurationString));
     }
+
 
     /**
      * Retrieves associations needed to compose a configuration.

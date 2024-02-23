@@ -67,8 +67,8 @@ public class VEVOSPresenceConditionTest {
                 "argouml-app\\src\\org\\argouml\\kernel\\MemberList.java;True;COGNITIVE;COGNITIVE;322;327",
                 this.logicToModuleTransformer);
         assertEquals("argouml-app\\src\\org\\argouml\\kernel\\MemberList.java", vevosPresenceCondition.getFilePath().toString());
-        assertEquals(322, vevosPresenceCondition.getStartLineNumber());
-        assertEquals(327, vevosPresenceCondition.getEndLineNumber());
+        assertEquals(322, vevosPresenceCondition.getStartLine());
+        assertEquals(327, vevosPresenceCondition.getEndLine());
         FeatureTraceCondition featureTraceCondition = vevosPresenceCondition.getFeatureTraceConditions();
         Collection<ModuleRevision> positiveModuleRevisions = featureTraceCondition.getPositiveModuleRevisions();
         Collection<ModuleRevision> negativeModuleRevisions = featureTraceCondition.getNegativeModuleRevisions();

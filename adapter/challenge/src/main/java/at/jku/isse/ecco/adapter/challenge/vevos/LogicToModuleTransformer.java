@@ -9,6 +9,8 @@ import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.storage.mem.featuretrace.MemFeatureTraceCondition;
 
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 // TODO: handle feature revisions!
@@ -19,6 +21,13 @@ public class LogicToModuleTransformer {
 
     public LogicToModuleTransformer(Repository.Op repository){
         this.repository = repository;
+    }
+
+    private enum ExpressionType{
+        AND,
+        OR,
+        NEG,
+        SIMPLE
     }
 
     public FeatureTraceCondition transformLogicalConditionToFeatureTraceCondition(String logicalCondition){
@@ -35,14 +44,20 @@ public class LogicToModuleTransformer {
 
         // transformation:
         // !a (a is a feature) -> module with negative feature a
-        // a && b && ... (a and b are features) -> module with a and b as positive features
-        // a || b || ... -> feature traces a, b, ... respectively
-        // everything else is not supported yet
+        // && -> put both operands in one module
+        // || -> put both operands in its own module
+        // ((a || b) && c) == ((a && c) || (b && c))
+        // ((a && b) || c)
+
+        //((STATEDIAGRAM || ACTIVITYDIAGRAM) && ACTIVITYDIAGRAM && STATEDIAGRAM)
 
         logicalCondition = logicalCondition.trim();
 
         if (logicalCondition.startsWith("!")){
             return this.transformNegation(logicalCondition);
+        } else if (logicalCondition.startsWith("((")){
+            // TODO: replace hacky solution with proper one
+            return this.hackySolution(logicalCondition);
         } else if (logicalCondition.contains("&&")) {
             return this.transformConjunction(logicalCondition);
         } else if (logicalCondition.contains("||")) {
@@ -50,6 +65,17 @@ public class LogicToModuleTransformer {
         } else {
             return this.transformFeature(logicalCondition);
         }
+    }
+
+    private FeatureTraceCondition hackySolution(String logicalCondition){
+        // structure ((a || b) && c && ...)
+        // remove parentheses
+        // split by space
+        // (check if first operator is "||" and all the others are "&&"
+        // remove operators
+        // make modules for the first two operators and put one feature in each positive feature collection
+        // put all other features in each module in positive feature collection
+        return null;
     }
 
     private FeatureTraceCondition transformNegation(String logicalCondition){
@@ -79,7 +105,9 @@ public class LogicToModuleTransformer {
         String trimmedString = logicalCondition.substring(1, logicalCondition.length() - 1);
         String[] strings = trimmedString.split(" ");
         if (!this.unevenIndicesMatchString(strings, "&&")){
-            throw new RuntimeException("The given format of logical expression is not supported yet: " + logicalCondition);
+            // throw new RuntimeException("The given format of logical expression is not supported yet: " + logicalCondition);
+            System.out.println("The given format of logical expression is not supported yet: " + logicalCondition);
+            return null;
         }
         List<String> featureStrings = new LinkedList<>();
         // remove all "&&" strings
@@ -110,14 +138,18 @@ public class LogicToModuleTransformer {
 
     private FeatureTraceCondition transformDisjunction(String logicalCondition){
         if (!(logicalCondition.startsWith("(") && logicalCondition.endsWith(")"))){
-            throw new RuntimeException("The structure of the given logical expression seems to be faulty: " + logicalCondition);
+            //throw new RuntimeException("The structure of the given logical expression seems to be faulty: " + logicalCondition);
+            System.out.println("The given format of logical expression is not supported yet: " + logicalCondition);
+            return null;
         }
 
         // remove parentheses
         String trimmedString = logicalCondition.substring(1, logicalCondition.length() - 1);
         String[] strings = trimmedString.split(" ");
         if (!this.unevenIndicesMatchString(strings, "||")){
-            throw new RuntimeException("The given format of logical expression is not supported yet: " + logicalCondition);
+            //throw new RuntimeException("The given format of logical expression is not supported yet: " + logicalCondition);
+            System.out.println("The given format of logical expression is not supported yet: " + logicalCondition);
+            return null;
         }
         List<String> featureStrings = new LinkedList<>();
         // remove all "||" strings

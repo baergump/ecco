@@ -21,7 +21,6 @@ public class VEVOSConditionHandler {
         if (this.vevosFileExists){
             this.parsePresenceConditions();
         }
-        this.vevosPresenceConditions.sort(Comparator.comparingInt(VEVOSPresenceCondition::getStartLineNumber));
     }
 
     private void parsePresenceConditions() {
