@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 public class JavaChallengeReaderTest {
 
     private final Path REPOSITORY_PATH = Paths.get("src", "test","resources", "test_repository");
-    private final Path VARIANT_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Tools\\ArgoUMLExtractor\\variants\\Variant_0");
+    private final Path VARIANT_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\ArgoUMLExtractor\\variants\\Variant_10");
     private EccoService eccoService;
     private Repository.Op repository;
     private JavaChallengeReader reader;
@@ -88,7 +88,7 @@ public class JavaChallengeReaderTest {
             Path variantPath = Paths.get("C:\\Users\\Bernhard\\Work\\Tools\\ArgoUMLExtractor\\variants\\Variant_" + i);
             this.setup(variantPath);
             long start = System.currentTimeMillis();
-            Set<Node.Op> nodes = this.eccoService.readFiles(this.repository);
+            Set<Node.Op> nodes = this.eccoService.readFiles();
             long finish = System.currentTimeMillis();
             long timeElapsed = finish - start;
             System.out.printf("took %d milliseconds (%d seconds).%n", timeElapsed, timeElapsed / 1000);
