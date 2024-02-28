@@ -1,5 +1,7 @@
 package utils;
 
+import org.apache.commons.io.FilenameUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,26 +16,43 @@ import java.util.stream.Stream;
  */
 public class ConfigTransformer {
 
+    public static void main(String[] args) {
+        final Path VARIANTS_BASE_PATH = Paths.get("");
+        transformConfigurations(VARIANTS_BASE_PATH);
+    }
+
     public static void transformConfigurations(Path variantsBasePath){
-        try (Stream<Path> stream = Files.list(variantsBasePath)) {
-            // TODO: only consider ".config" files
-            stream.filter(file -> !Files.isDirectory(file))
-                    .forEach(ConfigTransformer::transformConfiguration);
+        try (Stream<Path> stream = Files.list(variantsBasePath.resolve("configs"))) {
+            List <Path> paths = stream.filter(file -> !Files.isDirectory(file))
+                    .filter(file -> file.getFileName().toString().contains(".config"))
+                    .collect(Collectors.toList());
+            for (Path path : paths){
+                transformConfiguration(path);
+            }
         } catch (IOException e){
-            // TODO
+            System.out.printf(e.getMessage());
         }
     }
 
     public static void transformConfiguration(Path configFilePath){
-        // TODO: get variant number
+        String configFileName = configFilePath.getFileName().toString();
+        String extension = FilenameUtils.getExtension(configFileName);
+        configFileName = configFileName.replace("." + extension, "");
+        Path eccoConfigFile = configFilePath.getParent().getParent().resolve(configFileName + "\\.config").toAbsolutePath();
         try {
             List<String> allLines = Files.readAllLines(configFilePath);
             allLines = allLines.stream().filter(f -> !f.isEmpty()).collect(Collectors.toList());
             String eccoConfigString = String.join(", ", allLines);
-            // TODO
-            Files.write(Paths.get("todo"), eccoConfigString.getBytes());
+
+            if (eccoConfigString.isEmpty()){
+                eccoConfigString = "BASE";
+            } else {
+                eccoConfigString = "BASE, " + eccoConfigString;
+            }
+
+            Files.write(eccoConfigFile, eccoConfigString.getBytes());
         } catch (IOException e) {
-            // TODO
+            System.out.printf(e.getMessage());
         }
     }
 
