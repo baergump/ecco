@@ -24,18 +24,23 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class JavaChallengeReaderTest {
 
     private final Path REPOSITORY_PATH = Paths.get("src", "test","resources", "test_repository");
-    private final Path VARIANT_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\ArgoUMLExtractor\\variants\\Variant_10");
+    private final Path VARIANT_PATH = Paths.get("src\\test\\resources\\test_variant\\Variant_5");
+    private final Path VARIANTS_BASE_PATH = Paths.get("src\\test\\resources\\test_variant\\Variant_5");
     private EccoService eccoService;
     private Repository.Op repository;
     private JavaChallengeReader reader;
 
     @BeforeEach
     public void setup() throws IOException {
-        this.deleteRepository();
+        //this.deleteRepository();
         this.createRepository(this.VARIANT_PATH);
+        //this.openRepository(this.VARIANT_PATH);
         EntityFactory factory = new MemEntityFactory();
         this.reader = new JavaChallengeReader(factory);
     }
@@ -60,6 +65,14 @@ public class JavaChallengeReaderTest {
         this.eccoService.setRepositoryDir(this.REPOSITORY_PATH.resolve(".ecco").toAbsolutePath());
         this.eccoService.setBaseDir(variantPath.toAbsolutePath());
         this.eccoService.init();
+        this.repository = (Repository.Op) this.eccoService.getRepository();
+    }
+
+    private void openRepository(Path variantPath){
+        this.eccoService = new EccoService();
+        this.eccoService.setRepositoryDir(this.REPOSITORY_PATH.resolve(".ecco").toAbsolutePath());
+        this.eccoService.setBaseDir(variantPath.toAbsolutePath());
+        this.eccoService.open();
         this.repository = (Repository.Op) this.eccoService.getRepository();
     }
 
@@ -88,7 +101,7 @@ public class JavaChallengeReaderTest {
             Path variantPath = Paths.get("C:\\Users\\Bernhard\\Work\\Tools\\ArgoUMLExtractor\\variants\\Variant_" + i);
             this.setup(variantPath);
             long start = System.currentTimeMillis();
-            Set<Node.Op> nodes = this.eccoService.readFiles();
+            Set<Node.Op> nodes = this.eccoService.readFiles(this.repository);
             long finish = System.currentTimeMillis();
             long timeElapsed = finish - start;
             System.out.printf("took %d milliseconds (%d seconds).%n", timeElapsed, timeElapsed / 1000);
@@ -99,7 +112,6 @@ public class JavaChallengeReaderTest {
     @Test
     public void listAllLogicalExpressions(){
         Path VARIANTS_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\ArgoUMLExtractor\\variants");
-
         try {
             Stream<Path> folderStream = Files.walk(VARIANTS_PATH)
                     .filter(Files::isDirectory);
@@ -107,10 +119,19 @@ public class JavaChallengeReaderTest {
             for (Path path : paths){
 
             }
-
-
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    @Test
+    public void readFeatureTracesTest(){
+        this.eccoService.commit();
+        assertFalse(this.repository.getFeatureTraces().isEmpty());
+    }
+
+    @Test
+    public void trainAllVariants(){
+
     }
 }

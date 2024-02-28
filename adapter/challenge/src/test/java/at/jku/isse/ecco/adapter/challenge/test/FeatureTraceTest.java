@@ -55,6 +55,6 @@ public class FeatureTraceTest {
     @Test
     public void readFeatureTracesTest(){
         this.eccoService.commit();
-       // assertFalse(this.repository.getFeatureTraces().isEmpty());
+        assertFalse(this.repository.getFeatureTraces().isEmpty());
     }
 }

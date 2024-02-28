@@ -430,7 +430,7 @@ public interface Repository extends Persistable {
 			}
 
 			// add configuration features and revisions
-			Collection<FeatureRevision> repoFeatureRevisions = this.addConfigurationFeatures(configuration);
+				Collection<FeatureRevision> repoFeatureRevisions = this.addConfigurationFeatures(configuration);
 
 			// create configuration with repo feature revisions
 			Configuration repoConfiguration = this.getEntityFactory().createConfiguration(repoFeatureRevisions.toArray(new FeatureRevision[0]));

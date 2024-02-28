@@ -1545,25 +1545,20 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
      * @return The resulting commit object or null in case of an error.
      */
     public synchronized Commit commit(String commitMessage, Configuration configuration, String committer) {
-        // TODO: extend with Feature Trace Recording (use respective information if present)
-
         this.checkInitialized();
-
         checkNotNull(configuration);
 
         try {
             this.transactionStrategy.begin(TransactionStrategy.TRANSACTION.READ_WRITE);
 
             Repository.Op repository = this.repositoryDao.load();
+            repository.addFeatureRevisions(configuration.getFeatureRevisions());
             Set<Node.Op> nodes = readFiles(repository);
-
             ArrayList<Variant> variants = repository.getVariants();
 
             long extractTime = System.currentTimeMillis();
             Commit commit = repository.extract(configuration, nodes, committer);
             extractTime = System.currentTimeMillis() - extractTime;
-
-            // TODO: update Feature Traces in the repository
 
             //storing new variant
             boolean hasConfiguration = false;
@@ -1838,12 +1833,10 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
             if (variant != null) {
                 repository.updateVariant(variant, configuration, name);
             }
-            //
 
             service.repositoryDao.store(repository);
 
             service.transactionStrategy.end();
-
 
         } catch (Exception e) {
             service.transactionStrategy.rollback();
@@ -1852,9 +1845,7 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
         }
     }
 
-
     public synchronized Set<Node.Op> readFiles(Repository.Op repository) {
-        // TODO: feature trace reading?
         this.reader.setRepository(repository);
         return this.reader.read(this.baseDir, new Path[]{Paths.get("")});
     }

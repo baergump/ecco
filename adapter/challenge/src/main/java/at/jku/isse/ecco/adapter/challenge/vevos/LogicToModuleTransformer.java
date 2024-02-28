@@ -254,6 +254,7 @@ public class LogicToModuleTransformer {
             // TODO: (possibly) handle multiple existing features with the same name
             throw new RuntimeException(String.format("There are more than one features with the given name, which is not yet supported for feature traces (name: %s)", featureName));
         } else if (features.isEmpty()){
+            // TODO: this should not be the case (throw Exception here?)
             return this.repository.addFeature(UUID.randomUUID().toString(), featureName);
         }  else {
             return features.iterator().next();
