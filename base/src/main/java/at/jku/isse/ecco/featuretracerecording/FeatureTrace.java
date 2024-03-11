@@ -20,4 +20,7 @@ public interface FeatureTrace extends Persistable {
     Node getNode();
 
     Collection<ModuleRevision> getAllModuleRevisions();
+
+    @Override
+    boolean equals(Object obj);
 }

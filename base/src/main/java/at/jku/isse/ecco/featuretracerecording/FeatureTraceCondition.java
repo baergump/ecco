@@ -51,4 +51,7 @@ public interface FeatureTraceCondition extends Persistable {
         condition.addAllNegativeModuleRevisions(condition2.getNegativeModuleRevisions());
         return condition;
     }
+
+    @Override
+    boolean equals(Object o);
 }

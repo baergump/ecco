@@ -1846,8 +1846,17 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
     }
 
     public synchronized Set<Node.Op> readFiles(Repository.Op repository) {
-        this.reader.setRepository(repository);
-        return this.reader.read(this.baseDir, new Path[]{Paths.get("")});
+        try {
+            this.transactionStrategy.begin(TransactionStrategy.TRANSACTION.READ_WRITE);
+            this.reader.setRepository(repository);
+            Set<Node.Op> nodes = this.reader.read(this.baseDir, new Path[]{Paths.get("")});
+            this.repositoryDao.store(repository);
+            this.transactionStrategy.end();
+            return nodes;
+        } catch (Exception e) {
+            this.transactionStrategy.rollback();
+            throw new EccoException("Error during adding a variant.", e);
+        }
     }
 
 

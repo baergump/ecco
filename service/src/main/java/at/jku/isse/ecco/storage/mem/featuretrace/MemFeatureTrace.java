@@ -22,6 +22,10 @@ public class MemFeatureTrace implements FeatureTrace {
         this.presenceCondition = presenceCondition;
     }
 
+    public FeatureTraceCondition getPresenceCondition(){
+        return this.presenceCondition;
+    }
+
     @Override
     public Node getNode(){
         return this.node;
@@ -35,5 +39,14 @@ public class MemFeatureTrace implements FeatureTrace {
     @Override
     public Collection<ModuleRevision> getAllModuleRevisions(){
         return this.presenceCondition.getAllModuleRevisions();
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if (this == o) return true;
+        if (!(o instanceof MemFeatureTrace)) return false;
+        if (!(this.node.equals(((MemFeatureTrace) o).getNode()))) return false;
+        if (!(this.presenceCondition.equals(((MemFeatureTrace) o).getPresenceCondition()))) return false;
+        return true;
     }
 }

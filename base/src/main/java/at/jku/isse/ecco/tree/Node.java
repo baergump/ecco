@@ -18,6 +18,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public interface Node extends Persistable {
 
+
 	@Override
 	public int hashCode();
 

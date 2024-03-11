@@ -68,5 +68,27 @@ public class MemFeatureTraceCondition implements FeatureTraceCondition {
         this.negativeModuleRevisions.addAll(moduleRevisions);
     }
 
+    @Override
+    public boolean equals(Object o){
+        if (this == o) return true;
+        if (!(o instanceof MemFeatureTraceCondition)) return false;
 
+        MemFeatureTraceCondition otherMemFeatureTraceCondition = (MemFeatureTraceCondition) o;
+        if (!(this.positiveModuleRevisions.size() == otherMemFeatureTraceCondition.getPositiveModuleRevisions().size())){
+            return false;
+        }
+        if (!(this.negativeModuleRevisions.size() == otherMemFeatureTraceCondition.getNegativeModuleRevisions().size())){
+            return false;
+        }
+
+        for(ModuleRevision moduleRevision : otherMemFeatureTraceCondition.getNegativeModuleRevisions()){
+            if (!(this.negativeModuleRevisions.contains(moduleRevision))) return false;
+        }
+
+        for(ModuleRevision moduleRevision : otherMemFeatureTraceCondition.getPositiveModuleRevisions()){
+            if (!(this.positiveModuleRevisions.contains(moduleRevision))) return false;
+        }
+
+        return true;
+    }
 }
