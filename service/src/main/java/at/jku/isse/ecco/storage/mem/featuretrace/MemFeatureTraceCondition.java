@@ -7,6 +7,7 @@ import at.jku.isse.ecco.module.ModuleRevision;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Objects;
 
 public class MemFeatureTraceCondition implements FeatureTraceCondition {
     private final Collection<ModuleRevision> positiveModuleRevisions;
@@ -90,5 +91,10 @@ public class MemFeatureTraceCondition implements FeatureTraceCondition {
         }
 
         return true;
+    }
+
+    @Override
+    public int hashCode(){
+        return Objects.hash(this.positiveModuleRevisions, this.negativeModuleRevisions);
     }
 }

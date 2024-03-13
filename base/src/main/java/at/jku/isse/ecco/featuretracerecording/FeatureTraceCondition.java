@@ -54,4 +54,7 @@ public interface FeatureTraceCondition extends Persistable {
 
     @Override
     boolean equals(Object o);
+
+    @Override
+    int hashCode();
 }

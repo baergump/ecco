@@ -29,7 +29,7 @@ public final class MemRepository implements Repository, Repository.Op {
 	private List<Map<MemModule, MemModule>> modules;
 	private Collection<Commit> commits;
 	private int maxOrder;
-	private List<FeatureTrace> featureTraces;
+	private Set<FeatureTrace> featureTraces;
 
 	public MemRepository() {
 		this.features = Maps.mutable.empty();
@@ -37,7 +37,7 @@ public final class MemRepository implements Repository, Repository.Op {
 		this.modules = new ArrayList<>();
 		this.commits = new ArrayList<>();
 		this.setMaxOrder(2);
-		this.featureTraces = new LinkedList<>();
+		this.featureTraces = new HashSet<>();
 	}
 
 	@Override

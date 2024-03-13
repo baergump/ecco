@@ -7,6 +7,7 @@ import at.jku.isse.ecco.module.ModuleRevision;
 import at.jku.isse.ecco.tree.Node;
 
 import java.util.Collection;
+import java.util.Objects;
 
 public class MemFeatureTrace implements FeatureTrace {
 
@@ -48,5 +49,10 @@ public class MemFeatureTrace implements FeatureTrace {
         if (!(this.node.equals(((MemFeatureTrace) o).getNode()))) return false;
         if (!(this.presenceCondition.equals(((MemFeatureTrace) o).getPresenceCondition()))) return false;
         return true;
+    }
+
+    @Override
+    public int hashCode(){
+        return Objects.hash(this.node, this.presenceCondition);
     }
 }

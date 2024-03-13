@@ -23,4 +23,7 @@ public interface FeatureTrace extends Persistable {
 
     @Override
     boolean equals(Object obj);
+
+    @Override
+    int hashCode();
 }

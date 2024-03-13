@@ -271,6 +271,7 @@ public class FtrTest {
             Trees.mergePartialOrderGraphs(rootNode, (Node.Op) association.getRootNode());
         }
 
+
         FeatureTrace featureTrace = new MemFeatureTrace(rootNode, presenceCondition);
         this.repository.addFeatureTrace(featureTrace);
 

@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 public class ConfigTransformer {
 
     public static void main(String[] args) {
-        final Path VARIANTS_BASE_PATH = Paths.get("");
+        final Path VARIANTS_BASE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\ArgoUML_Challenge\\ScenarioAllVariants");
         transformConfigurations(VARIANTS_BASE_PATH);
     }
 
@@ -55,5 +55,4 @@ public class ConfigTransformer {
             System.out.printf(e.getMessage());
         }
     }
-
 }

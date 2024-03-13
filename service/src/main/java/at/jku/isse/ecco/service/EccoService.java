@@ -1850,6 +1850,8 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
             this.transactionStrategy.begin(TransactionStrategy.TRANSACTION.READ_WRITE);
             this.reader.setRepository(repository);
             Set<Node.Op> nodes = this.reader.read(this.baseDir, new Path[]{Paths.get("")});
+            // TODO: delete this line
+            System.out.println("No. of feature traces: " + repository.getFeatureTraces().size());
             this.repositoryDao.store(repository);
             this.transactionStrategy.end();
             return nodes;
