@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -13,14 +14,32 @@ import java.util.stream.Stream;
 public class EccoTrainer {
 
     public static void main(String[] args) {
-        Path repositoryPath = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\ArgoUML_Challenge\\Repositories\\ScenarioAllVariants_AllFeatureTraces");
-        //Path repositoryPath = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\ArgoUML_Challenge\\Repositories\\DummyScenario");
-        Path scenarioPath = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\ArgoUML_Challenge\\ScenarioAllVariants");
+        //Path repositoryPath = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\ArgoUML_Challenge\\Repositories\\ScenarioAllVariants_AllFeatureTraces");
+        //Path repositoryPath = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\ArgoUML_Challenge\\Repositories\\DummyRepository");
+        Path repositoryPath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories\\ScenarioRandom002Variants");
+        //Path scenarioPath = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\ArgoUML_Challenge\\ScenarioAllVariants");
         //Path scenarioPath = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\ArgoUML_Challenge\\DummyScenario");
+        Path scenarioPath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Scenarios\\ScenarioRandom002Variants");
         EccoTrainer trainer = new EccoTrainer(repositoryPath);
         trainer.trainScenario(scenarioPath);
     }
 
+    /*public static void main(String[] args) throws IOException {
+        Path variantsPath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Scenarios\\ScenarioAllVariants");
+        Path repoPath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories\\DummyRepository");
+        EccoTrainer eccoTrainer = new EccoTrainer(repoPath);
+        String[] configStrings = {"BASE",
+                "COGNITIVE",
+                "LOGGING",
+                "ACTIVITYDIAGRAM",
+                "SEQUENCEDIAGRAM",
+                "USECASEDIAGRAM",
+                "COLLABORATIONDIAGRAM",
+                "DEPLOYMENTDIAGRAM"};
+        Path path = eccoTrainer.searchVariant(variantsPath, configStrings);
+        System.out.println(path);
+    }
+*/
     private EccoService eccoService;
 
     public EccoTrainer(Path repositoryPath){
@@ -56,5 +75,28 @@ public class EccoTrainer {
     private void train(Path variantPath){
         this.eccoService.setBaseDir(variantPath.toAbsolutePath());
         this.eccoService.commit();
+    }
+
+    public Path searchVariant(Path variantsPath, String[] configStrings) throws IOException {
+        List<Path> variantPaths = this.getVariantFolders(variantsPath);
+        for (Path variantPath : variantPaths){
+            Path configPath = variantPath.resolve(".config").toAbsolutePath();
+            List<String> allLines = Files.readAllLines(configPath);
+            String variantConfig = allLines.get(0);
+            String[] variantConfigStrings = variantConfig.split(",");
+            for (int i = 0; i < variantConfigStrings.length; i++){ variantConfigStrings[i] = variantConfigStrings[i].trim(); }
+            List<String> variantConfigStringsList = Arrays.stream(variantConfigStrings).collect(Collectors.toList());
+
+            if (!(variantConfigStrings.length == configStrings.length)) continue;
+            boolean allThere = true;
+            for (String config : configStrings){
+                if (!variantConfigStringsList.contains(config)) {
+                    allThere = false;
+                    break;
+                }
+            }
+            if (allThere) return variantPath;
+        }
+        throw new RuntimeException("No matching variant found...");
     }
 }

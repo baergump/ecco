@@ -70,6 +70,7 @@ public interface Module extends Persistable {
 
 	public int getCount();
 
+
 	public void setCount(int count);
 
 	public void incCount();

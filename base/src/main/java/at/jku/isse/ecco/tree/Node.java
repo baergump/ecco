@@ -195,6 +195,10 @@ public interface Node extends Persistable {
 		this.getProperties().remove(name);
 	}
 
+	default void clearFeatureTraceCondition(){
+
+	}
+
 
 	/**
 	 * Private interface for node operands that are used internally and not passed outside.

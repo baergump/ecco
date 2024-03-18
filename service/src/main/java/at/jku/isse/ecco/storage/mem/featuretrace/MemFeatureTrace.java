@@ -23,6 +23,7 @@ public class MemFeatureTrace implements FeatureTrace {
         this.presenceCondition = presenceCondition;
     }
 
+    @Override
     public FeatureTraceCondition getPresenceCondition(){
         return this.presenceCondition;
     }

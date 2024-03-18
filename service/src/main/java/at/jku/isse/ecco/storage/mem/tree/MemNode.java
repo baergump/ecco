@@ -189,4 +189,9 @@ public class MemNode implements Node, Node.Op {
 			this.properties = Maps.mutable.empty();
 		return this.properties;
 	}
+
+	@Override
+	public void clearFeatureTraceCondition(){
+		this.featureTraceConditions = new HashSet<>();
+	}
 }
