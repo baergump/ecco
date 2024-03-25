@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 public class FeatureTraceChallengeTest {
 
-    // TODO: clean up fields
     private static final Path BENCHMARK_DIR = Paths.get("C:\\Users\\user\\Desktop\\splc_challenge\\workspace\\ArgoUMLSPLBenchmark");
     private static final Path OUTPUT_DIR = Paths.get("C:\\Users\\user\\Desktop\\splc_challenge\\results");
     // set this path to a concrete scenario if you only want to run a specific one
@@ -42,25 +41,24 @@ public class FeatureTraceChallengeTest {
 
     // ----------------------------------
 
+    private static final Path FEATURE_TRACE_REPOSITORY = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\ArgoUML_Challenge\\Repositories\\ScenarioRandom010Variants");
     private static final Path SERVICE_BASE_DIR = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\ServiceBaseDir");
     private static final Path RESULTS_DIR = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Results");
     private EccoService eccoService;
     private Repository.Op repository;
 
-    // TODO: how to handle feature trace condition?
-    // TODO: make a global list of written files
-
     @Test
     public void testFeatureTraceImport(){
-        Path fromRepoPath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories\\ScenarioRandom002Variants");
-        Path toRepoPath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories\\Dummy2Repository");
+        Path fromRepoPath = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\ArgoUML_Challenge\\Repositories\\ScenarioRandom010Variants");
+        Path toRepoPath = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\ArgoUML_Challenge\\Repositories\\DummyScenario");
         // toRepoPath is used here as placeholder
         EccoService eccoService = this.openRepository(fromRepoPath, toRepoPath);
         Repository.Op fromRepo = (Repository.Op) eccoService.getRepository();
-        eccoService = this.createRepository(toRepoPath, toRepoPath);
+        eccoService = this.createRepository(toRepoPath, SERVICE_BASE_DIR);
         Repository.Op toRepo = (Repository.Op) eccoService.getRepository();
-        this.transferFeatureTraces(fromRepo, toRepo);
+        this.transferFeatureTraces(fromRepo, toRepo, 100);
     }
+
     private EccoService openRepository(Path repoPath, Path baseDir){
         EccoService eccoService = new EccoService();
         eccoService.setRepositoryDir(repoPath.resolve(".ecco").toAbsolutePath());
@@ -77,12 +75,30 @@ public class FeatureTraceChallengeTest {
         return eccoService;
     }
 
-    private void transferFeatureTraces(Repository.Op from, Repository.Op to){
-        // the repository "to" must be empty (no features, modules etc)
+    private void transferFeatureTraces(Repository.Op from, Repository.Op to, int percentage){
+        // the repository "to" must be empty (no features, modules etc.)
         // (this method is only for challenge-purposes)
+        if (percentage < 0 || percentage > 100){
+            throw new RuntimeException(String.format("Percentage of feature traces is invalid (%d).", percentage));
+        }
         Collection<FeatureTrace> featureTraces = from.getFeatureTraces();
         for (FeatureTrace featureTrace : featureTraces){
-            featureTrace.getNode().clearFeatureTraceCondition();
+            Node.Op node = (Node.Op) featureTrace.getNode();
+            node.removeAllFeatureTraceConditions();
+            this.addFeatureTraceToRepository(to, featureTrace);
+        }
+    }
+
+    private List<FeatureTrace> getRandomFeatureTracePercentage(List<FeatureTrace> allFeatureTraces, int percentage){
+        Collections.shuffle(allFeatureTraces);
+        int toBeRemoved = (allFeatureTraces.size() * percentage / 100);
+        return null;
+    }
+
+    private void transferFeatureTraces(Collection<FeatureTrace> featureTraces, Repository.Op to){
+        for (FeatureTrace featureTrace : featureTraces){
+            Node.Op node = (Node.Op) featureTrace.getNode();
+            node.removeAllFeatureTraceConditions();
             this.addFeatureTraceToRepository(to, featureTrace);
         }
     }
@@ -189,14 +205,10 @@ public class FeatureTraceChallengeTest {
 
     @Test
     public void runExperiment() throws IOException {
-        // TODO: create repository
-        // TODO: transfer feature traces
-
-        // TODO: create results for every scenario for different amounts of feature traces
-        // TODO: for every amount of feature traces, choose random ones multiple times (10?)
-        Path scenarioPath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories\\ScenarioRandom002Variants");
-        Path outputpath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Results\\Add\\ScenarioRandom002Variants\\000_Feature_Traces\\000_Faulty_Traces");
-        this.eccoService = this.openRepository(scenarioPath, SERVICE_BASE_DIR);
+        //Path repositoryPath = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\ArgoUML_Challenge\\Results\\Add\\ScenarioRandom004Variants\\000_Feature_Traces\\000_Faulty_Traces\\Repo");
+        Path repositoryPath = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\ArgoUML_Challenge\\Repositories\\ScenarioRandom004Variants");
+        Path outputpath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Results\\Add\\ScenarioRandom002Variants\\000_Feature_Traces\\000_Faulty_Traces\\000_Faulty_Traces");
+        this.eccoService = this.openRepository(repositoryPath, SERVICE_BASE_DIR);
         this.repository = (Repository.Op) eccoService.getRepository();
         this.computeResults(outputpath);
     }
@@ -210,6 +222,7 @@ public class FeatureTraceChallengeTest {
         System.out.println("Max Order: " + this.repository.getMaxOrder());
         Collection<? extends Association> associations = repository.getAssociations();
         int assocCounter = 0;
+
         for (Association association : associations) {
             assocCounter++;
             this.computeAssociationResult(association, results, scenarioOutputDir, assocCounter);
@@ -217,10 +230,11 @@ public class FeatureTraceChallengeTest {
 
         Collection<FeatureTrace> featureTraces = this.repository.getFeatureTraces();
         for (FeatureTrace featureTrace : featureTraces){
-            this.computeFeatureTraceResult(featureTrace);
+            this.computeFeatureTraceResult(featureTrace, results);
         }
 
         // write to file (for all associations/traces)
+        // results are written to the files that really matter here
         Path resultsDir = scenarioOutputDir.resolve("results");
         if (!Files.exists(resultsDir))
             Files.createDirectory(resultsDir);
@@ -236,7 +250,7 @@ public class FeatureTraceChallengeTest {
         }
     }
 
-    private void computeFeatureTraceResult(FeatureTrace featureTrace){
+    private void computeFeatureTraceResult(FeatureTrace featureTrace, Map<String, Map<String, Boolean>> results){
         System.out.println("compute feature trace result.");
         FeatureTraceCondition condition = featureTrace.getPresenceCondition();
         Collection<ModuleRevision> posModuleRevisions = condition.getPositiveModuleRevisions();
@@ -251,21 +265,53 @@ public class FeatureTraceChallengeTest {
         }
 
         for (ModuleRevision moduleRevision : posModuleRevisions){
-            this.computePosModuleRevisionResult(moduleRevision, featureTrace.getNode());
+            this.computePosModuleRevisionResult(moduleRevision, featureTrace.getNode(), results);
         }
         for (ModuleRevision moduleRevision : negModuleRevisions){
-            this.computeNegModuleRevisionResult(moduleRevision, featureTrace.getNode());
+            this.computeNegModuleRevisionResult(moduleRevision, featureTrace.getNode(), results);
         }
     }
 
-    private void computePosModuleRevisionResult(ModuleRevision moduleRevision, Node node){
+    private void computePosModuleRevisionResult(ModuleRevision moduleRevision, Node node, Map<String, Map<String, Boolean>> results){
         String filename = this.moduleRevisionToFilename(moduleRevision);
-
-        // compute string using node
+        Map<String, Boolean> lines;
+        if (results.containsKey(filename)){
+            lines = results.get(filename);
+        } else {
+            lines = new HashMap<>();
+            results.put(filename, lines);
+        }
+        StringBuilder placeholder = new StringBuilder();
+        this.computeString(node, placeholder, lines, null);
     }
 
-    private void computeNegModuleRevisionResult(ModuleRevision moduleRevision, Node node){
-        // TODO: logic to get filename
+    private void computeNegModuleRevisionResult(ModuleRevision moduleRevision, Node node, Map<String, Map<String, Boolean>> results){
+        String filename = this.negModuleRevisionToFilename(moduleRevision);
+        Map<String, Boolean> lines;
+        if (results.containsKey(filename)){
+            lines = results.get(filename);
+        } else {
+            lines = new HashMap<>();
+            results.put(filename, lines);
+        }
+        StringBuilder placeholder = new StringBuilder();
+        this.computeString(node, placeholder, lines, null);
+    }
+
+    private String negModuleRevisionToFilename(ModuleRevision moduleRevision){
+        FeatureRevision[] posFeatureRevisions = moduleRevision.getPos();
+        Feature[] negFeatures = moduleRevision.getNeg();
+        if (posFeatureRevisions.length > 0 && negFeatures.length > 0){
+            throw new RuntimeException("There is a negative module revision with both, positive feature revisions, as well as negative features.");
+        } else if (posFeatureRevisions.length > 0){
+            throw new RuntimeException("There is a negative module revision with positive feature revisions, maybe ignore this case for now.");
+        } else if (negFeatures.length == 1){
+            // todo
+            throw new RuntimeException("lets see...");
+        } else if (negFeatures.length > 1){
+            throw new RuntimeException("There is a negative module revision with multiple negative features, maybe ignore this case for now.");
+        }
+        throw new RuntimeException("No features in the given negative module revision.");
     }
 
     private String moduleRevisionToFilename(ModuleRevision moduleRevision){
@@ -310,12 +356,14 @@ public class FeatureTraceChallengeTest {
         Collection<Module> finalModules = this.selectModules(association);
 
         // compute results
+        // all the results are collected here
         StringBuilder sb = new StringBuilder();
         Map<String, Boolean> lines = new HashMap<>();
         this.computeString(association.getRootNode(), sb, lines, null);
         System.out.println(sb);
 
         // loop over modules, create filename by: removing base feature, concatenating with "_and_" or "_or" (depending on type) and prefixing "not_" for negative modules
+        // the results are written per module here (only as informative purpose)
         for (Module module : finalModules) {
             String filename = featuresToFilename(module.getPos(), module.getNeg());
             if (filename.isEmpty())
@@ -380,9 +428,6 @@ public class FeatureTraceChallengeTest {
     private boolean checkNonMethodDescendants(Node node) {
         // get the node data and see if it exists
         if (node.getArtifact() != null && node.getArtifact().getData() != null) {
-            // see if the node is an import or variable declaration child
-            //if (node.getArtifact().getData() instanceof ImportArtifactData || node.getArtifact().getData() instanceof FieldArtifactData) {
-            //if (!(node.getArtifact().getData() instanceof MethodArtifactData)) {
             if (node.getArtifact().getData() instanceof ImportArtifactData || node.getArtifact().getData() instanceof FieldArtifactData || node.getArtifact().getData() instanceof LineArtifactData) {
                 return true;
             }
@@ -398,30 +443,28 @@ public class FeatureTraceChallengeTest {
     }
 
     private void computeString(Node node, StringBuilder sb, Map<String, Boolean> lines, String currentClassName) {
+        // A refinement makes no sense if the whole class/method is a traced artifact
+        // (refinement == some artifact inside the class/method traces)
+
         if (node.getArtifact() != null && node.getArtifact().getData() != null) {
             if (node.getArtifact().getData() instanceof ClassArtifactData) {
                 currentClassName = ((ClassArtifactData) node.getArtifact().getData()).getName();
 
                 boolean nonMethodDescendants = this.checkNonMethodDescendants(node);
-
-                if (lines.containsKey(currentClassName))
-                    throw new EccoException("Class already exists.");
                 if (node.isUnique() && (!node.getParent().isUnique() || (node.getParent().getArtifact() != null && node.getArtifact().getData() != null && !(node.getParent().getArtifact().getData() instanceof ClassArtifactData)))) {
                     sb.append(currentClassName + "\n");
                     lines.put(currentClassName, true);
-                } else if (!node.isUnique() && nonMethodDescendants) {
+                } else if (!node.isUnique() && nonMethodDescendants && !lines.containsKey(currentClassName)) {
                     sb.append(currentClassName + " Refinement\n");
                     lines.put(currentClassName, false);
                 }
             } else if (node.getArtifact().getData() instanceof MethodArtifactData) {
                 String methodSignature = ((MethodArtifactData) node.getArtifact().getData()).getSignature().replaceAll(", ", ",");
                 String fullMethodSignature = currentClassName + " " + methodSignature;
-                if (lines.containsKey(fullMethodSignature))
-                    throw new EccoException("Method already exists.");
                 if (node.isUnique() && !node.getParent().isUnique()) {
                     sb.append(fullMethodSignature + "\n");
                     lines.put(fullMethodSignature, true);
-                } else if (!node.isUnique() && !node.getChildren().isEmpty()) { // it has unique descendants
+                } else if (!node.isUnique() && !node.getChildren().isEmpty() && !lines.containsKey(fullMethodSignature)) { // it has unique descendants
                     sb.append(fullMethodSignature + " Refinement\n");
                     lines.put(fullMethodSignature, false);
                 }
