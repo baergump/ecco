@@ -17,12 +17,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FeatureTraceTest {
 
+    // TODO: put this test class in another module? service?
+
     // TODO: test tree builds with feature traces including order
-    // add feature trace
-    // remove feature trace
+    // add node with feature trace
+    // (commit variant with feature A and node; commit variant with feature B and node as feature trace for feature C; built tree with feature A and C)
+    // remove node with feature trace
+    // (commit variant with feature A and B with two nodes; commit variant with feature A and one node and feature trace to A; build tree with B)
     // add child of ordered node with feature trace
+    // (same as above with
+    // remove child of ordered node with feature trace
     // compare child of ordered node of feature trace with read one that has sibling (equality in respect to sequence number)
     // (commit in sequence without feature trace and commit without sequence with feature trace)
+    // change order with feature trace? (build tree with one order and change it with feature trace?)
+
 
     private final Path REPOSITORY_PATH = Paths.get("src", "test","resources", "repo");
     private final Path SERVICE_BASE_PATH = Paths.get("src", "test", "resources", "base");
