@@ -238,7 +238,7 @@ public class FeatureTraceChallengeTest {
 
     private void computeFeatureTraceResult(FeatureTrace featureTrace){
         System.out.println("compute feature trace result.");
-        FeatureTraceCondition condition = featureTrace.getPresenceCondition();#
+        FeatureTraceCondition condition = featureTrace.getPresenceCondition();
         Collection<ModuleRevision> posModuleRevisions = condition.getPositiveModuleRevisions();
         Collection<ModuleRevision> negModuleRevisions = condition.getNegativeModuleRevisions();
 
