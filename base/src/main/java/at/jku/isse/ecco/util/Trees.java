@@ -748,7 +748,19 @@ public class Trees {
 		preparePath(nodeCopy.getParent());
 		removeSiblings(nodeCopy);
 		nodeCopy.removeChildren();
-		return nodeCopy;
+
+		// TODO: the returned node should be the root at the top
+
+
+		return Trees.getRootNode(nodeCopy);
+	}
+
+	private static Node.Op getRootNode(Node.Op node){
+		Node.Op parentNode = node.getParent();
+		while (parentNode.getParent() != null){
+			parentNode = parentNode.getParent();
+		}
+		return parentNode;
 	}
 
 	private static void preparePath(Node.Op node){

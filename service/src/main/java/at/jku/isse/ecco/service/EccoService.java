@@ -1921,7 +1921,8 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
     }
 
     // TODO: check if 'compareArtifacts' is proper name for method (fires association-selected events and returns artifact nodes)
-    private synchronized Set<Node> compareArtifacts(Checkout checkout) {
+    // TODO: make private?
+    public synchronized Set<Node> compareArtifacts(Checkout checkout) {
         for (Association selectedAssociation : checkout.getSelectedAssociations()) {
             this.fireAssociationSelectedEvent(selectedAssociation);
         }
