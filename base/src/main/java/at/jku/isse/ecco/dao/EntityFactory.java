@@ -8,8 +8,9 @@ import at.jku.isse.ecco.core.Remote;
 import at.jku.isse.ecco.feature.Configuration;
 import at.jku.isse.ecco.feature.Feature;
 import at.jku.isse.ecco.feature.FeatureRevision;
-import at.jku.isse.ecco.featuretracerecording.FeatureTrace;
-import at.jku.isse.ecco.featuretracerecording.FeatureTraceCondition;
+import at.jku.isse.ecco.featuretrace.FeatureTrace;
+import at.jku.isse.ecco.featuretrace.FeatureTraceCondition;
+import at.jku.isse.ecco.featuretrace.parser.VEVOSCondition;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.tree.Node;
 import at.jku.isse.ecco.tree.RootNode;
@@ -20,6 +21,8 @@ import java.util.Set;
  * Creates entities depending on the used data implementation.
  */
 public interface EntityFactory {
+
+	VEVOSCondition createVEVOSCondition(String vevosFileLine);
 
 	/**
 	 * Creates a remote with given name, address and type.
@@ -120,7 +123,4 @@ public interface EntityFactory {
 	public Node.Op createOrderedNode(final Artifact.Op<?> artifact);
 
 	public Node.Op createOrderedNode(final ArtifactData artifactData);
-
-	FeatureTrace createFeatureTrace(Node node, FeatureTraceCondition presenceCondition);
-
 }

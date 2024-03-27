@@ -3,9 +3,8 @@ package at.jku.isse.ecco.storage.mem.tree;
 import at.jku.isse.ecco.EccoException;
 import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.core.Association;
-import at.jku.isse.ecco.featuretracerecording.FeatureTraceCondition;
+import at.jku.isse.ecco.featuretrace.FeatureTraceCondition;
 import at.jku.isse.ecco.tree.Node;
-import at.jku.isse.ecco.tree.RootNode;
 import org.eclipse.collections.impl.factory.Maps;
 
 import java.util.*;
@@ -188,10 +187,5 @@ public class MemNode implements Node, Node.Op {
 		if (this.properties == null)
 			this.properties = Maps.mutable.empty();
 		return this.properties;
-	}
-
-	@Override
-	public void clearFeatureTraceCondition(){
-		this.featureTraceConditions = new HashSet<>();
 	}
 }

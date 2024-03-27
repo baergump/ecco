@@ -2,15 +2,13 @@ package at.jku.isse.ecco.adapter.challenge.vevos;
 
 import at.jku.isse.ecco.feature.Feature;
 import at.jku.isse.ecco.feature.FeatureRevision;
-import at.jku.isse.ecco.featuretracerecording.FeatureTraceCondition;
+import at.jku.isse.ecco.featuretrace.FeatureTraceCondition;
 import at.jku.isse.ecco.module.Module;
 import at.jku.isse.ecco.module.ModuleRevision;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.storage.mem.featuretrace.MemFeatureTraceCondition;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 // TODO: handle feature revisions!

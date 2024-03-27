@@ -3,7 +3,7 @@ package at.jku.isse.ecco.adapter.challenge.test;
 import at.jku.isse.ecco.adapter.challenge.vevos.LogicToModuleTransformer;
 import at.jku.isse.ecco.feature.Feature;
 import at.jku.isse.ecco.feature.FeatureRevision;
-import at.jku.isse.ecco.featuretracerecording.FeatureTraceCondition;
+import at.jku.isse.ecco.featuretrace.FeatureTraceCondition;
 import at.jku.isse.ecco.module.ModuleRevision;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.EccoService;

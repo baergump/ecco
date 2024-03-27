@@ -3,7 +3,8 @@ package at.jku.isse.ecco.tree;
 import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.core.Association;
 import at.jku.isse.ecco.dao.Persistable;
-import at.jku.isse.ecco.featuretracerecording.FeatureTraceCondition;
+import at.jku.isse.ecco.featuretrace.FeatureTrace;
+import at.jku.isse.ecco.featuretrace.FeatureTraceCondition;
 import at.jku.isse.ecco.util.Trees;
 
 import java.util.*;
@@ -195,11 +196,6 @@ public interface Node extends Persistable {
 		this.getProperties().remove(name);
 	}
 
-	default void clearFeatureTraceCondition(){
-
-	}
-
-
 	/**
 	 * Private interface for node operands that are used internally and not passed outside.
 	 */
@@ -387,13 +383,6 @@ public interface Node extends Persistable {
 			return Trees.createSkeletonPath(this);
 		}
 
-		void setFeatureTraceConditions(Collection<FeatureTraceCondition> featureTraceConditions);
-
-		void removeAllFeatureTraceConditions();
-
-		void addFeatureTraceCondition(FeatureTraceCondition featureTraceCondition);
-
-		Collection<FeatureTraceCondition> getFeatureTraceConditions();
-
+		FeatureTrace getFeatureTrace();
 	}
 }

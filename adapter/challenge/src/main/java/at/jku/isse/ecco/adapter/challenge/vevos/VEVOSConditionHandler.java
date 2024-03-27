@@ -11,11 +11,9 @@ public class VEVOSConditionHandler {
     private final Path vevosFilePath;
     private boolean vevosFileExists;
     private List<VEVOSPresenceCondition> vevosPresenceConditions;
-    private LogicToModuleTransformer logicToModuleTransformer;
 
-    public VEVOSConditionHandler(Path vevosFileBasePath, LogicToModuleTransformer logicToModuleTransformer){
+    public VEVOSConditionHandler(Path vevosFileBasePath){
         this.vevosFilePath = vevosFileBasePath.resolve(this.PRESENCE_CONDITION_FILENAME);
-        this.logicToModuleTransformer = logicToModuleTransformer;
         this.vevosFileExists = Files.exists(vevosFilePath);
         this.vevosPresenceConditions = new LinkedList<>();
         if (this.vevosFileExists){
@@ -41,7 +39,7 @@ public class VEVOSConditionHandler {
                 // ignore file conditions (for now)
                 // TODO: check file conditions for sure (check if end line is last line in file)
                 if(line.contains(";True;True;True;1")){ continue; }
-                this.vevosPresenceConditions.add(new VEVOSPresenceCondition(line, logicToModuleTransformer));
+                this.vevosPresenceConditions.add(new VEVOSPresenceCondition(line));
             }
         } catch(IllegalArgumentException e){
             throw new RuntimeException(String.format("VEVOS file entries could not be parsed: %s", e.getMessage()));

@@ -12,7 +12,8 @@ import at.jku.isse.ecco.dao.Persistable;
 import at.jku.isse.ecco.feature.Configuration;
 import at.jku.isse.ecco.feature.Feature;
 import at.jku.isse.ecco.feature.FeatureRevision;
-import at.jku.isse.ecco.featuretracerecording.FeatureTrace;
+import at.jku.isse.ecco.featuretrace.FeatureTrace;
+import at.jku.isse.ecco.featuretrace.evaluation.UserAdditionEvaluation;
 import at.jku.isse.ecco.module.Condition;
 import at.jku.isse.ecco.module.EmptyModule;
 import at.jku.isse.ecco.module.Module;
@@ -673,7 +674,8 @@ public interface Repository extends Persistable {
 			Collection<FeatureTrace> featureTraceAdditions = new HashSet<>();
 			Collection<FeatureTrace> featureTraceSubtractions = new HashSet<>();
 			for (FeatureTrace featureTrace : this.getFeatureTraces()){
-				if (featureTrace.holds(configuration)){
+				// TODO: make evaluation strategy decision possible
+				if (featureTrace.holds(configuration, new UserAdditionEvaluation())){
 					featureTraceAdditions.add(featureTrace);
 				} else {
 					featureTraceSubtractions.add(featureTrace);

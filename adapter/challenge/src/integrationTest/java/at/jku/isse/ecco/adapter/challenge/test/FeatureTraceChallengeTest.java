@@ -1,12 +1,11 @@
 package at.jku.isse.ecco.adapter.challenge.test;
 
-import at.jku.isse.ecco.EccoException;
 import at.jku.isse.ecco.adapter.challenge.data.*;
 import at.jku.isse.ecco.core.Association;
 import at.jku.isse.ecco.feature.Feature;
 import at.jku.isse.ecco.feature.FeatureRevision;
-import at.jku.isse.ecco.featuretracerecording.FeatureTrace;
-import at.jku.isse.ecco.featuretracerecording.FeatureTraceCondition;
+import at.jku.isse.ecco.featuretrace.FeatureTrace;
+import at.jku.isse.ecco.featuretrace.FeatureTraceCondition;
 import at.jku.isse.ecco.module.Condition;
 import at.jku.isse.ecco.module.Module;
 import at.jku.isse.ecco.module.ModuleRevision;

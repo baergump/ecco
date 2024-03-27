@@ -1,46 +1,45 @@
 package at.jku.isse.ecco.storage.mem.featuretrace;
 
 import at.jku.isse.ecco.feature.Configuration;
-import at.jku.isse.ecco.featuretracerecording.FeatureTrace;
-import at.jku.isse.ecco.featuretracerecording.FeatureTraceCondition;
-import at.jku.isse.ecco.module.ModuleRevision;
+import at.jku.isse.ecco.featuretrace.FeatureTrace;
+import at.jku.isse.ecco.featuretrace.TraceCondition;
+import at.jku.isse.ecco.featuretrace.evaluation.EvaluationStrategy;
 import at.jku.isse.ecco.tree.Node;
 
-import java.util.Collection;
 import java.util.Objects;
 
 public class MemFeatureTrace implements FeatureTrace {
 
-    // condition for the artefact to be present (unfulfilled presence condition does not imply absence)
-    private FeatureTraceCondition presenceCondition;
-    // condition for the artefact to be absent (unfulfilled absence condition does not imply presence)
-    //private FeatureTraceCondition absenceCondition;
+    // TODO: parse string to get condition
 
     private Node node;
+    private TraceCondition traceCondition;
 
-    public MemFeatureTrace(Node node, FeatureTraceCondition presenceCondition){
+    public MemFeatureTrace(Node node){
         this.node = node;
-        this.presenceCondition = presenceCondition;
     }
 
     @Override
-    public FeatureTraceCondition getPresenceCondition(){
-        return this.presenceCondition;
+    public boolean holds(Configuration configuration, EvaluationStrategy evaluationStrategy){
+        return evaluationStrategy.holds(configuration, this.traceCondition);
     }
 
     @Override
-    public Node getNode(){
+    public Node getNode() {
         return this.node;
     }
 
     @Override
-    public boolean holds(Configuration configuration){
-        return presenceCondition.holds(configuration);
+    public void setUserCondition(String userCondition) {
+        // TODO
     }
 
     @Override
-    public Collection<ModuleRevision> getAllModuleRevisions(){
-        return this.presenceCondition.getAllModuleRevisions();
+    public boolean conditionEquals(FeatureTrace featureTrace){
+        if (this == featureTrace) return true;
+        if (!(featureTrace instanceof MemFeatureTrace)) return false;
+        if (!(this.traceCondition.equals(((MemFeatureTrace) featureTrace).traceCondition))) return false;
+        return true;
     }
 
     @Override
@@ -48,12 +47,12 @@ public class MemFeatureTrace implements FeatureTrace {
         if (this == o) return true;
         if (!(o instanceof MemFeatureTrace)) return false;
         if (!(this.node.equals(((MemFeatureTrace) o).getNode()))) return false;
-        if (!(this.presenceCondition.equals(((MemFeatureTrace) o).getPresenceCondition()))) return false;
+        if (!(this.traceCondition.equals(((MemFeatureTrace) o).traceCondition))) return false;
         return true;
     }
 
     @Override
     public int hashCode(){
-        return Objects.hash(this.node, this.presenceCondition);
+        return Objects.hash(this.node, this.traceCondition);
     }
 }

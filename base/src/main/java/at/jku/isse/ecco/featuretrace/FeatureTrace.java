@@ -1,23 +1,22 @@
-package at.jku.isse.ecco.featuretracerecording;
+package at.jku.isse.ecco.featuretrace;
 
 import at.jku.isse.ecco.dao.Persistable;
 import at.jku.isse.ecco.feature.Configuration;
-import at.jku.isse.ecco.module.ModuleRevision;
+import at.jku.isse.ecco.featuretrace.evaluation.EvaluationStrategy;
 import at.jku.isse.ecco.tree.Node;
-
-import java.util.Collection;
 
 // TODO: make it possible to transform arbitrary logical formulas of first order to feature traces
 // TODO: (work directly with logical formulas and not sets of modules/features etc.)
 
 public interface FeatureTrace extends Persistable {
-    boolean holds(Configuration configuration);
+
+    boolean holds(Configuration configuration, EvaluationStrategy evaluationStrategy);
 
     Node getNode();
 
-    FeatureTraceCondition getPresenceCondition();
+    void setUserCondition(String userCondition);
 
-    Collection<ModuleRevision> getAllModuleRevisions();
+    boolean conditionEquals(FeatureTrace featureTrace);
 
     @Override
     boolean equals(Object obj);

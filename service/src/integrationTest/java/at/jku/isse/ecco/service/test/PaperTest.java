@@ -2,7 +2,7 @@ package at.jku.isse.ecco.service.test;
 
 import at.jku.isse.ecco.adapter.text.LineArtifactData;
 import at.jku.isse.ecco.core.Checkout;
-import at.jku.isse.ecco.featuretracerecording.FeatureTrace;
+import at.jku.isse.ecco.featuretrace.FeatureTrace;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.EccoService;
 import at.jku.isse.ecco.tree.Node;

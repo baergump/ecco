@@ -1,13 +1,10 @@
-package at.jku.isse.ecco.featuretracerecording;
+package at.jku.isse.ecco.featuretrace;
 
 import at.jku.isse.ecco.dao.Persistable;
 import at.jku.isse.ecco.feature.Configuration;
-import at.jku.isse.ecco.feature.FeatureRevision;
-import at.jku.isse.ecco.module.Module;
 import at.jku.isse.ecco.module.ModuleRevision;
 
 import java.util.Collection;
-import java.util.Map;
 
 /**
  * A condition in order to check feature traces to be applied for given configurations.

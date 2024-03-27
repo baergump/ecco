@@ -8,8 +8,9 @@ import at.jku.isse.ecco.core.Remote;
 import at.jku.isse.ecco.dao.EntityFactory;
 import at.jku.isse.ecco.feature.Configuration;
 import at.jku.isse.ecco.feature.FeatureRevision;
-import at.jku.isse.ecco.featuretracerecording.FeatureTrace;
-import at.jku.isse.ecco.featuretracerecording.FeatureTraceCondition;
+import at.jku.isse.ecco.featuretrace.FeatureTrace;
+import at.jku.isse.ecco.featuretrace.FeatureTraceCondition;
+import at.jku.isse.ecco.featuretrace.parser.VEVOSCondition;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.storage.mem.artifact.MemArtifact;
 import at.jku.isse.ecco.storage.mem.core.MemAssociation;
@@ -23,6 +24,7 @@ import at.jku.isse.ecco.storage.mem.tree.MemNode;
 import at.jku.isse.ecco.storage.mem.tree.MemRootNode;
 import at.jku.isse.ecco.tree.Node;
 import at.jku.isse.ecco.tree.RootNode;
+import org.logicng.formulas.FormulaFactory;
 
 import java.util.Set;
 
@@ -30,7 +32,17 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class MemEntityFactory implements EntityFactory {
-	public MemEntityFactory() {
+	private FormulaFactory formulaFactory;
+
+	public MemEntityFactory() {}
+
+	public void setFormulaFactory(FormulaFactory formulaFactory) {
+		this.formulaFactory = formulaFactory;
+	}
+
+	@Override
+	public VEVOSCondition createVEVOSCondition(String vevosFileLine){
+		return new VEVOSCondition(this.formulaFactory, vevosFileLine);
 	}
 
 	@Override

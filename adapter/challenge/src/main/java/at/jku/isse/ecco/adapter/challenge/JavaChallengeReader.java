@@ -30,26 +30,17 @@ import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-// TODO: test correct handling of feature traces for all types of nodes
-
 public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 
 	protected static final Logger LOGGER = Logger.getLogger(DispatchWriter.class.getName());
 
 	private final EntityFactory entityFactory;
 
-	private Repository.Op repository;
-
 	@Inject
 	public JavaChallengeReader(EntityFactory entityFactory) {
 		checkNotNull(entityFactory);
 
 		this.entityFactory = entityFactory;
-	}
-
-	@Override
-	public void setRepository(Repository.Op repository){
-		this.repository = repository;
 	}
 
 	@Override
@@ -77,9 +68,8 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 	@Override
 	public Set<Node.Op> read(Path base, Path[] input) {
 		// TODO: refactor method (make it shorter, less procedural, more oo)
-		// TODO: refactor: feature traces are created as a side-effect, which is bad practice
-		LogicToModuleTransformer logicToModuleTransformer = new LogicToModuleTransformer(repository);
-		VEVOSConditionHandler vevosConditionHandler = new VEVOSConditionHandler(base, logicToModuleTransformer);
+		// TODO: refactor: feature traces are created as a side-effect
+		VEVOSConditionHandler vevosConditionHandler = new VEVOSConditionHandler(base);
 
 		Set<Node.Op> nodes = new HashSet<>();
 

@@ -6,7 +6,7 @@ import at.jku.isse.ecco.core.Variant;
 import at.jku.isse.ecco.dao.EntityFactory;
 import at.jku.isse.ecco.feature.Configuration;
 import at.jku.isse.ecco.feature.Feature;
-import at.jku.isse.ecco.featuretracerecording.FeatureTrace;
+import at.jku.isse.ecco.featuretrace.FeatureTrace;
 import at.jku.isse.ecco.module.Module;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.storage.mem.dao.MemEntityFactory;

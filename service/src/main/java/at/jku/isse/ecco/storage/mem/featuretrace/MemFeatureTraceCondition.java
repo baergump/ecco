@@ -1,11 +1,10 @@
 package at.jku.isse.ecco.storage.mem.featuretrace;
 
 import at.jku.isse.ecco.feature.Configuration;
-import at.jku.isse.ecco.featuretracerecording.FeatureTraceCondition;
+import at.jku.isse.ecco.featuretrace.FeatureTraceCondition;
 import at.jku.isse.ecco.module.ModuleRevision;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 
