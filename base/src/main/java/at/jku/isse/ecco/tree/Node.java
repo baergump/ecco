@@ -2,6 +2,7 @@ package at.jku.isse.ecco.tree;
 
 import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.core.Association;
+import at.jku.isse.ecco.dao.EntityFactory;
 import at.jku.isse.ecco.dao.Persistable;
 import at.jku.isse.ecco.featuretrace.FeatureTrace;
 import at.jku.isse.ecco.featuretrace.FeatureTraceCondition;
@@ -18,7 +19,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Public interface for a node in the artifact tree.
  */
 public interface Node extends Persistable {
-
 
 	@Override
 	public int hashCode();
@@ -384,5 +384,7 @@ public interface Node extends Persistable {
 		}
 
 		FeatureTrace getFeatureTrace();
+
+		void addUserCondition(EntityFactory factory, String userCondition);
 	}
 }

@@ -5,9 +5,7 @@ import at.jku.isse.ecco.feature.Configuration;
 import at.jku.isse.ecco.featuretrace.evaluation.EvaluationStrategy;
 import at.jku.isse.ecco.module.ModuleRevision;
 import at.jku.isse.ecco.tree.Node;
-
-// TODO: make it possible to transform arbitrary logical formulas of first order to feature traces
-// TODO: (work directly with logical formulas and not sets of modules/features etc.)
+import org.logicng.formulas.FormulaFactory;
 
 public interface FeatureTrace extends Persistable {
 
@@ -15,9 +13,9 @@ public interface FeatureTrace extends Persistable {
 
     Node getNode();
 
-    void setUserCondition(String conditionString);
+    boolean ContainsUserCondition();
 
-    boolean conditionEquals(FeatureTrace featureTrace);
+    boolean equalConditions(FeatureTrace featureTrace);
 
     @Override
     boolean equals(Object obj);

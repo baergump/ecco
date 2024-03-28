@@ -3,9 +3,12 @@ package at.jku.isse.ecco.storage.mem.tree;
 import at.jku.isse.ecco.EccoException;
 import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.core.Association;
+import at.jku.isse.ecco.dao.EntityFactory;
+import at.jku.isse.ecco.featuretrace.FeatureTrace;
 import at.jku.isse.ecco.featuretrace.FeatureTraceCondition;
 import at.jku.isse.ecco.tree.Node;
 import org.eclipse.collections.impl.factory.Maps;
+import org.logicng.formulas.FormulaFactory;
 
 import java.util.*;
 
@@ -15,7 +18,6 @@ public class MemNode implements Node, Node.Op {
 
 	public static final long serialVersionUID = 1L;
 
-
 	private boolean unique = true;
 
 	private List<Op> children = new ArrayList<>();
@@ -24,30 +26,15 @@ public class MemNode implements Node, Node.Op {
 
 	private Op parent = null;
 
-	private Collection<FeatureTraceCondition> featureTraceConditions;
+	private FeatureTrace featureTrace;
 
 	public Op copySingleNode(){
 		return new MemNode(this.artifact);
 	}
 
 	@Override
-	public Collection<FeatureTraceCondition> getFeatureTraceConditions(){
-		return this.featureTraceConditions;
-	}
-
-	@Override
-	public void setFeatureTraceConditions(Collection<FeatureTraceCondition> featureTraceConditions) {
-		this.featureTraceConditions = featureTraceConditions;
-	}
-
-	@Override
-	public void removeAllFeatureTraceConditions() {
-		this.featureTraceConditions = new HashSet<>();
-	}
-
-	@Override
-	public void addFeatureTraceCondition(FeatureTraceCondition featureTraceCondition) {
-		this.featureTraceConditions.add(featureTraceCondition);
+	public FeatureTrace getFeatureTrace() {
+		return this.featureTrace;
 	}
 
 	@Deprecated
@@ -56,14 +43,16 @@ public class MemNode implements Node, Node.Op {
 
 	public MemNode(Artifact.Op<?> artifact) {
 		this.artifact = artifact;
-		this.featureTraceConditions = new HashSet<>();
+	}
+
+	public void setFeatureTrace(FeatureTrace featureTrace) {
+		this.featureTrace = featureTrace;
 	}
 
 	@Override
 	public Op createNode(Artifact.Op<?> artifact) {
 		return new MemNode(artifact);
 	}
-
 
 	@Override
 	public boolean isAtomic() {
@@ -73,7 +62,6 @@ public class MemNode implements Node, Node.Op {
 			return false;
 	}
 
-
 	@Override
 	public Association.Op getContainingAssociation() {
 		if (this.parent == null)
@@ -81,7 +69,6 @@ public class MemNode implements Node, Node.Op {
 		else
 			return this.parent.getContainingAssociation();
 	}
-
 
 	@Override
 	public Artifact.Op<?> getArtifact() {
@@ -112,7 +99,6 @@ public class MemNode implements Node, Node.Op {
 	public void setUnique(boolean unique) {
 		this.unique = unique;
 	}
-
 
 	@Override
 	public void addChild(Op child) {
@@ -151,7 +137,6 @@ public class MemNode implements Node, Node.Op {
 		return this.children;
 	}
 
-
 	@Override
 	public int hashCode() {
 		return this.getArtifact() != null ? this.getArtifact().hashCode() : 0;
@@ -171,14 +156,10 @@ public class MemNode implements Node, Node.Op {
 		return this.getArtifact().equals(otherNode.getArtifact());
 	}
 
-
 	@Override
 	public String toString() {
 		return this.getNodeString();
 	}
-
-
-	// properties
 
 	private transient Map<String, Object> properties = null;
 
@@ -187,5 +168,10 @@ public class MemNode implements Node, Node.Op {
 		if (this.properties == null)
 			this.properties = Maps.mutable.empty();
 		return this.properties;
+	}
+
+	@Override
+	public void addUserCondition(EntityFactory factory, String userCondition) {
+		this.featureTrace = factory.addUserConditionToTrace(this.featureTrace, userCondition);
 	}
 }

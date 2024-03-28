@@ -18,10 +18,14 @@ public class MemFeatureTrace implements FeatureTrace {
     private Node node;
     private TraceCondition traceCondition;
 
-    private FormulaFactory formulaFactory;
 
-    public MemFeatureTrace(FormulaFactory formulaFactory, Node node){
+    public MemFeatureTrace(Node node){
         this.node = node;
+        this.traceCondition = new TraceCondition();
+    }
+
+    public TraceCondition getTraceCondition(){
+        return this.traceCondition;
     }
 
     @Override
@@ -35,21 +39,13 @@ public class MemFeatureTrace implements FeatureTrace {
     }
 
     @Override
-    public void setUserCondition(String userCondition) {
-        Formula condition = this.parseCondition(userCondition);
-        this.traceCondition.setUserCondition(condition);
-    }
-
-    private Formula parseCondition(String stringCondition){
-        try {
-            return formulaFactory.parse(stringCondition);
-        } catch (ParserException e){
-            throw new RuntimeException(String.format("Parsing of string %s failed!", stringCondition));
-        }
+    public boolean ContainsUserCondition() {
+        String userCondition = this.traceCondition.getUserCondition();
+        return (userCondition != null);
     }
 
     @Override
-    public boolean conditionEquals(FeatureTrace featureTrace){
+    public boolean equalConditions(FeatureTrace featureTrace){
         if (this == featureTrace) return true;
         if (!(featureTrace instanceof MemFeatureTrace)) return false;
         if (!(this.traceCondition.equals(((MemFeatureTrace) featureTrace).traceCondition))) return false;

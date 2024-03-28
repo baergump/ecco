@@ -7,6 +7,7 @@ import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.artifact.ArtifactData;
 import at.jku.isse.ecco.core.Checkout;
 import at.jku.isse.ecco.feature.Configuration;
+import at.jku.isse.ecco.featuretrace.FeatureTrace;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.EccoService;
 import at.jku.isse.ecco.storage.mem.feature.MemConfiguration;
@@ -15,12 +16,15 @@ import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.logicng.formulas.FormulaFactory;
+import org.logicng.formulas.Formula;
 import utils.EmptyVisitor;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -177,4 +181,13 @@ public class FeatureTraceTest {
         node.traverse(visitor);
     }
      */
+
+    @Test
+    public void letsTrySomething(){
+        FormulaFactory factory = new FormulaFactory();
+        Formula literal1 = factory.literal("X", true);
+        Formula literal2 = factory.literal("Y", true);
+        Formula conjunction = factory.and(literal1, literal2);
+        System.out.println(conjunction.toString());
+    }
 }

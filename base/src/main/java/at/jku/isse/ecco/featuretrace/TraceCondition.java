@@ -8,40 +8,21 @@ import java.util.Objects;
 
 public class TraceCondition {
 
-    private Formula diffCondition;
-    private Formula userCondition;
+    private String diffCondition;
+    private String userCondition;
 
-    public TraceCondition(Formula diffCondition, Formula userCondition){
-        this.diffCondition = diffCondition;
-        this.userCondition = userCondition;
-    }
+    public TraceCondition(){}
 
-    public FormulaFactory factory(){
-        FormulaFactory diffFactory = this.diffCondition.factory();
-        FormulaFactory userFactory = this.userCondition.factory();
-        if (diffFactory != null && userFactory != null){
-            assert(diffFactory == userFactory);
-            return diffFactory;
-        } else if (diffFactory != null){
-            return diffFactory;
-        } else if (userFactory != null){
-            return userFactory;
-        } else {
-            return null;
-        }
-    }
-
-    public Formula getDiffCondition(){
+    public String getDiffCondition(){
         return this.diffCondition;
     }
 
-    public Formula getUserCondition(){
+    public String getUserCondition(){
         return this.userCondition;
     }
 
-    public void setDiffCondition(Formula diffCondition){ this.diffCondition = diffCondition; }
-    public void setUserCondition(Formula userCondition){ this.userCondition = userCondition; }
-
+    public void setDiffCondition(String diffCondition){ this.diffCondition = diffCondition; }
+    public void setUserCondition(String userCondition){ this.userCondition = userCondition; }
 
     @Override
     public boolean equals(Object o){

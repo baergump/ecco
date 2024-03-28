@@ -17,14 +17,17 @@ public class FeatureTraceCreatorVisitor implements Node.Op.NodeVisitor{
         this.repository = repository;
         this.factory = factory;
     }
+
     @Override
     public void visit(Node.Op node) {
+        if (!node.getFeatureTrace().ContainsUserCondition()) {
+            return;
+        }
         Node.Op nodeCopy = node.copyTree().createPathSkeleton();
         // at the top, there must be a root node
         Node.Op rootNode = factory.createRootNode();
         nodeCopy.setParent(rootNode);
         rootNode.addChild(nodeCopy);
-        FeatureTrace featureTrace = this.factory.createFeatureTrace(nodeCopy.getParent(), node.getFeatureTrace());
-        this.repository.addFeatureTrace(featureTrace);
+        this.repository.addFeatureTrace(node.getFeatureTrace());
     }
 }

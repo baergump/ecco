@@ -121,22 +121,8 @@ public interface Repository extends Persistable {
 		EntityFactory getEntityFactory();
 
 		default void addFeatureTrace(FeatureTrace featureTrace){
-			// TODO: include safety measures to make sure feature traces only have positive feature revisions
-
-			Collection<ModuleRevision> moduleRevisions = featureTrace.getAllModuleRevisions();
-			for (ModuleRevision moduleRevision : moduleRevisions){
-				this.addFeatureRevisions(moduleRevision.getPos());
-
-				// add module / module revision if new
-				Module module = moduleRevision.getModule();
-				Module repositoryModule = this.getModule(module.getPos(), module.getNeg());
-				if (repositoryModule == null){
-					repositoryModule = this.addModule(module.getPos(), module.getNeg());
-				}
-				// TODO: make sure associations don't get confused by new revisions
-				repositoryModule.addRevision(moduleRevision.getPos(), moduleRevision.getNeg());
-			}
-
+			// TODO: is it necessary to add new features / feature-revisions / modules / module-revisions?
+			// TODO: combine feature traces with same node
 			this.getFeatureTraces().add(featureTrace);
 		}
 

@@ -10,6 +10,7 @@ import at.jku.isse.ecco.feature.Configuration;
 import at.jku.isse.ecco.feature.FeatureRevision;
 import at.jku.isse.ecco.featuretrace.FeatureTrace;
 import at.jku.isse.ecco.featuretrace.FeatureTraceCondition;
+import at.jku.isse.ecco.featuretrace.FeatureTraceFactory;
 import at.jku.isse.ecco.featuretrace.parser.VEVOSCondition;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.storage.mem.artifact.MemArtifact;
@@ -19,6 +20,7 @@ import at.jku.isse.ecco.storage.mem.core.MemRemote;
 import at.jku.isse.ecco.storage.mem.feature.MemConfiguration;
 import at.jku.isse.ecco.storage.mem.feature.MemFeature;
 import at.jku.isse.ecco.storage.mem.featuretrace.MemFeatureTrace;
+import at.jku.isse.ecco.storage.mem.featuretrace.MemFeatureTraceFactory;
 import at.jku.isse.ecco.storage.mem.repository.MemRepository;
 import at.jku.isse.ecco.storage.mem.tree.MemNode;
 import at.jku.isse.ecco.storage.mem.tree.MemRootNode;
@@ -32,10 +34,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class MemEntityFactory implements EntityFactory {
-	private final FormulaFactory formulaFactory;
+	private final MemFeatureTraceFactory featureTraceFactory;
 
 	public MemEntityFactory() {
-		this.formulaFactory = new FormulaFactory();
+		this.featureTraceFactory = new MemFeatureTraceFactory();
 	}
 
 	@Override
@@ -104,17 +106,16 @@ public class MemEntityFactory implements EntityFactory {
 
 	@Deprecated
 	@Override
-	public Node.Op createNode() {
-		return new MemNode();
+	public Node.Op createNode() {return new MemNode();
 	}
 
 	@Override
 	public Node.Op createNode(final Artifact.Op artifact) {
 		checkNotNull(artifact);
-
-		final Node.Op node = new MemNode(artifact);
+		MemNode node = new MemNode(artifact);
+		FeatureTrace featureTrace = this.featureTraceFactory.createFeatureTrace(node);
+		node.setFeatureTrace(featureTrace);
 		artifact.setContainingNode(node);
-
 		return node;
 	}
 
@@ -138,7 +139,8 @@ public class MemEntityFactory implements EntityFactory {
 		return this.createOrderedNode(this.createArtifact(artifactData));
 	}
 
-	public FeatureTrace createFeatureTrace(FormulaFactory formulaFactory, Node node){
-		return new MemFeatureTrace(formulaFactory, node);
+	@Override
+	public FeatureTrace addUserConditionToTrace(FeatureTrace featureTrace, String userConditionString) {
+		return this.featureTraceFactory.addUserCondition(featureTrace, userConditionString);
 	}
 }

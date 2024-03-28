@@ -32,6 +32,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 
+	// TODO: make different encodings of feature traces possible
+
 	protected static final Logger LOGGER = Logger.getLogger(DispatchWriter.class.getName());
 
 	private final EntityFactory entityFactory;
@@ -143,68 +145,6 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 	public Set<Node.Op> read(Path base, Path[] input, ArrayList<String> methods) {
 		return null;
 	}
-
-    /*
-	public Set<Node.Op> read(Path base, Path[] input, ArrayList<String> methods) {
-		Set<Node.Op> nodes = new HashSet<>();
-
-		long totalJavaParserTime = 0;
-
-		for (Path path : input) {
-			Path resolvedPath = base.resolve(path);
-
-			// create plugin artifact/node
-			Artifact.Op<PluginArtifactData> pluginArtifact = this.entityFactory.createArtifact(new PluginArtifactData(this.getPluginId(), path));
-			Node.Op pluginNode = this.entityFactory.createNode(pluginArtifact);
-			nodes.add(pluginNode);
-
-			try {
-				// read raw file contents
-				String fileContent = new String(Files.readAllBytes(resolvedPath), StandardCharsets.UTF_8);
-				String[] lines = fileContent.split("\\r?\\n");
-
-				long localStartTime = System.currentTimeMillis();
-				//CompilationUnit cu = JavaParser.parse(resolvedPath);
-				CompilationUnit cu = StaticJavaParser.parse(fileContent);
-				totalJavaParserTime += (System.currentTimeMillis() - localStartTime);
-
-				// package name
-				String packageName = "";
-				if (cu.getPackageDeclaration().isPresent())
-					packageName = cu.getPackageDeclaration().get().getName().toString();
-
-				for (TypeDeclaration<?> typeDeclaration : cu.getTypes()) {
-					// create class artifact/node
-					String className = typeDeclaration.getName().toString();
-					Artifact.Op<ClassArtifactData> classArtifact = this.entityFactory.createArtifact(new ClassArtifactData(packageName + "." + className));
-					Node.Op classNode = this.entityFactory.createNode(classArtifact);
-					pluginNode.addChild(classNode);
-
-					// imports
-					Artifact.Op<AbstractArtifactData> importsGroupArtifact = this.entityFactory.createArtifact(new AbstractArtifactData("IMPORTS"));
-					Node.Op importsGroupNode = this.entityFactory.createNode(importsGroupArtifact);
-					classNode.addChild(importsGroupNode);
-					for (ImportDeclaration importDeclaration : cu.getImports()) {
-						String importName = "import " + importDeclaration.getName().asString();
-						Artifact.Op<ImportArtifactData> importArtifact = this.entityFactory.createArtifact(new ImportArtifactData(importName));
-						Node.Op importNode = this.entityFactory.createNode(importArtifact);
-						importsGroupNode.addChild(importNode);
-					}
-
-					this.addClassChildren(typeDeclaration, classNode, lines, methods);
-				}
-			} catch (IOException e) {
-				e.printStackTrace();
-				throw new EccoException("Error parsing java file.", e);
-			}
-
-		}
-
-		LOGGER.fine(JavaParser.class + ".parse(): " + totalJavaParserTime + "ms");
-
-		return nodes;
-	}
-	 */
 
 	private void addClassChildren(TypeDeclaration<?> typeDeclaration,
 								  Node.Op classNode,
@@ -334,14 +274,14 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 	private void checkForFeatureTrace(com.github.javaparser.ast.Node astNode, List<VEVOSCondition> fileSpecificConditions, Node.Op node){
 		Collection<VEVOSCondition> matchingCondition = this.getMatchingPresenceConditions(astNode, fileSpecificConditions);
 		for(VEVOSCondition condition : matchingCondition){
-			node.addFeatureTraceCondition(condition.getFeatureTraceConditions());
+			node.addUserCondition(this.entityFactory, condition.getConditionString());
 		}
 	}
 
 	private void checkForFeatureTrace(int line, List<VEVOSCondition> fileSpecificConditions, Node.Op node){
 		Collection<VEVOSCondition> matchingConditions = this.getMatchingPresenceConditions(line, fileSpecificConditions);
 		for (VEVOSCondition condition : matchingConditions){
-			node.addFeatureTraceCondition(condition.getFeatureTraceConditions());
+			node.addUserCondition(this.entityFactory, condition.getConditionString());
 		}
 	}
 

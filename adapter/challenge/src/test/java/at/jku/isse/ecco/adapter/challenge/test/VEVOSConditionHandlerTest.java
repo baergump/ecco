@@ -57,7 +57,7 @@ public class VEVOSConditionHandlerTest {
 
     @Test
     public void parseFileTest() throws IOException {
-        VEVOSConditionHandler handler = new VEVOSConditionHandler(this.VARIANT_PATH.toAbsolutePath(), this.logicToModuleTransformer);
+        VEVOSConditionHandler handler = new VEVOSConditionHandler(this.VARIANT_PATH.toAbsolutePath());
         // TODO
     }
 }

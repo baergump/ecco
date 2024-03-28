@@ -10,6 +10,7 @@ import at.jku.isse.ecco.feature.Feature;
 import at.jku.isse.ecco.feature.FeatureRevision;
 import at.jku.isse.ecco.featuretrace.FeatureTrace;
 import at.jku.isse.ecco.featuretrace.FeatureTraceCondition;
+import at.jku.isse.ecco.featuretrace.FeatureTraceFactory;
 import at.jku.isse.ecco.featuretrace.parser.VEVOSCondition;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.tree.Node;
@@ -121,4 +122,6 @@ public interface EntityFactory {
 	public Node.Op createOrderedNode(final Artifact.Op<?> artifact);
 
 	public Node.Op createOrderedNode(final ArtifactData artifactData);
+
+	FeatureTrace addUserConditionToTrace(FeatureTrace featureTrace, String userConditionString);
 }

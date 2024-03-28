@@ -18,6 +18,7 @@ import at.jku.isse.ecco.tree.*;
 import com.google.inject.Module;
 import com.google.inject.*;
 import com.google.inject.name.*;
+import org.logicng.formulas.FormulaFactory;
 
 import java.io.*;
 import java.net.*;
@@ -1547,6 +1548,8 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
     public synchronized Commit commit(String commitMessage, Configuration configuration, String committer) {
         this.checkInitialized();
         checkNotNull(configuration);
+
+        // TODO: uncomment try-catch
 
         try {
             this.transactionStrategy.begin(TransactionStrategy.TRANSACTION.READ_WRITE);
