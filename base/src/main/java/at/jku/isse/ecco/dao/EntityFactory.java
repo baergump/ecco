@@ -22,8 +22,6 @@ import java.util.Set;
  */
 public interface EntityFactory {
 
-	VEVOSCondition createVEVOSCondition(String vevosFileLine);
-
 	/**
 	 * Creates a remote with given name, address and type.
 	 *

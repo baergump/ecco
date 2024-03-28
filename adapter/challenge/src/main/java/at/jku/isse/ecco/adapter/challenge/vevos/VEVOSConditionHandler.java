@@ -1,5 +1,7 @@
 package at.jku.isse.ecco.adapter.challenge.vevos;
 
+import at.jku.isse.ecco.featuretrace.parser.VEVOSCondition;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Files;
@@ -10,12 +12,12 @@ public class VEVOSConditionHandler {
     private final String PRESENCE_CONDITION_FILENAME = "pcs.variant.csv";
     private final Path vevosFilePath;
     private boolean vevosFileExists;
-    private List<VEVOSPresenceCondition> vevosPresenceConditions;
+    private List<VEVOSCondition> vevosConditions;
 
     public VEVOSConditionHandler(Path vevosFileBasePath){
         this.vevosFilePath = vevosFileBasePath.resolve(this.PRESENCE_CONDITION_FILENAME);
         this.vevosFileExists = Files.exists(vevosFilePath);
-        this.vevosPresenceConditions = new LinkedList<>();
+        this.vevosConditions = new LinkedList<>();
         if (this.vevosFileExists){
             this.parsePresenceConditions();
         }
@@ -39,17 +41,17 @@ public class VEVOSConditionHandler {
                 // ignore file conditions (for now)
                 // TODO: check file conditions for sure (check if end line is last line in file)
                 if(line.contains(";True;True;True;1")){ continue; }
-                this.vevosPresenceConditions.add(new VEVOSPresenceCondition(line));
+                this.vevosConditions.add(new VEVOSCondition(line));
             }
         } catch(IllegalArgumentException e){
             throw new RuntimeException(String.format("VEVOS file entries could not be parsed: %s", e.getMessage()));
         }
     }
 
-    public List<VEVOSPresenceCondition> getFileSpecificPresenceConditions(Path filePath){
+    public List<VEVOSCondition> getFileSpecificPresenceConditions(Path filePath){
         // result is ordered according to line start
-        List<VEVOSPresenceCondition> specificPresenceConditions = new LinkedList<>();
-        for (VEVOSPresenceCondition vevosPresenceCondition : this.vevosPresenceConditions){
+        List<VEVOSCondition> specificPresenceConditions = new LinkedList<>();
+        for (VEVOSCondition vevosPresenceCondition : this.vevosConditions){
             if (vevosPresenceCondition.getFilePath().compareTo(filePath) == 0){
                 specificPresenceConditions.add(vevosPresenceCondition);
             }

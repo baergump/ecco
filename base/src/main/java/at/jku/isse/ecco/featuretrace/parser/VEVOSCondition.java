@@ -2,17 +2,18 @@ package at.jku.isse.ecco.featuretrace.parser;
 
 import org.logicng.formulas.Formula;
 import org.logicng.formulas.FormulaFactory;
+import org.logicng.io.parsers.ParserException;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class VEVOSCondition {
     private final Path filePath;
-    private Formula condition;
+    private final String conditionString;
     private final int startLine;
     private final int endLine;
 
-    public VEVOSCondition(FormulaFactory formulaFactory, String vevosFileLine){
+    public VEVOSCondition(String vevosFileLine){
         // VEVOS file entry structure: Path;File Condition;Block Condition;Presence Condition;start;end
         String[] lineParts = vevosFileLine.split(";");
         if (lineParts.length < 6){
@@ -21,18 +22,17 @@ public class VEVOSCondition {
         }
 
         this.filePath = Paths.get(lineParts[0]);
-        this.condition = this.parseVEVOSCondition(lineParts[3]);
+        this.conditionString = this.prepareConditionString(lineParts[3]);
         this.startLine = Integer.parseInt(lineParts[4]);
         this.endLine = Integer.parseInt(lineParts[5]);
     }
 
-    private Formula parseVEVOSCondition(String stringCondition){
+    private String prepareConditionString(String stringCondition){
         // replace operands (!; ||; &&)
         stringCondition = stringCondition.replace("!", "~");
         stringCondition = stringCondition.replace("||", "|");
         stringCondition = stringCondition.replace("&&", "&");
-
-
+        return stringCondition;
     }
 
     public Path getFilePath(){
@@ -47,7 +47,7 @@ public class VEVOSCondition {
         return this.endLine;
     }
 
-    public Formula getCondition(){
-        return this.condition;
+    public String getConditionString(){
+        return this.conditionString;
     }
 }

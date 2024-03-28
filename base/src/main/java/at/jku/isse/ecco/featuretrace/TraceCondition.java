@@ -2,6 +2,7 @@ package at.jku.isse.ecco.featuretrace;
 
 import org.logicng.formulas.Formula;
 import org.logicng.formulas.FormulaFactory;
+import org.logicng.io.parsers.ParserException;
 
 import java.util.Objects;
 
@@ -37,6 +38,10 @@ public class TraceCondition {
     public Formula getUserCondition(){
         return this.userCondition;
     }
+
+    public void setDiffCondition(Formula diffCondition){ this.diffCondition = diffCondition; }
+    public void setUserCondition(Formula userCondition){ this.userCondition = userCondition; }
+
 
     @Override
     public boolean equals(Object o){

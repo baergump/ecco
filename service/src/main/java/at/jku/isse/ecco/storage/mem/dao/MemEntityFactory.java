@@ -32,17 +32,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class MemEntityFactory implements EntityFactory {
-	private FormulaFactory formulaFactory;
+	private final FormulaFactory formulaFactory;
 
-	public MemEntityFactory() {}
-
-	public void setFormulaFactory(FormulaFactory formulaFactory) {
-		this.formulaFactory = formulaFactory;
-	}
-
-	@Override
-	public VEVOSCondition createVEVOSCondition(String vevosFileLine){
-		return new VEVOSCondition(this.formulaFactory, vevosFileLine);
+	public MemEntityFactory() {
+		this.formulaFactory = new FormulaFactory();
 	}
 
 	@Override
@@ -145,7 +138,7 @@ public class MemEntityFactory implements EntityFactory {
 		return this.createOrderedNode(this.createArtifact(artifactData));
 	}
 
-	public FeatureTrace createFeatureTrace(Node node, FeatureTraceCondition presenceCondition){
-		return new MemFeatureTrace(node, presenceCondition);
+	public FeatureTrace createFeatureTrace(FormulaFactory formulaFactory, Node node){
+		return new MemFeatureTrace(formulaFactory, node);
 	}
 }

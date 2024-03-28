@@ -3,6 +3,7 @@ package at.jku.isse.ecco.featuretrace;
 import at.jku.isse.ecco.dao.Persistable;
 import at.jku.isse.ecco.feature.Configuration;
 import at.jku.isse.ecco.featuretrace.evaluation.EvaluationStrategy;
+import at.jku.isse.ecco.module.ModuleRevision;
 import at.jku.isse.ecco.tree.Node;
 
 // TODO: make it possible to transform arbitrary logical formulas of first order to feature traces
@@ -14,7 +15,7 @@ public interface FeatureTrace extends Persistable {
 
     Node getNode();
 
-    void setUserCondition(String userCondition);
+    void setUserCondition(String conditionString);
 
     boolean conditionEquals(FeatureTrace featureTrace);
 

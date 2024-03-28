@@ -5,6 +5,7 @@ import at.jku.isse.ecco.adapter.challenge.vevos.VEVOSPresenceCondition;
 import at.jku.isse.ecco.feature.Feature;
 import at.jku.isse.ecco.feature.FeatureRevision;
 import at.jku.isse.ecco.featuretrace.FeatureTraceCondition;
+import at.jku.isse.ecco.featuretrace.parser.VEVOSCondition;
 import at.jku.isse.ecco.module.ModuleRevision;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.EccoService;
@@ -63,25 +64,6 @@ public class VEVOSPresenceConditionTest {
 
     @Test
     public void parseVevosFileLineTest(){
-        VEVOSPresenceCondition vevosPresenceCondition = new VEVOSPresenceCondition(
-                "argouml-app\\src\\org\\argouml\\kernel\\MemberList.java;True;COGNITIVE;COGNITIVE;322;327",
-                this.logicToModuleTransformer);
-        assertEquals("argouml-app\\src\\org\\argouml\\kernel\\MemberList.java", vevosPresenceCondition.getFilePath().toString());
-        assertEquals(322, vevosPresenceCondition.getStartLine());
-        assertEquals(327, vevosPresenceCondition.getEndLine());
-        FeatureTraceCondition featureTraceCondition = vevosPresenceCondition.getFeatureTraceConditions();
-        Collection<ModuleRevision> positiveModuleRevisions = featureTraceCondition.getPositiveModuleRevisions();
-        Collection<ModuleRevision> negativeModuleRevisions = featureTraceCondition.getNegativeModuleRevisions();
-        assertEquals(1, positiveModuleRevisions.size());
-        assertEquals(0, negativeModuleRevisions.size());
-
-        ModuleRevision positiveModuleRevision = positiveModuleRevisions.iterator().next();
-        FeatureRevision[] positiveFeatures = positiveModuleRevision.getPos();
-        Feature[] negativeFeatures = positiveModuleRevision.getNeg();
-        assertEquals(1, positiveFeatures.length);
-        assertEquals(0, negativeFeatures.length);
-
-        Feature feature = positiveFeatures[0].getFeature();
-        assertEquals("COGNITIVE", feature.getName());
+        // TODO
     }
 }

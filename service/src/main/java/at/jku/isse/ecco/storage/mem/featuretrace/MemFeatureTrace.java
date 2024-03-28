@@ -5,6 +5,9 @@ import at.jku.isse.ecco.featuretrace.FeatureTrace;
 import at.jku.isse.ecco.featuretrace.TraceCondition;
 import at.jku.isse.ecco.featuretrace.evaluation.EvaluationStrategy;
 import at.jku.isse.ecco.tree.Node;
+import org.logicng.formulas.Formula;
+import org.logicng.formulas.FormulaFactory;
+import org.logicng.io.parsers.ParserException;
 
 import java.util.Objects;
 
@@ -15,7 +18,9 @@ public class MemFeatureTrace implements FeatureTrace {
     private Node node;
     private TraceCondition traceCondition;
 
-    public MemFeatureTrace(Node node){
+    private FormulaFactory formulaFactory;
+
+    public MemFeatureTrace(FormulaFactory formulaFactory, Node node){
         this.node = node;
     }
 
@@ -31,7 +36,16 @@ public class MemFeatureTrace implements FeatureTrace {
 
     @Override
     public void setUserCondition(String userCondition) {
-        // TODO
+        Formula condition = this.parseCondition(userCondition);
+        this.traceCondition.setUserCondition(condition);
+    }
+
+    private Formula parseCondition(String stringCondition){
+        try {
+            return formulaFactory.parse(stringCondition);
+        } catch (ParserException e){
+            throw new RuntimeException(String.format("Parsing of string %s failed!", stringCondition));
+        }
     }
 
     @Override

@@ -5,11 +5,11 @@ import at.jku.isse.ecco.adapter.ArtifactReader;
 import at.jku.isse.ecco.adapter.challenge.data.*;
 import at.jku.isse.ecco.adapter.challenge.vevos.LogicToModuleTransformer;
 import at.jku.isse.ecco.adapter.challenge.vevos.VEVOSConditionHandler;
-import at.jku.isse.ecco.adapter.challenge.vevos.VEVOSPresenceCondition;
 import at.jku.isse.ecco.adapter.dispatch.DispatchWriter;
 import at.jku.isse.ecco.adapter.dispatch.PluginArtifactData;
 import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.dao.EntityFactory;
+import at.jku.isse.ecco.featuretrace.parser.VEVOSCondition;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.listener.ReadListener;
 import at.jku.isse.ecco.tree.Node;
@@ -84,7 +84,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 			// parser results seem to offer the possibility to get the respective line numbers in the source code
 			// -> connect vevos line numbers to parser result line numbers to recognize feature traces
 
-			List<VEVOSPresenceCondition> fileSpecificConditions = vevosConditionHandler.getFileSpecificPresenceConditions(path);
+			List<VEVOSCondition> fileSpecificConditions = vevosConditionHandler.getFileSpecificPresenceConditions(path);
 
 			Path resolvedPath = base.resolve(path);
 
@@ -210,7 +210,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 								  Node.Op classNode,
 								  String[] lines,
 								  ArrayList<String> methods,
-								  List<VEVOSPresenceCondition> fileSpecificConditions) {
+								  List<VEVOSCondition> fileSpecificConditions) {
 		// TODO: refactor method (shorten, less procedural, more oo, less arguments)
 
 		// create methods artifact/node
@@ -312,7 +312,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 	}
 
 	private void addMethodChildren(MethodDeclaration methodDeclaration, Node.Op methodNode, String[] lines,
-								   List<VEVOSPresenceCondition> fileSpecificConditions) {
+								   List<VEVOSCondition> fileSpecificConditions) {
 		// lines inside method
 		if (methodDeclaration.getBody().isPresent()) {
 			int beginLine = methodDeclaration.getBody().get().getRange().get().begin.line;
@@ -331,29 +331,29 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 		}
 	}
 
-	private void checkForFeatureTrace(com.github.javaparser.ast.Node astNode, List<VEVOSPresenceCondition> fileSpecificConditions, Node.Op node){
-		Collection<VEVOSPresenceCondition> matchingCondition = this.getMatchingPresenceConditions(astNode, fileSpecificConditions);
-		for(VEVOSPresenceCondition condition : matchingCondition){
+	private void checkForFeatureTrace(com.github.javaparser.ast.Node astNode, List<VEVOSCondition> fileSpecificConditions, Node.Op node){
+		Collection<VEVOSCondition> matchingCondition = this.getMatchingPresenceConditions(astNode, fileSpecificConditions);
+		for(VEVOSCondition condition : matchingCondition){
 			node.addFeatureTraceCondition(condition.getFeatureTraceConditions());
 		}
 	}
 
-	private void checkForFeatureTrace(int line, List<VEVOSPresenceCondition> fileSpecificConditions, Node.Op node){
-		Collection<VEVOSPresenceCondition> matchingConditions = this.getMatchingPresenceConditions(line, fileSpecificConditions);
-		for (VEVOSPresenceCondition condition : matchingConditions){
+	private void checkForFeatureTrace(int line, List<VEVOSCondition> fileSpecificConditions, Node.Op node){
+		Collection<VEVOSCondition> matchingConditions = this.getMatchingPresenceConditions(line, fileSpecificConditions);
+		for (VEVOSCondition condition : matchingConditions){
 			node.addFeatureTraceCondition(condition.getFeatureTraceConditions());
 		}
 	}
 
-	private Collection<VEVOSPresenceCondition> getMatchingPresenceConditions(
+	private Collection<VEVOSCondition> getMatchingPresenceConditions(
 			com.github.javaparser.ast.Node astNode,
-			List<VEVOSPresenceCondition> presenceConditions){
+			List<VEVOSCondition> presenceConditions){
 
-		Collection<VEVOSPresenceCondition> conditions = new HashSet<>();
+		Collection<VEVOSCondition> conditions = new HashSet<>();
 		int nodeStartLine = astNode.getRange().get().begin.line;
 		int nodeEndLine = astNode.getRange().get().end.line;
 
-		for (VEVOSPresenceCondition condition : presenceConditions){
+		for (VEVOSCondition condition : presenceConditions){
 			if (this.rangesAreOverlapping(nodeStartLine, nodeEndLine, condition.getStartLine(), condition.getEndLine())){
 				throw new RuntimeException(String.format("Line ranges of ast node and condition are overlapping. node: %d - %d; condition: %d - %d"
 						, nodeStartLine, nodeEndLine, condition.getStartLine(), condition.getEndLine()));
@@ -372,9 +372,9 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 		return false;
 	}
 
-	private Collection<VEVOSPresenceCondition> getMatchingPresenceConditions(int line, List<VEVOSPresenceCondition> presenceConditions){
-		Collection<VEVOSPresenceCondition> conditions = new HashSet<>();
-		for (VEVOSPresenceCondition condition : presenceConditions){
+	private Collection<VEVOSCondition> getMatchingPresenceConditions(int line, List<VEVOSCondition> presenceConditions){
+		Collection<VEVOSCondition> conditions = new HashSet<>();
+		for (VEVOSCondition condition : presenceConditions){
 			if (condition.getStartLine() <= line && condition.getEndLine() >= line){
 				conditions.add(condition);
 			}
