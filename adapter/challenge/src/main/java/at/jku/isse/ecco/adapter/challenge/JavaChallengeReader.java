@@ -3,14 +3,13 @@ package at.jku.isse.ecco.adapter.challenge;
 import at.jku.isse.ecco.EccoException;
 import at.jku.isse.ecco.adapter.ArtifactReader;
 import at.jku.isse.ecco.adapter.challenge.data.*;
-import at.jku.isse.ecco.adapter.challenge.vevos.LogicToModuleTransformer;
 import at.jku.isse.ecco.adapter.challenge.vevos.VEVOSConditionHandler;
 import at.jku.isse.ecco.adapter.dispatch.DispatchWriter;
 import at.jku.isse.ecco.adapter.dispatch.PluginArtifactData;
 import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.dao.EntityFactory;
+import at.jku.isse.ecco.featuretrace.FeatureTrace;
 import at.jku.isse.ecco.featuretrace.parser.VEVOSCondition;
-import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.listener.ReadListener;
 import at.jku.isse.ecco.tree.Node;
 import com.github.javaparser.*;
@@ -41,7 +40,6 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 	@Inject
 	public JavaChallengeReader(EntityFactory entityFactory) {
 		checkNotNull(entityFactory);
-
 		this.entityFactory = entityFactory;
 	}
 
@@ -71,8 +69,8 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 	public Set<Node.Op> read(Path base, Path[] input) {
 		// TODO: refactor method (make it shorter, less procedural, more oo)
 		// TODO: refactor: feature traces are created as a side-effect
-		VEVOSConditionHandler vevosConditionHandler = new VEVOSConditionHandler(base);
 
+		VEVOSConditionHandler vevosConditionHandler = new VEVOSConditionHandler(base);
 		Set<Node.Op> nodes = new HashSet<>();
 
 		long totalJavaParserTime = 0;
@@ -92,6 +90,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 
 			// create plugin artifact/node
 			Artifact.Op<PluginArtifactData> pluginArtifact = this.entityFactory.createArtifact(new PluginArtifactData(this.getPluginId(), path));
+			// todo: while creating a node, dont set the feature trace
 			Node.Op pluginNode = this.entityFactory.createNode(pluginArtifact);
 			nodes.add(pluginNode);
 
@@ -274,14 +273,16 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 	private void checkForFeatureTrace(com.github.javaparser.ast.Node astNode, List<VEVOSCondition> fileSpecificConditions, Node.Op node){
 		Collection<VEVOSCondition> matchingCondition = this.getMatchingPresenceConditions(astNode, fileSpecificConditions);
 		for(VEVOSCondition condition : matchingCondition){
-			node.addUserCondition(this.entityFactory, condition.getConditionString());
+			FeatureTrace nodeTrace = node.getFeatureTrace();
+			nodeTrace.addUserCondition(condition.getConditionString());
 		}
 	}
 
 	private void checkForFeatureTrace(int line, List<VEVOSCondition> fileSpecificConditions, Node.Op node){
 		Collection<VEVOSCondition> matchingConditions = this.getMatchingPresenceConditions(line, fileSpecificConditions);
 		for (VEVOSCondition condition : matchingConditions){
-			node.addUserCondition(this.entityFactory, condition.getConditionString());
+			FeatureTrace nodeTrace = node.getFeatureTrace();
+			nodeTrace.addUserCondition(condition.getConditionString());
 		}
 	}
 

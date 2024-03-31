@@ -1549,8 +1549,6 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
         this.checkInitialized();
         checkNotNull(configuration);
 
-        // TODO: uncomment try-catch
-
         try {
             this.transactionStrategy.begin(TransactionStrategy.TRANSACTION.READ_WRITE);
 
@@ -1849,19 +1847,12 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
     }
 
     public synchronized Set<Node.Op> readFiles(Repository.Op repository) {
-        try {
-            this.transactionStrategy.begin(TransactionStrategy.TRANSACTION.READ_WRITE);
-            this.reader.setRepository(repository);
-            Set<Node.Op> nodes = this.reader.read(this.baseDir, new Path[]{Paths.get("")});
-            // TODO: delete this line
-            System.out.println("No. of feature traces: " + repository.getFeatureTraces().size());
-            this.repositoryDao.store(repository);
-            this.transactionStrategy.end();
-            return nodes;
-        } catch (Exception e) {
-            this.transactionStrategy.rollback();
-            throw new EccoException("Error during adding a variant.", e);
-        }
+        // TODO: if possible dont include repository in reader
+        this.reader.setRepository(repository);
+        Set<Node.Op> nodes = this.reader.read(this.baseDir, new Path[]{Paths.get("")});
+        // TODO: delete this line
+        System.out.println("No. of feature traces: " + repository.getFeatureTraces().size());
+        return nodes;
     }
 
 

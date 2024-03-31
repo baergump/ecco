@@ -1,7 +1,6 @@
 package at.jku.isse.ecco.featuretrace.evaluation;
 
 import at.jku.isse.ecco.feature.Configuration;
-import at.jku.isse.ecco.featuretrace.TraceCondition;
 import org.logicng.datastructures.Assignment;
 import org.logicng.formulas.Formula;
 import org.logicng.formulas.FormulaFactory;
@@ -13,18 +12,20 @@ import org.logicng.formulas.FormulaFactory;
 public class UserAdditionEvaluation implements EvaluationStrategy{
 
     @Override
-    public boolean holds (Configuration configuration, TraceCondition traceCondition){
-        FormulaFactory factory = traceCondition.factory();
-        assert(factory != null);
-        Assignment assignment = configuration.toAssignment(factory);
-        Formula formula = this.getOverallFormula(factory, traceCondition.getDiffCondition(), traceCondition.getUserCondition());
+    public boolean holds (Configuration configuration,
+                          String userCondition,
+                          String diffCondition){
+        Assignment assignment = configuration.toAssignment(formulaFactory);
+        Formula userFormula = this.parseString(userCondition);
+        Formula diffFormula = this.parseString(diffCondition);
+        Formula formula = this.getOverallFormula(diffFormula, userFormula);
         return formula.evaluate(assignment);
     }
 
-    private Formula getOverallFormula(FormulaFactory factory, Formula diffCondition, Formula userCondition){
+    private Formula getOverallFormula(Formula diffCondition, Formula userCondition){
         assert(diffCondition != null || userCondition != null);
         if (diffCondition != null && userCondition != null){
-            return factory.or(diffCondition, userCondition);
+            return this.formulaFactory.or(diffCondition, userCondition);
         } else if (userCondition != null){
             return userCondition;
         } else {

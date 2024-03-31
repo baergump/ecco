@@ -6,6 +6,7 @@ import at.jku.isse.ecco.core.Association;
 import at.jku.isse.ecco.dao.EntityFactory;
 import at.jku.isse.ecco.featuretrace.FeatureTrace;
 import at.jku.isse.ecco.featuretrace.FeatureTraceCondition;
+import at.jku.isse.ecco.storage.mem.featuretrace.MemFeatureTrace;
 import at.jku.isse.ecco.tree.Node;
 import org.eclipse.collections.impl.factory.Maps;
 import org.logicng.formulas.FormulaFactory;
@@ -33,6 +34,17 @@ public class MemNode implements Node, Node.Op {
 	}
 
 	@Override
+	public Op getEqualChild(Op template) {
+		Collection<Node.Op> children = this.getChildren();
+		for (Node.Op child : children){
+			if (child.getArtifact() == template.getArtifact()){
+				return child;
+			}
+		}
+		return null;
+	}
+
+	@Override
 	public FeatureTrace getFeatureTrace() {
 		return this.featureTrace;
 	}
@@ -43,6 +55,7 @@ public class MemNode implements Node, Node.Op {
 
 	public MemNode(Artifact.Op<?> artifact) {
 		this.artifact = artifact;
+		this.featureTrace = new MemFeatureTrace(this);
 	}
 
 	public void setFeatureTrace(FeatureTrace featureTrace) {
@@ -168,10 +181,5 @@ public class MemNode implements Node, Node.Op {
 		if (this.properties == null)
 			this.properties = Maps.mutable.empty();
 		return this.properties;
-	}
-
-	@Override
-	public void addUserCondition(EntityFactory factory, String userCondition) {
-		this.featureTrace = factory.addUserConditionToTrace(this.featureTrace, userCondition);
 	}
 }

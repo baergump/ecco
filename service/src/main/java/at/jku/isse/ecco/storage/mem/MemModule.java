@@ -4,7 +4,8 @@ import at.jku.isse.ecco.dao.*;
 import at.jku.isse.ecco.storage.mem.dao.*;
 import com.google.inject.AbstractModule;
 
-public class MemModule extends AbstractModule {
+public class
+MemModule extends AbstractModule {
 
 	@Override
 	protected void configure() {

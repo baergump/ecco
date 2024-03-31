@@ -167,11 +167,12 @@ public interface Configuration extends Persistable {
     default Assignment toAssignment(FormulaFactory factory){
         Assignment assignment = new Assignment();
         for (FeatureRevision featureRevision: this.getFeatureRevisions()){
-            // the feature in general is true
-            Literal featureLiteral = factory.literal(featureRevision.getFeature().getName(), true);
             // the specific revision is true
-            Literal revisionLiteral = factory.literal(featureRevision.getFeatureRevisionString(), true);
-            assignment.addLiteral(featureLiteral);
+            // TODO: reuse code from MemFeatureTrace
+            String literalString = featureRevision.getFeature().getName() + "." + featureRevision.getId();
+            literalString = literalString.replace(".", "_");
+            literalString = literalString.replace("-", "_");
+            Literal revisionLiteral = factory.literal(literalString, true);
             assignment.addLiteral(revisionLiteral);
         }
         return assignment;

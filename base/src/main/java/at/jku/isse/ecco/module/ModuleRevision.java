@@ -76,6 +76,8 @@ public interface ModuleRevision extends Persistable {
 
 	Module getModule();
 
+	String getConditionString();
+
 
 	default int getOrder() {
 		return this.getPos().length + this.getNeg().length - 1;

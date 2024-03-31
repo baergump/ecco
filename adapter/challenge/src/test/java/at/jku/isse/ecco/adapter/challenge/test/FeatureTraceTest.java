@@ -1,16 +1,12 @@
 package at.jku.isse.ecco.adapter.challenge.test;
 
 import at.jku.isse.ecco.adapter.challenge.data.AbstractArtifactData;
-import at.jku.isse.ecco.adapter.challenge.data.ClassArtifactData;
 import at.jku.isse.ecco.adapter.challenge.data.LineArtifactData;
-import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.artifact.ArtifactData;
 import at.jku.isse.ecco.core.Checkout;
 import at.jku.isse.ecco.feature.Configuration;
-import at.jku.isse.ecco.featuretrace.FeatureTrace;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.EccoService;
-import at.jku.isse.ecco.storage.mem.feature.MemConfiguration;
 import at.jku.isse.ecco.tree.Node;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -24,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -142,6 +137,13 @@ public class FeatureTraceTest {
         assertFalse(this.repository.getFeatureTraces().isEmpty());
     }
 
+    @Test
+    public void saveAndLoadRepository(){
+        this.commitVariantByPath(this.TEST_VARIANT1);
+        this.repository = (Repository.Op) this.eccoService.getRepository();
+        assertFalse(this.repository.getFeatureTraces().isEmpty());
+    }
+
     // TODO: commit without feature trace file works
 
     @Test
@@ -163,6 +165,13 @@ public class FeatureTraceTest {
 
         List<Node> lineNodes = (List<Node>) methodNode.getChildren();
         assertTrue(this.findLineArtifactData(lineNodes, "        System.out.println(\"Code line y\");"));
+    }
+
+    @Test
+    public void fuseAssociationsWithFeatureTraces(){
+        this.commitVariantByPath(this.TEST_VARIANT1);
+        this.repository = (Repository.Op) this.eccoService.getRepository();
+        Node.Op mainTree = this.repository.fuseAssociationsWithFeatureTraces();
     }
 
     /*

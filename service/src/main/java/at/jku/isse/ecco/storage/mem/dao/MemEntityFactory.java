@@ -8,10 +8,6 @@ import at.jku.isse.ecco.core.Remote;
 import at.jku.isse.ecco.dao.EntityFactory;
 import at.jku.isse.ecco.feature.Configuration;
 import at.jku.isse.ecco.feature.FeatureRevision;
-import at.jku.isse.ecco.featuretrace.FeatureTrace;
-import at.jku.isse.ecco.featuretrace.FeatureTraceCondition;
-import at.jku.isse.ecco.featuretrace.FeatureTraceFactory;
-import at.jku.isse.ecco.featuretrace.parser.VEVOSCondition;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.storage.mem.artifact.MemArtifact;
 import at.jku.isse.ecco.storage.mem.core.MemAssociation;
@@ -19,14 +15,11 @@ import at.jku.isse.ecco.storage.mem.core.MemCommit;
 import at.jku.isse.ecco.storage.mem.core.MemRemote;
 import at.jku.isse.ecco.storage.mem.feature.MemConfiguration;
 import at.jku.isse.ecco.storage.mem.feature.MemFeature;
-import at.jku.isse.ecco.storage.mem.featuretrace.MemFeatureTrace;
-import at.jku.isse.ecco.storage.mem.featuretrace.MemFeatureTraceFactory;
 import at.jku.isse.ecco.storage.mem.repository.MemRepository;
 import at.jku.isse.ecco.storage.mem.tree.MemNode;
 import at.jku.isse.ecco.storage.mem.tree.MemRootNode;
 import at.jku.isse.ecco.tree.Node;
 import at.jku.isse.ecco.tree.RootNode;
-import org.logicng.formulas.FormulaFactory;
 
 import java.util.Set;
 
@@ -34,11 +27,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 public class MemEntityFactory implements EntityFactory {
-	private final MemFeatureTraceFactory featureTraceFactory;
-
-	public MemEntityFactory() {
-		this.featureTraceFactory = new MemFeatureTraceFactory();
-	}
 
 	@Override
 	public Remote createRemote(String name, String address, Remote.Type type) {
@@ -113,8 +101,7 @@ public class MemEntityFactory implements EntityFactory {
 	public Node.Op createNode(final Artifact.Op artifact) {
 		checkNotNull(artifact);
 		MemNode node = new MemNode(artifact);
-		FeatureTrace featureTrace = this.featureTraceFactory.createFeatureTrace(node);
-		node.setFeatureTrace(featureTrace);
+
 		artifact.setContainingNode(node);
 		return node;
 	}
@@ -137,10 +124,5 @@ public class MemEntityFactory implements EntityFactory {
 	@Override
 	public Node.Op createOrderedNode(ArtifactData artifactData) {
 		return this.createOrderedNode(this.createArtifact(artifactData));
-	}
-
-	@Override
-	public FeatureTrace addUserConditionToTrace(FeatureTrace featureTrace, String userConditionString) {
-		return this.featureTraceFactory.addUserCondition(featureTrace, userConditionString);
 	}
 }

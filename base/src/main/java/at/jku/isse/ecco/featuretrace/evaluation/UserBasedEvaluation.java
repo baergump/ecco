@@ -1,7 +1,6 @@
 package at.jku.isse.ecco.featuretrace.evaluation;
 
 import at.jku.isse.ecco.feature.Configuration;
-import at.jku.isse.ecco.featuretrace.TraceCondition;
 import org.logicng.datastructures.Assignment;
 import org.logicng.formulas.Formula;
 import org.logicng.formulas.FormulaFactory;
@@ -11,13 +10,14 @@ import org.logicng.formulas.FormulaFactory;
  * The diff-based condition is ignored.
  */
 public class UserBasedEvaluation implements EvaluationStrategy{
+
     @Override
-    public boolean holds(Configuration configuration, TraceCondition traceCondition) {
-        FormulaFactory factory = traceCondition.factory();
-        assert(factory != null);
-        Assignment assignment = configuration.toAssignment(factory);
-        Formula userCondition = traceCondition.getUserCondition();
+    public boolean holds(Configuration configuration,
+                         String userCondition,
+                         String diffCondition) {
+        Assignment assignment = configuration.toAssignment(this.formulaFactory);
         assert(userCondition != null);
-        return userCondition.evaluate(assignment);
+        Formula userFormula = this.parseString(userCondition);
+        return userFormula.evaluate(assignment);
     }
 }

@@ -83,6 +83,14 @@ public interface Node extends Persistable {
 	 */
 	public Node getParent();
 
+	default Node getRoot(){
+		if (this.getParent() == null){
+			return this;
+		} else {
+			return this.getParent().getRoot();
+		}
+	}
+
 	/**
 	 * Returns whether this node is unique or not.
 	 *
@@ -383,8 +391,8 @@ public interface Node extends Persistable {
 			return Trees.createSkeletonPath(this);
 		}
 
-		FeatureTrace getFeatureTrace();
+		Node.Op getEqualChild(Node.Op template);
 
-		void addUserCondition(EntityFactory factory, String userCondition);
+		FeatureTrace getFeatureTrace();
 	}
 }

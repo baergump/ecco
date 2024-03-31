@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 public class FeatureTraceChallengeTest {
 
+    /*
     private static final Path BENCHMARK_DIR = Paths.get("C:\\Users\\user\\Desktop\\splc_challenge\\workspace\\ArgoUMLSPLBenchmark");
     private static final Path OUTPUT_DIR = Paths.get("C:\\Users\\user\\Desktop\\splc_challenge\\results");
     // set this path to a concrete scenario if you only want to run a specific one
@@ -520,4 +521,6 @@ public class FeatureTraceChallengeTest {
             onlyGTEntries.forEach(System.out::println);
         }
     }
+
+     */
 }

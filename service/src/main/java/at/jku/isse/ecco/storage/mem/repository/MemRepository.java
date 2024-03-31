@@ -1,18 +1,25 @@
 package at.jku.isse.ecco.storage.mem.repository;
 
+import at.jku.isse.ecco.util.Trees;
 import at.jku.isse.ecco.core.Association;
 import at.jku.isse.ecco.core.Commit;
 import at.jku.isse.ecco.core.Variant;
 import at.jku.isse.ecco.dao.EntityFactory;
 import at.jku.isse.ecco.feature.Configuration;
 import at.jku.isse.ecco.feature.Feature;
+import at.jku.isse.ecco.feature.FeatureRevision;
 import at.jku.isse.ecco.featuretrace.FeatureTrace;
 import at.jku.isse.ecco.module.Module;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.storage.mem.dao.MemEntityFactory;
 import at.jku.isse.ecco.storage.mem.feature.MemFeature;
 import at.jku.isse.ecco.storage.mem.module.MemModule;
+import at.jku.isse.ecco.tree.Node;
 import org.eclipse.collections.impl.factory.Maps;
+import org.logicng.formulas.Formula;
+import org.logicng.formulas.FormulaFactory;
+import org.logicng.formulas.Literal;
+import org.logicng.io.parsers.ParserException;
 
 import java.util.*;
 
@@ -29,7 +36,9 @@ public final class MemRepository implements Repository, Repository.Op {
 	private List<Map<MemModule, MemModule>> modules;
 	private Collection<Commit> commits;
 	private int maxOrder;
-	private Set<FeatureTrace> featureTraces;
+	private transient Set<FeatureTrace> featureTraces;
+	private transient FormulaFactory formulaFactory = new FormulaFactory();
+
 
 	public MemRepository() {
 		this.features = Maps.mutable.empty();
@@ -146,7 +155,6 @@ public final class MemRepository implements Repository, Repository.Op {
 		return feature;
 	}
 
-
 	@Override
 	public void addAssociation(Association.Op association) {
 		this.associations.add(association);
@@ -197,6 +205,98 @@ public final class MemRepository implements Repository, Repository.Op {
 	@Override
 	public EntityFactory getEntityFactory() {
 		return new MemEntityFactory();
+	}
+
+	@Override
+	public void addFeatureTrace(FeatureTrace featureTrace){
+		this.SyncRepositoryWithFeatureTrace(featureTrace);
+		// TODO: combine feature traces with same node
+		this.getFeatureTraces().add(featureTrace);
+	}
+
+	@Override
+	public Node.Op fuseAssociationsWithFeatureTraces() {
+		Node.Op mainTree = this.getEntityFactory().createRootNode();
+		for (FeatureTrace featureTrace : this.featureTraces){
+			Node.Op traceNode = (Node.Op) featureTrace.getNode().getRoot();
+			Trees.treeFusion(mainTree, traceNode);
+		}
+		for (Association.Op association : this.associations){
+			Node.Op associationTree = association.getTraceTree();
+			Trees.treeFusion(mainTree, associationTree);
+		}
+		return mainTree;
+	}
+
+	private void SyncRepositoryWithFeatureTrace(FeatureTrace featureTrace){
+		// replace condition-features with feature-revisions
+		// add missing features / feature-revisions
+
+		// iterate through literals
+		// feature-revision -> add to repo if missing
+		// feature 	-> add to repo if missing (create first revision)
+		// 			-> replace literal with feature-revision (latest)
+
+		Formula userCondition = this.parseFormulaString(featureTrace.getUserConditionString());
+		Collection<Literal> literals = userCondition.literals();
+		for (Literal literal : literals){
+			String literalName = literal.name();
+			if (literalName.contains("#")){
+				String featureRevisionName = literalName.replaceFirst("_", ".");
+				featureRevisionName = literalName.replace("_", "-");
+				this.addFeatureRevisionIfMissing(literalName);
+			} else {
+				this.SyncRepoWithFeature(featureTrace, literalName);
+			}
+		}
+	}
+
+	private void addFeatureRevisionIfMissing(String featureRevisionName){
+		// add feature if missing, add revision if missing
+		String[] nameParts = featureRevisionName.split("\\.");
+		String featureName = nameParts[0];
+		this.addFeatureIfMissing(featureName);
+
+		String revisionName = nameParts[1];
+		Collection<Feature> features = this.getFeaturesByName(featureName);
+		if (features.size() == 0){
+			throw new RuntimeException("could not add Feature " + featureName);
+		}
+		Feature feature = features.iterator().next();
+		feature.addRevision(revisionName);
+	}
+
+	private Feature addFeatureIfMissing(String featureName){
+		Collection<Feature> features = this.getFeaturesByName(featureName);
+		if (features.size() != 0) { return features.iterator().next(); }
+		String id = UUID.randomUUID().toString();
+		return this.addFeature(id, featureName);
+	}
+
+	private void SyncRepoWithFeature(FeatureTrace featureTrace, String featureName) {
+		String userCondition = featureTrace.getUserConditionString();
+		Feature feature = this.addFeatureIfMissing(featureName);
+		FeatureRevision latestRevision = feature.getLatestRevision();
+		String revisionName;
+		String newFeatureRevision;
+		if (latestRevision == null) {
+			revisionName = UUID.randomUUID().toString();
+			newFeatureRevision = featureName + "." + revisionName;
+			this.addFeatureRevisionIfMissing(featureName + "." + revisionName);
+		} else {
+			revisionName = latestRevision.getId();
+			newFeatureRevision = featureName + "." + revisionName;
+		}
+		userCondition = userCondition.replace(featureName, newFeatureRevision);
+		featureTrace.setUserCondition(userCondition);
+	}
+
+	private Formula parseFormulaString(String string){
+		try{
+			return this.formulaFactory.parse(string);
+		} catch (ParserException e){
+			throw new RuntimeException("Formula String could not be parsed: " + string + ": " + e.getMessage());
+		}
 	}
 
 	@Override

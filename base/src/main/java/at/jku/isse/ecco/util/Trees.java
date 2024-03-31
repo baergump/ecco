@@ -439,18 +439,15 @@ public class Trees {
 	 * @return True if the two given trees are equal, false otherwise.
 	 */
 	public static boolean equals(Node left, Node right) {
-		Iterator<? extends Node> leftChildrenIterator = left.getChildren().iterator();
-		while (leftChildrenIterator.hasNext()) {
-			Node leftChild = leftChildrenIterator.next();
+		if (left == null && right == null) { return true; }
+		if (left == null) { return false; }
+		if (!left.equals(right)) { return false; }
 
+		for (Node leftChild : left.getChildren()) {
 			int ri = right.getChildren().indexOf(leftChild);
-			if (ri == -1)
-				return false;
-
+			if (ri == -1) { return false; }
 			Node rightChild = right.getChildren().get(ri);
-
-			if (!equals(leftChild, rightChild))
-				return false;
+			if (!equals(leftChild, rightChild)) { return false; }
 		}
 		return true;
 	}
@@ -778,6 +775,27 @@ public class Trees {
 			// check for equal identity on purpose (equal siblings should be removed as well)
 			if (!(parentsChildNode == node)) {
 				parentNode.removeChild(parentsChildNode);
+			}
+		}
+	}
+
+	public static void treeFusion(Node.Op mainTree, Node.Op fusionNode){
+		// TODO: containing node of artifacts? (either copy artifact or remove containing node as field)
+		if (mainTree.getArtifact() != fusionNode.getArtifact()) {
+			throw new EccoException("Artifact instance must be identical, i.e. trees must originate from the same repository.");
+		}
+
+		// deal with children
+		for (Node.Op child : fusionNode.getChildren()) {
+			Node.Op mainChild = mainTree.getEqualChild(child);
+			if (mainChild == null) {
+				Node.Op newChild = child.copySingleNode();
+				newChild.getFeatureTrace().fuseFeatureTrace(child.getFeatureTrace());
+				mainTree.addChild(newChild);
+				treeFusion(newChild, child);
+			} else {
+				mainChild.getFeatureTrace().fuseFeatureTrace(child.getFeatureTrace());
+				treeFusion(mainChild, child);
 			}
 		}
 	}

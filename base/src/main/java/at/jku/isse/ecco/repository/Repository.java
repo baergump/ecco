@@ -22,6 +22,7 @@ import at.jku.isse.ecco.pog.PartialOrderGraph;
 import at.jku.isse.ecco.tree.Node;
 import at.jku.isse.ecco.tree.RootNode;
 import at.jku.isse.ecco.util.Trees;
+import org.logicng.formulas.FormulaFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -67,6 +68,7 @@ public interface Repository extends Persistable {
 	 * Private repository interface.
 	 */
 	interface Op extends Repository {
+
 
 		@Override
 		Collection<? extends Feature> getFeatures();
@@ -120,11 +122,9 @@ public interface Repository extends Persistable {
 
 		EntityFactory getEntityFactory();
 
-		default void addFeatureTrace(FeatureTrace featureTrace){
-			// TODO: is it necessary to add new features / feature-revisions / modules / module-revisions?
-			// TODO: combine feature traces with same node
-			this.getFeatureTraces().add(featureTrace);
-		}
+		void addFeatureTrace(FeatureTrace featureTrace);
+
+		Node.Op fuseAssociationsWithFeatureTraces();
 
 		default Collection<FeatureRevision> addFeatureRevisions(FeatureRevision[] featureRevisions){
 			Collection<FeatureRevision> repoFeatureRevisions = new ArrayList<>();
@@ -661,6 +661,7 @@ public interface Repository extends Persistable {
 			Collection<FeatureTrace> featureTraceSubtractions = new HashSet<>();
 			for (FeatureTrace featureTrace : this.getFeatureTraces()){
 				// TODO: make evaluation strategy decision possible
+				// TODO: inject strategy in repository
 				if (featureTrace.holds(configuration, new UserAdditionEvaluation())){
 					featureTraceAdditions.add(featureTrace);
 				} else {
@@ -729,12 +730,12 @@ public interface Repository extends Persistable {
 
 				// add artifacts of applicable feature traces
 				for (FeatureTrace featureTrace : featureTraceAdditions){
-					lazyCompRootNode.addOrigNode(featureTrace.getNode());
+					lazyCompRootNode.addOrigNode(featureTrace.getNode().getRoot());
 				}
 
 				// remove artifacts to be removed according to feature traces
 				for (FeatureTrace featureTrace : featureTraceSubtractions){
-					lazyCompRootNode.addUnwantedNode(featureTrace.getNode());
+					lazyCompRootNode.addUnwantedNode(featureTrace.getNode().getRoot());
 				}
 
 				orderWarnings = lazyCompRootNode.getOrderSelector().getUncertainOrders();

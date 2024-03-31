@@ -1,7 +1,6 @@
 package at.jku.isse.ecco.featuretrace.evaluation;
 
 import at.jku.isse.ecco.feature.Configuration;
-import at.jku.isse.ecco.featuretrace.TraceCondition;
 import org.logicng.datastructures.Assignment;
 import org.logicng.formulas.Formula;
 import org.logicng.formulas.FormulaFactory;
@@ -14,20 +13,19 @@ import org.logicng.formulas.FormulaFactory;
 public class UserSubtractionEvaluation implements EvaluationStrategy{
 
     @Override
-    public boolean holds (Configuration configuration, TraceCondition traceCondition){
-        FormulaFactory factory = traceCondition.factory();
-        assert(factory != null);
-        Formula diffCondition = traceCondition.getDiffCondition();
-        Formula userCondition = traceCondition.getUserCondition();
-        Assignment assignment = configuration.toAssignment(factory);
+    public boolean holds (Configuration configuration,
+                          String userCondition,
+                          String diffCondition){
+        Assignment assignment = configuration.toAssignment(this.formulaFactory);
         Formula formula;
-
-        if (diffCondition == null){
+        Formula userFormula = this.parseString(userCondition);
+        Formula diffFormula = this.parseString(diffCondition);
+        if (diffFormula == null){
             return false;
-        } else if (userCondition != null){
-            formula = factory.and(diffCondition, userCondition);
+        } else if (userFormula != null){
+            formula = this.formulaFactory.and(diffFormula, userFormula);
         } else {
-            formula = diffCondition;
+            formula = diffFormula;
         }
 
         return formula.evaluate(assignment);

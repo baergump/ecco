@@ -20,11 +20,11 @@ public class FeatureTraceCreatorVisitor implements Node.Op.NodeVisitor{
 
     @Override
     public void visit(Node.Op node) {
-        if (!node.getFeatureTrace().ContainsUserCondition()) {
+        if (!node.getFeatureTrace().containsUserCondition()) {
             return;
         }
         Node.Op nodeCopy = node.copyTree().createPathSkeleton();
-        // at the top, there must be a root node
+        // there must be a root node at the top
         Node.Op rootNode = factory.createRootNode();
         nodeCopy.setParent(rootNode);
         rootNode.addChild(nodeCopy);
