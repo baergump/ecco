@@ -1,19 +1,15 @@
 package at.jku.isse.ecco.featuretrace.parser;
 
-import org.logicng.formulas.Formula;
-import org.logicng.formulas.FormulaFactory;
-import org.logicng.io.parsers.ParserException;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class VEVOSCondition {
+public class VevosCondition {
     private final Path filePath;
     private final String conditionString;
     private final int startLine;
     private final int endLine;
 
-    public VEVOSCondition(String vevosFileLine){
+    public VevosCondition(String vevosFileLine){
         // VEVOS file entry structure: Path;File Condition;Block Condition;Presence Condition;start;end
         String[] lineParts = vevosFileLine.split(";");
         if (lineParts.length < 6){

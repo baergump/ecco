@@ -3,15 +3,17 @@ package at.jku.isse.ecco.adapter.challenge;
 import at.jku.isse.ecco.EccoException;
 import at.jku.isse.ecco.adapter.ArtifactReader;
 import at.jku.isse.ecco.adapter.challenge.data.*;
-import at.jku.isse.ecco.adapter.challenge.vevos.VEVOSConditionHandler;
+import at.jku.isse.ecco.featuretrace.parser.VevosConditionHandler;
 import at.jku.isse.ecco.adapter.dispatch.DispatchWriter;
 import at.jku.isse.ecco.adapter.dispatch.PluginArtifactData;
 import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.dao.EntityFactory;
 import at.jku.isse.ecco.featuretrace.FeatureTrace;
-import at.jku.isse.ecco.featuretrace.parser.VEVOSCondition;
+import at.jku.isse.ecco.featuretrace.parser.VevosCondition;
+import at.jku.isse.ecco.featuretrace.parser.VevosFileConditionContainer;
 import at.jku.isse.ecco.service.listener.ReadListener;
 import at.jku.isse.ecco.tree.Node;
+import at.jku.isse.ecco.util.Location;
 import com.github.javaparser.*;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
@@ -36,6 +38,8 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 	protected static final Logger LOGGER = Logger.getLogger(DispatchWriter.class.getName());
 
 	private final EntityFactory entityFactory;
+
+	private Collection<ReadListener> listeners = new ArrayList<>();
 
 	@Inject
 	public JavaChallengeReader(EntityFactory entityFactory) {
@@ -70,7 +74,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 		// TODO: refactor method (make it shorter, less procedural, more oo)
 		// TODO: refactor: feature traces are created as a side-effect
 
-		VEVOSConditionHandler vevosConditionHandler = new VEVOSConditionHandler(base);
+		VevosConditionHandler vevosConditionHandler = new VevosConditionHandler(base);
 		Set<Node.Op> nodes = new HashSet<>();
 
 		long totalJavaParserTime = 0;
@@ -84,7 +88,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 			// parser results seem to offer the possibility to get the respective line numbers in the source code
 			// -> connect vevos line numbers to parser result line numbers to recognize feature traces
 
-			List<VEVOSCondition> fileSpecificConditions = vevosConditionHandler.getFileSpecificPresenceConditions(path);
+			VevosFileConditionContainer fileConditionContainer = vevosConditionHandler.getFileSpecificPresenceConditions(path);
 
 			Path resolvedPath = base.resolve(path);
 
@@ -112,7 +116,12 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 					// create class artifact/node
 					String className = typeDeclaration.getName().toString();
 					Artifact.Op<ClassArtifactData> classArtifact = this.entityFactory.createArtifact(new ClassArtifactData(packageName + "." + className));
-					Node.Op classNode = this.entityFactory.createNode(classArtifact);
+
+					// TODO: how to handle conditions for whole class?
+					// TODO: check line range
+					Location location = new Location(typeDeclaration.getRange().get().begin.line,
+							typeDeclaration.getRange().get().begin.line, path);
+					Node.Op classNode = createNodeWithLocation(classArtifact, location);
 					pluginNode.addChild(classNode);
 					// TODO: use file conditions to create feature traces for classes?
 
@@ -123,12 +132,16 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 					for (ImportDeclaration importDeclaration : cu.getImports()) {
 						String importName = "import " + importDeclaration.getName().asString();
 						Artifact.Op<ImportArtifactData> importArtifact = this.entityFactory.createArtifact(new ImportArtifactData(importName));
-						Node.Op importNode = this.entityFactory.createNode(importArtifact);
+
+						location = new Location(importDeclaration.getRange().get().begin.line,
+								importDeclaration.getRange().get().begin.line, path);
+						Node.Op importNode = createNodeWithLocation(importArtifact, location);
+
 						importsGroupNode.addChild(importNode);
-						this.checkForFeatureTrace(importDeclaration, fileSpecificConditions, importNode);
+						this.checkForFeatureTrace(importDeclaration, fileConditionContainer, importNode);
 					}
 					ArrayList<String> methods =  new ArrayList<>();
-					this.addClassChildren(typeDeclaration, classNode, lines, methods, fileSpecificConditions);
+					this.addClassChildren(typeDeclaration, classNode, lines, methods, fileConditionContainer, path);
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -149,7 +162,8 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 								  Node.Op classNode,
 								  String[] lines,
 								  ArrayList<String> methods,
-								  List<VEVOSCondition> fileSpecificConditions) {
+								  VevosFileConditionContainer fileConditionContainer,
+								  Path path) {
 		// TODO: refactor method (shorten, less procedural, more oo, less arguments)
 
 		// create methods artifact/node
@@ -168,10 +182,15 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 			// nested classes/interfaces
 			if (node instanceof ClassOrInterfaceDeclaration) {
 				Artifact.Op<ClassArtifactData> nestedClassArtifact = this.entityFactory.createArtifact(new ClassArtifactData(classNode.toString() + "." + ((ClassOrInterfaceDeclaration) node).getName().toString()));
-				Node.Op nestedClassNode = this.entityFactory.createNode(nestedClassArtifact);
+
+				// TODO: check line range
+				Location location = new Location(typeDeclaration.getRange().get().begin.line,
+						typeDeclaration.getRange().get().begin.line, path);
+				Node.Op nestedClassNode = createNodeWithLocation(nestedClassArtifact, location);
+
 				classNode.addChild(nestedClassNode);
-				this.checkForFeatureTrace(node, fileSpecificConditions, nestedClassNode);
-				addClassChildren((ClassOrInterfaceDeclaration) node, nestedClassNode, lines, methods, fileSpecificConditions);
+				this.checkForFeatureTrace(node, fileConditionContainer, nestedClassNode);
+				addClassChildren((ClassOrInterfaceDeclaration) node, nestedClassNode, lines, methods, fileConditionContainer, path);
 			}
 			// enumerations
 			else if (node instanceof EnumDeclaration) {
@@ -182,9 +201,10 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 					String trimmedLine = lines[i].trim();
 					if (!trimmedLine.isEmpty() && !trimmedLine.equals("}") && !trimmedLine.equals("{")) {
 						Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(lines[i]));
-						Node.Op lineNode = this.entityFactory.createNode(lineArtifact);
+						Location location = new Location(beginLine, endLine, path);
+						Node.Op lineNode = createNodeWithLocation(lineArtifact, location);
 						enumsGroupNode.addChild(lineNode);
-						this.checkForFeatureTrace(i + 1, fileSpecificConditions, lineNode);
+						this.checkForFeatureTrace(i + 1, fileConditionContainer, lineNode);
 					}
 					i++;
 				}
@@ -196,12 +216,14 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 				String line;
 				int i = beginLine - 1;
 				while (i < endLine) {
+					int lineNumber = i + 1;
 					String trimmedLine = lines[i].trim();
 					if (!trimmedLine.isEmpty() && !trimmedLine.equals("}") && !trimmedLine.equals("{")) {
 						Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(lines[i]));
-						Node.Op lineNode = this.entityFactory.createNode(lineArtifact);
+						Location location = new Location(lineNumber, lineNumber, path);
+						Node.Op lineNode = createNodeWithLocation(lineArtifact, location);
 						fieldsGroupNode.addChild(lineNode);
-						this.checkForFeatureTrace(i + 1, fileSpecificConditions, lineNode);
+						this.checkForFeatureTrace(i + 1, fileConditionContainer, lineNode);
 					}
 					i++;
 				}
@@ -214,7 +236,7 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 				methods.add(classNode.getArtifact() + " " + methodSignature);
 				Artifact.Op<MethodArtifactData> methodArtifact = this.entityFactory.createArtifact(new MethodArtifactData(methodSignature));
 				Node.Op methodNode = this.entityFactory.createOrderedNode(methodArtifact);
-				this.checkForFeatureTrace(node, fileSpecificConditions, methodNode);
+				this.checkForFeatureTrace(node, fileConditionContainer, methodNode);
 
 				methodsGroupNode.addChild(methodNode);
 				if (((ConstructorDeclaration) node).getBody().getStatements().isNonEmpty()) {
@@ -222,12 +244,14 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 					int endLine = node.getRange().get().end.line;
 					int i = beginLine;
 					while (i < endLine - 1) {
+						int lineNumber = i + 1;
 						String trimmedLine = lines[i].trim();
 						if (!trimmedLine.isEmpty() && !trimmedLine.equals("}") && !trimmedLine.equals("{")) {
 							Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(lines[i]));
-							Node.Op lineNode = this.entityFactory.createNode(lineArtifact);
+							Location location = new Location(lineNumber, lineNumber, path);
+							Node.Op lineNode = createNodeWithLocation(lineArtifact, location);
 							methodNode.addChild(lineNode);
-							this.checkForFeatureTrace(i + 1, fileSpecificConditions, lineNode);
+							this.checkForFeatureTrace(i + 1, fileConditionContainer, lineNode);
 						}
 						i++;
 					}
@@ -243,87 +267,71 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 			methods.add(classNode.getArtifact() + " " + methodSignature);
 			Artifact.Op<MethodArtifactData> methodArtifact = this.entityFactory.createArtifact(new MethodArtifactData(methodSignature));
 			Node.Op methodNode = this.entityFactory.createOrderedNode(methodArtifact);
-			this.checkForFeatureTrace(methodDeclaration, fileSpecificConditions, methodNode);
+			this.checkForFeatureTrace(methodDeclaration, fileConditionContainer, methodNode);
 
 			methodsGroupNode.addChild(methodNode);
-			addMethodChildren(methodDeclaration, methodNode, lines, fileSpecificConditions);
+			addMethodChildren(methodDeclaration, methodNode, lines, fileConditionContainer, path);
 		}
 	}
 
 	private void addMethodChildren(MethodDeclaration methodDeclaration, Node.Op methodNode, String[] lines,
-								   List<VEVOSCondition> fileSpecificConditions) {
+								   VevosFileConditionContainer fileConditionContainer, Path path) {
 		// lines inside method
 		if (methodDeclaration.getBody().isPresent()) {
 			int beginLine = methodDeclaration.getBody().get().getRange().get().begin.line;
 			int endLine = methodDeclaration.getBody().get().getRange().get().end.line;
 			int i = beginLine;
 			while (i < endLine - 1) {
+				int lineNumber = i + 1;
 				String trimmedLine = lines[i].trim();
 				if (!trimmedLine.isEmpty() && !trimmedLine.equals("}") && !trimmedLine.equals("{")) {
 					Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(lines[i]));
-					Node.Op lineNode = this.entityFactory.createNode(lineArtifact);
+					Location location = new Location(lineNumber, lineNumber, path);
+					Node.Op lineNode = createNodeWithLocation(lineArtifact, location);
 					methodNode.addChild(lineNode);
-					this.checkForFeatureTrace(i + 1, fileSpecificConditions, lineNode);
+					this.checkForFeatureTrace(i + 1, fileConditionContainer, lineNode);
 				}
 				i++;
 			}
 		}
 	}
 
-	private void checkForFeatureTrace(com.github.javaparser.ast.Node astNode, List<VEVOSCondition> fileSpecificConditions, Node.Op node){
-		Collection<VEVOSCondition> matchingCondition = this.getMatchingPresenceConditions(astNode, fileSpecificConditions);
-		for(VEVOSCondition condition : matchingCondition){
+	private Node.Op createNodeWithLocation(Artifact.Op artifact, Location location){
+		Node.Op node = this.entityFactory.createNode(artifact);
+		node.setLocation(location);
+		return node;
+	}
+
+	private void checkForFeatureTrace(com.github.javaparser.ast.Node astNode, VevosFileConditionContainer fileConditionContainer, Node.Op node){
+		int startLine = astNode.getRange().get().begin.line;
+		int endLine = astNode.getRange().get().end.line;
+		Collection<VevosCondition> matchingConditions = fileConditionContainer.getMatchingPresenceConditions(startLine, endLine);
+		if (matchingConditions.size() > 1){
+			// the conditions must me enclosing
+			// the inner one must implicate the outer one
+			// todo: validate?
+			// todo: choose most specific condition?
+		}
+		for(VevosCondition condition : matchingConditions){
+			FeatureTrace nodeTrace = node.getFeatureTrace();
+			nodeTrace.buildUserConditionConjunction(condition.getConditionString());
+		}
+	}
+
+	private void checkForFeatureTrace(int lineNumber, VevosFileConditionContainer fileConditionContainer, Node.Op node){
+		Collection<VevosCondition> matchingConditions = fileConditionContainer.getMatchingPresenceConditions(lineNumber, lineNumber);
+		// TODO: check this out
+		if (matchingConditions.size() > 1){
+			// the conditions must me enclosing
+			// the inner one must implicate the outer one
+			// todo: validate?
+			// todo: choose most specific condition?
+		}
+		for (VevosCondition condition : matchingConditions){
 			FeatureTrace nodeTrace = node.getFeatureTrace();
 			nodeTrace.addUserCondition(condition.getConditionString());
 		}
 	}
-
-	private void checkForFeatureTrace(int line, List<VEVOSCondition> fileSpecificConditions, Node.Op node){
-		Collection<VEVOSCondition> matchingConditions = this.getMatchingPresenceConditions(line, fileSpecificConditions);
-		for (VEVOSCondition condition : matchingConditions){
-			FeatureTrace nodeTrace = node.getFeatureTrace();
-			nodeTrace.addUserCondition(condition.getConditionString());
-		}
-	}
-
-	private Collection<VEVOSCondition> getMatchingPresenceConditions(
-			com.github.javaparser.ast.Node astNode,
-			List<VEVOSCondition> presenceConditions){
-
-		Collection<VEVOSCondition> conditions = new HashSet<>();
-		int nodeStartLine = astNode.getRange().get().begin.line;
-		int nodeEndLine = astNode.getRange().get().end.line;
-
-		for (VEVOSCondition condition : presenceConditions){
-			if (this.rangesAreOverlapping(nodeStartLine, nodeEndLine, condition.getStartLine(), condition.getEndLine())){
-				throw new RuntimeException(String.format("Line ranges of ast node and condition are overlapping. node: %d - %d; condition: %d - %d"
-						, nodeStartLine, nodeEndLine, condition.getStartLine(), condition.getEndLine()));
-			}
-
-			if (condition.getStartLine() < nodeStartLine && condition.getEndLine() > nodeEndLine){
-				conditions.add(condition);
-			}
-		}
-		return conditions;
-	}
-
-	private boolean rangesAreOverlapping(int start1, int end1, int start2, int end2){
-		if (start1 < start2 && start2 < end1 && end1 < end2) { return true; }
-		if (start2 < start1 && start1 < end2 && end2 < end1) { return true; }
-		return false;
-	}
-
-	private Collection<VEVOSCondition> getMatchingPresenceConditions(int line, List<VEVOSCondition> presenceConditions){
-		Collection<VEVOSCondition> conditions = new HashSet<>();
-		for (VEVOSCondition condition : presenceConditions){
-			if (condition.getStartLine() <= line && condition.getEndLine() >= line){
-				conditions.add(condition);
-			}
-		}
-		return conditions;
-	}
-
-	private Collection<ReadListener> listeners = new ArrayList<>();
 
 	@Override
 	public void addListener(ReadListener listener) {
@@ -334,5 +342,4 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 	public void removeListener(ReadListener listener) {
 		this.listeners.remove(listener);
 	}
-
 }

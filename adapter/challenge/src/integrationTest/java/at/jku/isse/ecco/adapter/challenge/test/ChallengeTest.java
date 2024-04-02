@@ -65,7 +65,8 @@ public class ChallengeTest {
 			Files.createDirectory(scenarioOutputDir);
 			this.createRepo(scenarioDir, scenarioOutputDir);
 			this.computeResults(scenarioOutputDir);
-			MetricsCalculation.computeMetrics(BENCHMARK_DIR.resolve("groundTruth"), scenarioOutputDir);
+			// TODO: restore old metrics-calculation
+			// MetricsCalculation.computeMetrics(BENCHMARK_DIR.resolve("groundTruth"), scenarioOutputDir);
 		}
 	}
 
@@ -87,7 +88,8 @@ public class ChallengeTest {
 
 	@Test
 	public void Compute_Metrics() {
-		MetricsCalculation.computeMetrics(BENCHMARK_DIR.resolve("groundTruth"), SCENARIO_OUTPUT_DIR);
+		// TODO: restore old metrics-calculation
+		// MetricsCalculation.computeMetrics(BENCHMARK_DIR.resolve("groundTruth"), SCENARIO_OUTPUT_DIR);
 	}
 
 	private void createRepo(Path scenarioDir, Path scenarioOutputDir) throws IOException {

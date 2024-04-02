@@ -40,6 +40,10 @@ public interface Configuration extends Persistable {
 
     Configuration getConfiguration();
 
+    void setOriginalConfigString(String originalConfigString);
+
+    String getOriginalConfigString();
+
     void setFeatureRevisions(FeatureRevision[] featureRevisions);
 
     default Set<ModuleRevision> computeModules(int maxOrder, Repository.Op repository, Configuration configuration) {
@@ -178,6 +182,15 @@ public interface Configuration extends Persistable {
         return assignment;
     }
 
+    default String[] getFeatureNameList(){
+        FeatureRevision[] featureRevisions = this.getFeatureRevisions();
+        Collection<String> featureNames = Arrays.stream(featureRevisions)
+                .map(FeatureRevision::getFeature)
+                .map(Feature::getName)
+                .collect(Collectors.toList());
+        String[] featureNameArray = new String[featureRevisions.length];
+        return featureNames.toArray(featureNameArray);
+    }
 
     @Override
     int hashCode();

@@ -1,12 +1,9 @@
 package at.jku.isse.ecco.adapter.dispatch;
 
 import at.jku.isse.ecco.dao.EntityFactory;
-import at.jku.isse.ecco.featuretrace.FeatureTrace;
-import at.jku.isse.ecco.featuretrace.FeatureTraceCondition;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.tree.Node;
 
-import java.util.Collection;
 
 public class FeatureTraceCreatorVisitor implements Node.Op.NodeVisitor{
 
@@ -23,11 +20,11 @@ public class FeatureTraceCreatorVisitor implements Node.Op.NodeVisitor{
         if (!node.getFeatureTrace().containsUserCondition()) {
             return;
         }
-        Node.Op nodeCopy = node.copyTree().createPathSkeleton();
-        // there must be a root node at the top
+        // todo: feature-trace.equals(): equal conditions, equal nodes to the top until root
+
+        Node.Op nodeCopy = node.createPathSkeleton();
         Node.Op rootNode = factory.createRootNode();
-        nodeCopy.setParent(rootNode);
-        rootNode.addChild(nodeCopy);
-        this.repository.addFeatureTrace(node.getFeatureTrace());
+        rootNode.addChild((Node.Op) nodeCopy.getRoot());
+        this.repository.addFeatureTrace(nodeCopy.getFeatureTrace());
     }
 }

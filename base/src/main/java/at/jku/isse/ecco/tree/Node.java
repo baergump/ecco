@@ -6,6 +6,7 @@ import at.jku.isse.ecco.dao.EntityFactory;
 import at.jku.isse.ecco.dao.Persistable;
 import at.jku.isse.ecco.featuretrace.FeatureTrace;
 import at.jku.isse.ecco.featuretrace.FeatureTraceCondition;
+import at.jku.isse.ecco.util.Location;
 import at.jku.isse.ecco.util.Trees;
 
 import java.util.*;
@@ -362,6 +363,12 @@ public interface Node extends Persistable {
 
 		Op copySingleNode();
 
+		/**
+		 * Create a copy of the node that also includes a copy of the feature trace.
+		 * @return
+		 */
+		Op copySingleNodeCompletely();
+
 		default Op copyTreeDownwards(){
 			// copy this node and all descendants
 			Op node = this.copySingleNode();
@@ -394,5 +401,9 @@ public interface Node extends Persistable {
 		Node.Op getEqualChild(Node.Op template);
 
 		FeatureTrace getFeatureTrace();
+
+		Location getLocation();
+
+		void setLocation(Location location);
 	}
 }

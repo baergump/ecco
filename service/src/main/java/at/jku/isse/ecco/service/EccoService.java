@@ -10,6 +10,7 @@ import at.jku.isse.ecco.feature.*;
 import at.jku.isse.ecco.module.*;
 import at.jku.isse.ecco.repository.*;
 import at.jku.isse.ecco.service.listener.*;
+import at.jku.isse.ecco.service.utils.ConfigInsertionVisitor;
 import at.jku.isse.ecco.storage.*;
 import at.jku.isse.ecco.storage.mem.core.*;
 import at.jku.isse.ecco.storage.mem.dao.*;
@@ -731,6 +732,7 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
             }
 
             Configuration configuration = this.entityFactory.createConfiguration(featureRevisions.toArray(new FeatureRevision[0]));
+            configuration.setOriginalConfigString(configurationString);
 
             this.transactionStrategy.end();
 
@@ -1555,6 +1557,11 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
             Repository.Op repository = this.repositoryDao.load();
             repository.addFeatureRevisions(configuration.getFeatureRevisions());
             Set<Node.Op> nodes = readFiles(repository);
+
+            // TODO: this is done for paper-purposes in regard to feature traces
+            ConfigInsertionVisitor visitor = new ConfigInsertionVisitor(configuration);
+            nodes.forEach(node -> node.traverse(visitor));
+
             ArrayList<Variant> variants = repository.getVariants();
 
             long extractTime = System.currentTimeMillis();

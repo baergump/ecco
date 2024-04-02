@@ -13,10 +13,10 @@ import java.util.Objects;
 
 public class MemFeatureTrace implements FeatureTrace {
 
-    private Node node;
+    private final Node node;
     private String userCondition;
     private String diffCondition;
-    private transient FormulaFactory formulaFactory;
+    private final transient FormulaFactory formulaFactory;
 
 
     public MemFeatureTrace(Node node){
@@ -55,8 +55,28 @@ public class MemFeatureTrace implements FeatureTrace {
     }
 
     @Override
+    public void buildUserConditionConjunction(String userCondition) {
+        // TODO: validate input
+        if (userCondition == null) { return; }
+        userCondition = this.sanitizeFormulaString(userCondition);
+        if (this.userCondition == null){
+            this.userCondition = userCondition;
+        } else {
+            Formula currentCondition = this.parseString(this.userCondition);
+            Formula additionalCondition = this.parseString(userCondition);
+            Formula newCondition = this.formulaFactory.and(currentCondition, additionalCondition);
+            this.userCondition = newCondition.toString();
+        }
+    }
+
+    @Override
     public String getUserConditionString() {
         return this.userCondition;
+    }
+
+    @Override
+    public String getDiffConditionString() {
+        return this.diffCondition;
     }
 
     @Override
@@ -72,6 +92,15 @@ public class MemFeatureTrace implements FeatureTrace {
         this.addUserCondition(memFeatureTrace.userCondition);
     }
 
+    @Override
+    public String getOverallConditionString(EvaluationStrategy evaluationStrategy) {
+        if (this.diffCondition == null && this.userCondition == null){
+            throw new RuntimeException("Neither diff-based nor user-based condition exists.");
+        } else  {
+            return evaluationStrategy.getOverallConditionString(this.userCondition, this.diffCondition);
+        }
+    }
+
     private Formula parseString(String string){
         try{
             return this.formulaFactory.parse(string);
@@ -81,7 +110,7 @@ public class MemFeatureTrace implements FeatureTrace {
     }
 
     @Override
-    public boolean equalConditions(FeatureTrace featureTrace){
+    public boolean hasEqualConditions(FeatureTrace featureTrace){
         if (this == featureTrace) return true;
         if (!(featureTrace instanceof MemFeatureTrace)) return false;
         if (!(this.userCondition.equals(((MemFeatureTrace) featureTrace).userCondition))) return false;
@@ -96,7 +125,6 @@ public class MemFeatureTrace implements FeatureTrace {
 
     @Override
     public void setUserCondition(String userConditionString) {
-        if (userConditionString == null) { return; }
         userConditionString = this.sanitizeFormulaString(userConditionString);
         this.userCondition = userConditionString;
     }
@@ -106,6 +134,7 @@ public class MemFeatureTrace implements FeatureTrace {
         // conditions replace "." with "_" for indication of feature-revision-id
         // as opposed to documentation, "#" and "@" do not parse, which is why only "_" is used
         // conditions replace "-" with "_" for UUIDs (Feature-revision-IDs)
+        if (formulaString == null) { return null; }
         formulaString = formulaString.replace(".", "_");
         formulaString = formulaString.replace("-", "_");
         return formulaString;

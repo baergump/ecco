@@ -1,6 +1,7 @@
 package at.jku.isse.ecco.featuretrace.evaluation;
 
 import at.jku.isse.ecco.feature.Configuration;
+import at.jku.isse.ecco.featuretrace.LogicUtils;
 import org.logicng.datastructures.Assignment;
 import org.logicng.formulas.Formula;
 import org.logicng.formulas.FormulaFactory;
@@ -17,17 +18,28 @@ public class UserSubtractionEvaluation implements EvaluationStrategy{
                           String userCondition,
                           String diffCondition){
         Assignment assignment = configuration.toAssignment(this.formulaFactory);
-        Formula formula;
-        Formula userFormula = this.parseString(userCondition);
-        Formula diffFormula = this.parseString(diffCondition);
-        if (diffFormula == null){
-            return false;
-        } else if (userFormula != null){
-            formula = this.formulaFactory.and(diffFormula, userFormula);
-        } else {
-            formula = diffFormula;
-        }
+        Formula overallFormula = this.getOverallFormula(userCondition, diffCondition);
+        return overallFormula.evaluate(assignment);
+    }
 
-        return formula.evaluate(assignment);
+    private Formula getOverallFormula(String userCondition, String diffCondition) {
+        Formula diffFormula = null;
+        Formula userFormula = null;
+        if (diffCondition != null){ diffFormula = LogicUtils.parseString(this.formulaFactory, diffCondition); }
+        if (userCondition != null){ userFormula = LogicUtils.parseString(this.formulaFactory, userCondition); }
+
+        if (diffFormula == null){
+            return this.formulaFactory.constant(false);
+        } else if (userFormula != null){
+            return this.formulaFactory.and(diffFormula, userFormula);
+        } else {
+            return diffFormula;
+        }
+    }
+
+    @Override
+    public String getOverallConditionString(String userCondition, String diffCondition) {
+        Formula overallFormula = this.getOverallFormula(userCondition, diffCondition);
+        return overallFormula.toString();
     }
 }

@@ -710,12 +710,6 @@ public class Trees {
 		}
 	}
 
-	private static void isRootNode(Node rootNode) {
-		if (!(rootNode instanceof RootNode)) {
-			throw new IllegalStateException("Expected a root node.");
-		}
-	}
-
 	private static void isUniqueAndArtifactReferencesNode(Node node) {
 		if (!(node instanceof RootNode) && node.isUnique() && node.getArtifact().getContainingNode() != node) {
 			//throw new IllegalStateException("Expected a unique node where the artifact's containing node is the unique node.");
@@ -738,44 +732,30 @@ public class Trees {
 	 * Copies the node and removes all nodes from the tree except the given and those leading to the root node.
 	 * Makes all nodes non-unique except the given node, which it makes unique.
 	 */
-	public static Node.Op createSkeletonPath(Node.Op node){
-		// TODO: make sure there is a root at the top
-		Node.Op nodeCopy = node.copyTree();
-		nodeCopy.setUnique(true);
-		preparePath(nodeCopy.getParent());
-		removeSiblings(nodeCopy);
-		nodeCopy.removeChildren();
-
-		// TODO: the returned node should be the root at the top
-
-
-		return Trees.getRootNode(nodeCopy);
-	}
-
-	private static Node.Op getRootNode(Node.Op node){
-		Node.Op parentNode = node.getParent();
-		while (parentNode.getParent() != null){
-			parentNode = parentNode.getParent();
+	public static Node.Op createSkeletonPath(Node.Op node) {
+		// create a copy of the path from the node to the root
+		// copy of given node will include feature trace
+		// other copies will not
+		Node.Op newNode = node.copySingleNodeCompletely();
+		if (node.getParent() == null) {
+			return newNode;
+		} else {
+			Node.Op parent = createShallowSkeletonPath(node.getParent());
+			parent.addChild(newNode);
+			return newNode;
 		}
-		return parentNode;
 	}
 
-	private static void preparePath(Node.Op node){
-		// set non-unique and remove siblings along path to root
-		node.setUnique(false);
-		if (node instanceof RootNode || node.getParent() == null){ return; }
-		removeSiblings(node);
-		preparePath(node.getParent());
-	}
-
-	private static void removeSiblings(Node.Op node) {
-		Node.Op parentNode = node.getParent();
-		List<Node.Op> children = new LinkedList<>(parentNode.getChildren());
-		for (Node.Op parentsChildNode : children) {
-			// check for equal identity on purpose (equal siblings should be removed as well)
-			if (!(parentsChildNode == node)) {
-				parentNode.removeChild(parentsChildNode);
-			}
+	public static Node.Op createShallowSkeletonPath(Node.Op node){
+		// create a copy of the path from the node to the root
+		// copied nodes will not include feature traces
+		Node.Op newNode = node.copySingleNode();
+		if (node.getParent() == null) {
+			return newNode;
+		} else {
+			Node.Op parent = createShallowSkeletonPath(node.getParent());
+			parent.addChild(newNode);
+			return newNode;
 		}
 	}
 

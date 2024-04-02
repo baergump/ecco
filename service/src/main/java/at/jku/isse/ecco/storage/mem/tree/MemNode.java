@@ -8,6 +8,7 @@ import at.jku.isse.ecco.featuretrace.FeatureTrace;
 import at.jku.isse.ecco.featuretrace.FeatureTraceCondition;
 import at.jku.isse.ecco.storage.mem.featuretrace.MemFeatureTrace;
 import at.jku.isse.ecco.tree.Node;
+import at.jku.isse.ecco.util.Location;
 import org.eclipse.collections.impl.factory.Maps;
 import org.logicng.formulas.FormulaFactory;
 
@@ -29,8 +30,19 @@ public class MemNode implements Node, Node.Op {
 
 	private FeatureTrace featureTrace;
 
+	private Location location;
+
 	public Op copySingleNode(){
 		return new MemNode(this.artifact);
+	}
+
+	@Override
+	public Op copySingleNodeCompletely() {
+		MemNode.Op newNode = new MemNode(this.artifact);
+		newNode.setLocation(this.location);
+		newNode.getFeatureTrace().setUserCondition(this.featureTrace.getUserConditionString());
+		newNode.getFeatureTrace().setDiffCondition(this.featureTrace.getDiffConditionString());
+		return newNode;
 	}
 
 	@Override
@@ -49,6 +61,16 @@ public class MemNode implements Node, Node.Op {
 		return this.featureTrace;
 	}
 
+	@Override
+	public Location getLocation() {
+		return this.location;
+	}
+
+	@Override
+	public void setLocation(Location location){
+		this.location = location;
+	}
+
 	@Deprecated
 	public MemNode() {
 	}
@@ -56,10 +78,6 @@ public class MemNode implements Node, Node.Op {
 	public MemNode(Artifact.Op<?> artifact) {
 		this.artifact = artifact;
 		this.featureTrace = new MemFeatureTrace(this);
-	}
-
-	public void setFeatureTrace(FeatureTrace featureTrace) {
-		this.featureTrace = featureTrace;
 	}
 
 	@Override

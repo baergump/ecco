@@ -36,7 +36,7 @@ public final class MemRepository implements Repository, Repository.Op {
 	private List<Map<MemModule, MemModule>> modules;
 	private Collection<Commit> commits;
 	private int maxOrder;
-	private transient Set<FeatureTrace> featureTraces;
+	private Set<FeatureTrace> featureTraces = new HashSet<>();
 	private transient FormulaFactory formulaFactory = new FormulaFactory();
 
 
@@ -46,7 +46,6 @@ public final class MemRepository implements Repository, Repository.Op {
 		this.modules = new ArrayList<>();
 		this.commits = new ArrayList<>();
 		this.setMaxOrder(2);
-		this.featureTraces = new HashSet<>();
 	}
 
 	@Override
@@ -211,7 +210,7 @@ public final class MemRepository implements Repository, Repository.Op {
 	public void addFeatureTrace(FeatureTrace featureTrace){
 		this.SyncRepositoryWithFeatureTrace(featureTrace);
 		// TODO: combine feature traces with same node
-		this.getFeatureTraces().add(featureTrace);
+		this.featureTraces.add(featureTrace);
 	}
 
 	@Override
@@ -228,6 +227,20 @@ public final class MemRepository implements Repository, Repository.Op {
 		return mainTree;
 	}
 
+	@Override
+	public void removeFeatureTracePercentage(int percentage) {
+		if (percentage < 0 || percentage > 100){
+			throw new RuntimeException(String.format("Percentage of feature traces is invalid (%d).", percentage));
+		}
+		int noOfRemovals = (this.featureTraces.size() * percentage) / 100;
+		List<FeatureTrace> featureTraceList = new ArrayList<>(this.featureTraces);
+		Collections.shuffle(featureTraceList);
+		Iterator<FeatureTrace> iterator = featureTraceList.stream().iterator();
+		for (int i = 1; i <= noOfRemovals; i++){
+			this.featureTraces.remove(iterator.next());
+		}
+	}
+
 	private void SyncRepositoryWithFeatureTrace(FeatureTrace featureTrace){
 		// replace condition-features with feature-revisions
 		// add missing features / feature-revisions
@@ -241,10 +254,10 @@ public final class MemRepository implements Repository, Repository.Op {
 		Collection<Literal> literals = userCondition.literals();
 		for (Literal literal : literals){
 			String literalName = literal.name();
-			if (literalName.contains("#")){
+			if (literalName.contains("_")){
 				String featureRevisionName = literalName.replaceFirst("_", ".");
-				featureRevisionName = literalName.replace("_", "-");
-				this.addFeatureRevisionIfMissing(literalName);
+				featureRevisionName = featureRevisionName.replace("_", "-");
+				this.addFeatureRevisionIfMissing(featureRevisionName);
 			} else {
 				this.SyncRepoWithFeature(featureTrace, literalName);
 			}

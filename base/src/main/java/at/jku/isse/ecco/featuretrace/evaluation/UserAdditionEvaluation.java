@@ -1,6 +1,7 @@
 package at.jku.isse.ecco.featuretrace.evaluation;
 
 import at.jku.isse.ecco.feature.Configuration;
+import at.jku.isse.ecco.featuretrace.LogicUtils;
 import org.logicng.datastructures.Assignment;
 import org.logicng.formulas.Formula;
 import org.logicng.formulas.FormulaFactory;
@@ -15,21 +16,30 @@ public class UserAdditionEvaluation implements EvaluationStrategy{
     public boolean holds (Configuration configuration,
                           String userCondition,
                           String diffCondition){
-        Assignment assignment = configuration.toAssignment(formulaFactory);
-        Formula userFormula = this.parseString(userCondition);
-        Formula diffFormula = this.parseString(diffCondition);
-        Formula formula = this.getOverallFormula(diffFormula, userFormula);
+        Assignment assignment = configuration.toAssignment(this.formulaFactory);
+        Formula formula = this.getOverallFormula(userCondition, diffCondition);
         return formula.evaluate(assignment);
     }
 
-    private Formula getOverallFormula(Formula diffCondition, Formula userCondition){
-        assert(diffCondition != null || userCondition != null);
-        if (diffCondition != null && userCondition != null){
-            return this.formulaFactory.or(diffCondition, userCondition);
-        } else if (userCondition != null){
-            return userCondition;
+    @Override
+    public String getOverallConditionString(String userCondition, String diffCondition) {
+        Formula overallCondition = this.getOverallFormula(userCondition, diffCondition);
+        return overallCondition.toString();
+    }
+
+    private Formula getOverallFormula(String userCondition, String diffCondition){
+        Formula diffFormula = null;
+        Formula userFormula = null;
+        if (diffCondition != null){ diffFormula = LogicUtils.parseString(this.formulaFactory, diffCondition); }
+        if (userCondition != null){ userFormula = LogicUtils.parseString(this.formulaFactory, userCondition); }
+
+        assert(diffFormula != null || userFormula != null);
+        if (diffFormula != null && userFormula != null){
+            return this.formulaFactory.or(diffFormula, userFormula);
+        } else if (userFormula != null){
+            return userFormula;
         } else {
-            return diffCondition;
+            return diffFormula;
         }
     }
 }

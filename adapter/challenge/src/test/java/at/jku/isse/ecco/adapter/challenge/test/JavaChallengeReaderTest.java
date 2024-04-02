@@ -1,16 +1,12 @@
 package at.jku.isse.ecco.adapter.challenge.test;
 
 import at.jku.isse.ecco.adapter.challenge.JavaChallengeReader;
-import at.jku.isse.ecco.adapter.challenge.vevos.LogicToModuleTransformer;
-import at.jku.isse.ecco.adapter.challenge.vevos.VEVOSConditionHandler;
 import at.jku.isse.ecco.dao.EntityFactory;
-import at.jku.isse.ecco.feature.Configuration;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.EccoService;
 import at.jku.isse.ecco.storage.mem.dao.MemEntityFactory;
 import at.jku.isse.ecco.tree.Node;
 import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -13,14 +13,5 @@ public interface EvaluationStrategy {
                   String userCondition,
                   String diffCondition);
 
-    default Formula parseString(String string){
-        if (string == null){
-            return null;
-        }
-        try{
-            return this.formulaFactory.parse(string);
-        } catch (ParserException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    String getOverallConditionString(String userCondition, String diffCondition);
 }

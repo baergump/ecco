@@ -13,17 +13,27 @@ public interface FeatureTrace extends Persistable {
 
     boolean containsUserCondition();
 
-    boolean equalConditions(FeatureTrace featureTrace);
+    boolean hasEqualConditions(FeatureTrace featureTrace);
 
     void setDiffCondition(String diffConditionString);
 
     void setUserCondition(String userConditionString);
 
+    /**
+     * Add a new condition that is independent of existing ones
+     * @param userCondition
+     */
     void addUserCondition(String userCondition);
+
+    void buildUserConditionConjunction(String newCondition);
 
     String getUserConditionString();
 
+    String getDiffConditionString();
+
     void fuseFeatureTrace(FeatureTrace featureTrace);
+
+    String getOverallConditionString(EvaluationStrategy evaluationStrategy);
 
     @Override
     boolean equals(Object obj);

@@ -472,6 +472,9 @@ public class DispatchReader implements ArtifactReader<Path, Set<Node.Op>>{
 
 	private void createFeatureTraces(Set<Node.Op> nodes){
 		FeatureTraceCreatorVisitor visitor = new FeatureTraceCreatorVisitor(this.repository, this.entityFactory);
+		// the nodes here are connected to the whole tree, which is the read-result
+		// feature-traces must contain a copy of only the respective node and a path to the root
+		// this is done in the visitor
 		for(Node.Op node : nodes){
 			node.traverse(visitor);
 		}

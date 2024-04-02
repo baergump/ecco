@@ -22,7 +22,6 @@ import at.jku.isse.ecco.pog.PartialOrderGraph;
 import at.jku.isse.ecco.tree.Node;
 import at.jku.isse.ecco.tree.RootNode;
 import at.jku.isse.ecco.util.Trees;
-import org.logicng.formulas.FormulaFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -125,6 +124,8 @@ public interface Repository extends Persistable {
 		void addFeatureTrace(FeatureTrace featureTrace);
 
 		Node.Op fuseAssociationsWithFeatureTraces();
+
+		void removeFeatureTracePercentage(int percentage);
 
 		default Collection<FeatureRevision> addFeatureRevisions(FeatureRevision[] featureRevisions){
 			Collection<FeatureRevision> repoFeatureRevisions = new ArrayList<>();
