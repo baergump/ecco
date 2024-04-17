@@ -88,14 +88,16 @@ public class MemModuleRevision implements ModuleRevision {
 		Formula positiveFormula = formulaFactory.and(positiveFormulas);
 		Formula negativeFormula = this.getNegativeFormula(formulaFactory);
 
-		Formula condition = formulaFactory.and(positiveFormula, negativeFormula);
+		Formula condition = formulaFactory.and(positiveFormula, formulaFactory.not(negativeFormula));
 		return condition.toString();
 	}
 
 	private Formula getNegativeFormula(FormulaFactory formulaFactory){
 		Collection<Formula> negativeFormulas = this.getFeatureFormulas(formulaFactory);
 		if (negativeFormulas.size() == 0){
-			return formulaFactory.constant(true);
+			// negative formulas must not hold for the condition to hold
+			// -> if there are none "false" must not hold, which is always the case
+			return formulaFactory.constant(false);
 		} else {
 			return formulaFactory.or(negativeFormulas);
 		}

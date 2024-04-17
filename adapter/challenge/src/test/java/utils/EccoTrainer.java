@@ -13,8 +13,13 @@ import java.util.List;
 
 public class EccoTrainer {
 
-    private static final Path REPOSITORY_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories\\DummyScenario");
-    private static final Path SCENARIO_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Scenarios\\DummyScenario");
+    //private static final Path REPOSITORY_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories\\DummyScenario");
+    private static final Path REPOSITORY_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Repositories\\DummyScenario");
+
+
+    //private static final Path SCENARIO_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Scenarios\\DummyScenario");
+    private static final Path SCENARIO_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Scenarios\\DummyScenario");
+
 
     private EccoService eccoService;
     private Repository.Op repository;
@@ -26,6 +31,7 @@ public class EccoTrainer {
     public static void main(String[] args) {
         EccoTrainer trainer = null;
         try {
+
             trainer = new EccoTrainer();
             trainer.trainScenario();
             trainer.eccoService.getRepository();

@@ -87,6 +87,7 @@ public class MemAssociation implements Association, Association.Op {
 		Condition condition = this.computeCondition();
 		String conditionFormulaString = condition.toLogicString();
 		Node.Op treeCopy = this.getRootNode().copyTree();
+		treeCopy.setUnique(false);
 
 		DiffConditionVisitor visitor = new DiffConditionVisitor(conditionFormulaString);
 		treeCopy.traverse(visitor);

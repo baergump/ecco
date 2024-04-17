@@ -3,14 +3,11 @@ package at.jku.isse.ecco.storage.mem.tree;
 import at.jku.isse.ecco.EccoException;
 import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.core.Association;
-import at.jku.isse.ecco.dao.EntityFactory;
 import at.jku.isse.ecco.featuretrace.FeatureTrace;
-import at.jku.isse.ecco.featuretrace.FeatureTraceCondition;
 import at.jku.isse.ecco.storage.mem.featuretrace.MemFeatureTrace;
 import at.jku.isse.ecco.tree.Node;
 import at.jku.isse.ecco.util.Location;
 import org.eclipse.collections.impl.factory.Maps;
-import org.logicng.formulas.FormulaFactory;
 
 import java.util.*;
 
@@ -34,6 +31,7 @@ public class MemNode implements Node, Node.Op {
 
 	public Op copySingleNode(){
 		Node.Op newNode = new MemNode(this.artifact);
+		newNode.setUnique(this.unique);
 		newNode.setLocation(this.location);
 		return newNode;
 	}
@@ -42,8 +40,10 @@ public class MemNode implements Node, Node.Op {
 	public Op copySingleNodeCompletely() {
 		MemNode.Op newNode = new MemNode(this.artifact);
 		newNode.setLocation(this.location);
-		newNode.getFeatureTrace().setUserCondition(this.featureTrace.getUserConditionString());
-		newNode.getFeatureTrace().setDiffCondition(this.featureTrace.getDiffConditionString());
+		if (this.featureTrace != null) {
+			newNode.getFeatureTrace().setUserCondition(this.featureTrace.getUserConditionString());
+			newNode.getFeatureTrace().setDiffCondition(this.featureTrace.getDiffConditionString());
+		}
 		return newNode;
 	}
 

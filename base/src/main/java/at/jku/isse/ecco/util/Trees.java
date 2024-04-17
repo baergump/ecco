@@ -782,9 +782,12 @@ public class Trees {
 		}
 	}
 
-	public static void treeFusion(Node.Op mainTree, Node.Op fusionNode){
+	public static Node.Op treeFusion(Node.Op mainTree, Node.Op fusionNode){
 		// TODO: containing node of artifacts? (either copy artifact or remove containing node as field)
-		if (!mainTree.getArtifact().equals(fusionNode.getArtifact())) {
+
+		if (fusionNode == null){ return mainTree; }
+		if (mainTree == null){ mainTree = fusionNode.copySingleNode(); }
+		if (!Objects.equals(mainTree.getArtifact(), fusionNode.getArtifact())) {
 			throw new EccoException("Fusing feature trace (sub-)trees with different root nodes is not possible.");
 		}
 
@@ -801,6 +804,8 @@ public class Trees {
 				treeFusion(mainChild, child);
 			}
 		}
+
+		return mainTree;
 	}
 
 	/**

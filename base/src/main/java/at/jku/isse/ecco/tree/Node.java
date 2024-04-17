@@ -417,6 +417,5 @@ public interface Node extends Persistable {
 
 		void setLocation(Location location);
 
-
 	}
 }

@@ -37,7 +37,7 @@ public final class MemRepository implements Repository, Repository.Op {
 	private List<Map<MemModule, MemModule>> modules;
 	private Collection<Commit> commits;
 	private int maxOrder;
-	private Set<Node.Op> featureTraceTrees = new HashSet<>();
+	private Node.Op featureTraceTree;
 	private transient FormulaFactory formulaFactory = new FormulaFactory();
 
 
@@ -51,16 +51,7 @@ public final class MemRepository implements Repository, Repository.Op {
 
 	@Override
 	public void mergeFeatureTraceTree(Node.Op root) {
-		Set<Node.Op> equalNodes = this.featureTraceTrees.stream().filter(root::equals).collect(Collectors.toSet());
-		if (equalNodes.size() == 0) {
-			Node.Op copy = root.copySingleNode();
-			Trees.treeFusion(copy, root);
-			this.featureTraceTrees.add(copy);
-		} else if (equalNodes.size() == 1){
-			Trees.treeFusion(equalNodes.iterator().next(), root);
-		} else {
-			throw new RuntimeException("There exist multiple equal roots of feature trace trees.");
-		}
+		this.featureTraceTree = Trees.treeFusion(this.featureTraceTree, root);
 	}
 
 	@Override
@@ -223,26 +214,21 @@ public final class MemRepository implements Repository, Repository.Op {
 
 	@Override
 	public Node.Op fuseAssociationsWithFeatureTraces() {
-		Set<Node.Op> mainTrees = new HashSet<>();
-		this.featureTraceTrees.forEach(node -> {
-			Node.Op copy = node.copySingleNodeCompletely();
-			Trees.treeFusion(copy, node);
-			mainTrees.add(copy);
-		});
+		Node.Op mainTree = this.featureTraceTree.copySingleNodeCompletely();
+		Trees.treeFusion(mainTree, this.featureTraceTree);
 
-		/*
 		for (Association.Op association : this.associations){
 			Node.Op associationTree = association.getTraceTree();
 			Trees.treeFusion(mainTree, associationTree);
 		}
 
-		 */
-		return mainTrees.iterator().next();
+		return mainTree;
 	}
 
 
 	@Override
 	public void removeFeatureTracePercentage(int percentage) {
+		// TODO
 		/*
 		if (percentage < 0 || percentage > 100){
 			throw new RuntimeException(String.format("Percentage of feature traces is invalid (%d).", percentage));
@@ -357,7 +343,7 @@ public final class MemRepository implements Repository, Repository.Op {
 	@Override
 	public Collection<FeatureTrace> getFeatureTraces(){
 		FeatureTraceCollectorVisitor collectorVisitor = new FeatureTraceCollectorVisitor();
-		this.featureTraceTrees.forEach(nodeOp -> nodeOp.traverse(collectorVisitor));
+		this.featureTraceTree.traverse(collectorVisitor);
 		return collectorVisitor.getFeatureTraces();
 	}
 }

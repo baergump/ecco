@@ -1564,7 +1564,11 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
             nodes.forEach(node -> node.traverse(visitor));
 
             List<Node.Op> featureTraceTrees = nodes.stream().map(Trees::extractFeatureTraceTree).collect(Collectors.toList());
-            featureTraceTrees.forEach(repository::mergeFeatureTraceTree);
+            featureTraceTrees.forEach(node -> {
+                        Node.Op root = this.entityFactory.createRootNode();
+                        root.addChild(node);
+                        repository.mergeFeatureTraceTree(root);
+            });
 
             ArrayList<Variant> variants = repository.getVariants();
 

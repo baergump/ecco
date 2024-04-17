@@ -12,11 +12,20 @@ import java.nio.file.Paths;
 
 public class FTExperiment {
 
-    private final Path SCENARIO_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories\\DummyScenario");
-    private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Scenarios\\ScenarioAllVariants");
-    private final Path RESULT_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Results\\Add\\ScenarioRandom002Variants\\000_Feature_Traces\\000_Faulty_Traces");
+    //private final Path REPOSITORY_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories\\DummyScenario");
+    private final Path REPOSITORY_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Repositories\\DummyScenario");
+
+
+    //private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Scenarios\\ScenarioAllVariants");
+    private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Scenarios\\DummyScenario");
+
+
+    //private final Path RESULT_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Results\\Add\\ScenarioRandom002Variants\\000_Feature_Traces\\000_Faulty_Traces");
+    private final Path RESULT_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Results\\Add\\ScenarioRandom002Variants\\000_Feature_Traces\\000_Faulty_Traces");
+
+
     // how many feature traces should be used in percent
-    private final int FT_PERCENT = 0;
+    private final int FT_PERCENT = 100;
     // how many faulty feature traces should exist in percent
     private final int FT_MISTAKES_PERCENT = 0;
     private final EvaluationStrategy EVALUATION_STRATEGY = new UserAdditionEvaluation();
@@ -34,12 +43,11 @@ public class FTExperiment {
         //trainer.trainScenario();
         // EccoService eccoService = trainer.getEccoService();
         FTExperiment experiment = new FTExperiment();
-        experiment.initService();
-        //experiment.runExperiment(experiment.eccoService);
+        experiment.runExperiment();
     }
 
-    public void runExperiment(EccoService eccoService){
-        // this.initService();
+    public void runExperiment(){
+        this.initService();
         Repository.Op repository = (Repository.Op) eccoService.getRepository();
         repository.removeFeatureTracePercentage(100 - this.FT_PERCENT);
         // todo: introduce certain amount of mistakes in remaining feature traces
@@ -50,7 +58,7 @@ public class FTExperiment {
 
     private void initService(){
         this.eccoService = new EccoService();
-        this.eccoService.setRepositoryDir(this.SCENARIO_PATH.resolve(".ecco"));
+        this.eccoService.setRepositoryDir(this.REPOSITORY_PATH.resolve(".ecco"));
         this.eccoService.open();
         this.repository = (Repository.Op) this.eccoService.getRepository();
     }
