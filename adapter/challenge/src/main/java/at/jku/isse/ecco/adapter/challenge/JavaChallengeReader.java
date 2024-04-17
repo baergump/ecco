@@ -88,6 +88,9 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 			// parser results seem to offer the possibility to get the respective line numbers in the source code
 			// -> connect vevos line numbers to parser result line numbers to recognize feature traces
 
+			// todo: delete
+			System.out.println(path);
+
 			VevosFileConditionContainer fileConditionContainer = vevosConditionHandler.getFileSpecificPresenceConditions(path);
 
 			Path resolvedPath = base.resolve(path);

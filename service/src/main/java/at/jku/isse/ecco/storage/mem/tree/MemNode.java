@@ -33,7 +33,9 @@ public class MemNode implements Node, Node.Op {
 	private Location location;
 
 	public Op copySingleNode(){
-		return new MemNode(this.artifact);
+		Node.Op newNode = new MemNode(this.artifact);
+		newNode.setLocation(this.location);
+		return newNode;
 	}
 
 	@Override
@@ -49,7 +51,7 @@ public class MemNode implements Node, Node.Op {
 	public Op getEqualChild(Op template) {
 		Collection<Node.Op> children = this.getChildren();
 		for (Node.Op child : children){
-			if (child.getArtifact() == template.getArtifact()){
+			if (child.getArtifact().equals(template.getArtifact())){
 				return child;
 			}
 		}
@@ -59,6 +61,16 @@ public class MemNode implements Node, Node.Op {
 	@Override
 	public FeatureTrace getFeatureTrace() {
 		return this.featureTrace;
+	}
+
+	@Override
+	public void setFeatureTrace(FeatureTrace featureTrace) {
+		this.featureTrace = featureTrace;
+	}
+
+	@Override
+	public void removeFeatureTrace() {
+		this.featureTrace = new MemFeatureTrace(this);
 	}
 
 	@Override

@@ -11,6 +11,8 @@ public interface FeatureTrace extends Persistable {
 
     Node getNode();
 
+    void setNode(Node node);
+
     boolean containsUserCondition();
 
     boolean hasEqualConditions(FeatureTrace featureTrace);

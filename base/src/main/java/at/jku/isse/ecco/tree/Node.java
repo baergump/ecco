@@ -2,10 +2,8 @@ package at.jku.isse.ecco.tree;
 
 import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.core.Association;
-import at.jku.isse.ecco.dao.EntityFactory;
 import at.jku.isse.ecco.dao.Persistable;
 import at.jku.isse.ecco.featuretrace.FeatureTrace;
-import at.jku.isse.ecco.featuretrace.FeatureTraceCondition;
 import at.jku.isse.ecco.util.Location;
 import at.jku.isse.ecco.util.Trees;
 
@@ -369,6 +367,15 @@ public interface Node extends Persistable {
 		 */
 		Op copySingleNodeCompletely();
 
+		default Op createCopyWithStolenTrace(){
+			Op copy = this.copySingleNode();
+			FeatureTrace featureTrace = this.getFeatureTrace();
+			copy.setFeatureTrace(featureTrace);
+			featureTrace.setNode(copy);
+			this.removeFeatureTrace();
+			return copy;
+		}
+
 		default Op copyTreeDownwards(){
 			// copy this node and all descendants
 			Op node = this.copySingleNode();
@@ -402,8 +409,14 @@ public interface Node extends Persistable {
 
 		FeatureTrace getFeatureTrace();
 
+		void setFeatureTrace(FeatureTrace featureTrace);
+
+		void removeFeatureTrace();
+
 		Location getLocation();
 
 		void setLocation(Location location);
+
+
 	}
 }

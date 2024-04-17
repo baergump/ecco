@@ -85,14 +85,6 @@ public class DispatchReader implements ArtifactReader<Path, Set<Node.Op>>{
 		this.prioritizedPatterns = new HashMap<>();
 	}
 
-	@Override
-	public void setRepository(Repository.Op repository){
-		this.repository = repository;
-		for(ArtifactReader<Path, Set<Node.Op>> reader : this.readers){
-			reader.setRepository(repository);
-		}
-	}
-
 	public void addAdapterMappings(String pattern, ArtifactReader<Path, Set<Node.Op>> reader) {
 		this.adapterMappings.add(new Mapping(pattern, reader));
 	}
@@ -394,8 +386,6 @@ public class DispatchReader implements ArtifactReader<Path, Set<Node.Op>>{
 
 		}
 
-		this.createFeatureTraces(nodes);
-
 		LOGGER.info(this.getClass() + ".read(): " + (System.currentTimeMillis() - startTime) + "ms");
 
 		// return produced nodes
@@ -468,16 +458,6 @@ public class DispatchReader implements ArtifactReader<Path, Set<Node.Op>>{
 		}
 
 		return null;
-	}
-
-	private void createFeatureTraces(Set<Node.Op> nodes){
-		FeatureTraceCreatorVisitor visitor = new FeatureTraceCreatorVisitor(this.repository, this.entityFactory);
-		// the nodes here are connected to the whole tree, which is the read-result
-		// feature-traces must contain a copy of only the respective node and a path to the root
-		// this is done in the visitor
-		for(Node.Op node : nodes){
-			node.traverse(visitor);
-		}
 	}
 
 	private Collection<ReadListener> listeners = new ArrayList<>();

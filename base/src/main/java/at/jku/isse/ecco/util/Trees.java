@@ -14,22 +14,6 @@ import java.util.stream.Collectors;
  */
 public class Trees {
 
-	private Trees() {
-	}
-
-
-	// # COPY OPERATION ##################################################################################
-
-	/**
-	 * Creates a shallow copy of the tree.
-	 *
-	 * @param node The root node of the tree to copy.
-	 */
-	public void copy(Node node) {
-
-	}
-
-
 	// # WRITE OPERATIONS ##############################################################################################
 
 	/**
@@ -264,6 +248,44 @@ public class Trees {
 		}
 	}
 
+	/**
+	 * Merges the right node into the left node and combines Traces of equal nodes.
+	 *
+	 * @param left  The left node to which is added.
+	 * @param right The right node which is added.
+	 */
+	public static void mergeTraceTrees(Node.Op left, Node.Op right) {
+		// do some basic checks
+		if (left.getArtifact() != right.getArtifact()) {
+			throw new EccoException("Artifact instance must be identical, i.e. trees must originate from the same repository.");
+		}
+
+		// deal with current node
+		if (right.isUnique()) {
+			left.setUnique(true); // TODO: the "unique" field is redundant. we could determine uniqueness via the artifact's containing node (i.e. whether node and containing node are identical).
+			if (left.getArtifact() != null)
+				left.getArtifact().setContainingNode(left);
+		}
+
+		// deal with children
+		Iterator<? extends Node.Op> iterator = right.getChildren().iterator();
+		while (iterator.hasNext()) {
+			Node.Op rightChild = iterator.next();
+			int li = left.getChildren().indexOf(rightChild);
+			if (li != -1) {
+				Node.Op leftChild = left.getChildren().get(li);
+
+				merge(leftChild, rightChild);
+
+				// detatch right child from right node. this should not be necessary, but to be safe we clean up here.
+				iterator.remove();
+				rightChild.setParent(null);
+			} else {
+				left.addChild(rightChild);
+			}
+		}
+	}
+
 
 	/**
 	 * Sequences all ordered nodes in the tree rooted at the given node.
@@ -452,6 +474,19 @@ public class Trees {
 		return true;
 	}
 
+	/**
+	 * Returns true, if the given nodes and all nodes on the path to root are equal.
+	 * @param left first node to be compared (not necessarily root).
+	 * @param right second node to be compared (not necessarily root).
+	 * @return
+	 */
+	public static boolean equalTrunks(Node left, Node right){
+		if (left == null && right == null) { return true; }
+		if (left == null) { return false; }
+		if (!left.equals(right)) { return false; }
+		return equalTrunks(left.getParent(), right.getParent());
+	}
+
 
 	/**
 	 * Maps artifacts in tree rooted at right to artifacts in tree rooted at left.
@@ -540,18 +575,6 @@ public class Trees {
 			Trees.mapAtomicArtifacts(leftChild, rightChild);
 		}
 	}
-
-
-	/**
-	 * Composes a new tree from the given trees using clone/add/merge/etc. operations on the given trees without modifying them.
-	 *
-	 * @param nodes The root nodes of the trees to be composed.
-	 * @return The root node of the composed tree.
-	 */
-	public Node compose(Collection<Node> nodes) {
-		return null; // TODO
-	}
-
 
 	/**
 	 * Counts the number of artifacts (i.e. unique nodes) that are contained in the given tree.
@@ -761,8 +784,8 @@ public class Trees {
 
 	public static void treeFusion(Node.Op mainTree, Node.Op fusionNode){
 		// TODO: containing node of artifacts? (either copy artifact or remove containing node as field)
-		if (mainTree.getArtifact() != fusionNode.getArtifact()) {
-			throw new EccoException("Artifact instance must be identical, i.e. trees must originate from the same repository.");
+		if (!mainTree.getArtifact().equals(fusionNode.getArtifact())) {
+			throw new EccoException("Fusing feature trace (sub-)trees with different root nodes is not possible.");
 		}
 
 		// deal with children
@@ -778,5 +801,45 @@ public class Trees {
 				treeFusion(mainChild, child);
 			}
 		}
+	}
+
+	/**
+	 * Copy the whole tree and move all user-based feature traces from the original to the copy.
+	 * @param root the root node of the tree to be copied.
+	 * @return the root node of the created copy.
+	 */
+	public static Node.Op createCopyWithStolenTraces(Node.Op root){
+		Node.Op copy = root.createCopyWithStolenTrace();
+		for (Node.Op child : root.getChildren()){
+			copy.addChild(createCopyWithStolenTraces(child));
+		}
+		return copy;
+	}
+
+	/**
+	 * remove all tree-trunks, that contain no user-based feature traces.
+	 * @param root the root of the tree to be trimmed
+	 */
+	public static void removeTracelessTrunks(Node.Op root){
+		List<Node.Op> toRemove = new LinkedList<>();
+		for (Node.Op child : root.getChildren()){
+			removeTracelessTrunks(child);
+			if (child.getChildren().isEmpty() && !child.getFeatureTrace().containsUserCondition()){
+				toRemove.add(child);
+			}
+		}
+		toRemove.forEach(root::removeChild);
+	}
+
+	/**
+	 * Create a copy of the tree that contains only nodes with user-based feature traces (and all nodes holding the tree together).
+	 * User-Based feature traces are moved to the copy (and removed in the original).
+	 * @param root
+	 * @return
+	 */
+	public static Node.Op extractFeatureTraceTree(Node.Op root){
+		Node.Op copy = createCopyWithStolenTraces(root);
+		removeTracelessTrunks(copy);
+		return copy;
 	}
 }

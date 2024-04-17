@@ -27,7 +27,4 @@ public interface ArtifactReader<I, O> {
 	public void addListener(ReadListener listener);
 
 	public void removeListener(ReadListener listener);
-
-	default void setRepository(Repository.Op repository){}
-
 }

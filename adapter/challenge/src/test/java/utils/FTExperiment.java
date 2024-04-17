@@ -30,11 +30,12 @@ public class FTExperiment {
 
     public static void main(String[] args) {
         // train a repository before the experiment
-        EccoTrainer trainer = new EccoTrainer();
-        trainer.trainScenario();
-        EccoService eccoService = trainer.getEccoService();
+        //EccoTrainer trainer = new EccoTrainer();
+        //trainer.trainScenario();
+        // EccoService eccoService = trainer.getEccoService();
         FTExperiment experiment = new FTExperiment();
-        experiment.runExperiment(eccoService);
+        experiment.initService();
+        //experiment.runExperiment(experiment.eccoService);
     }
 
     public void runExperiment(EccoService eccoService){

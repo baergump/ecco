@@ -23,14 +23,15 @@ public class EccoTrainer {
         this.createRepository();
     }
 
-    public static Repository main(String[] args) {
+    public static void main(String[] args) {
         EccoTrainer trainer = null;
         try {
             trainer = new EccoTrainer();
             trainer.trainScenario();
-            return (Repository.Op) trainer.eccoService.getRepository();
+            trainer.eccoService.getRepository();
         } catch (Exception e){
             if (trainer != null){ trainer.cleanupService(); }
+            e.printStackTrace();
             throw new RuntimeException(e.getMessage());
         }
     }

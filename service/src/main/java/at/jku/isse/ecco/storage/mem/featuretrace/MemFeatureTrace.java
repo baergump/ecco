@@ -13,7 +13,7 @@ import java.util.Objects;
 
 public class MemFeatureTrace implements FeatureTrace {
 
-    private final Node node;
+    private Node node;
     private String userCondition;
     private String diffCondition;
     private final transient FormulaFactory formulaFactory;
@@ -32,6 +32,11 @@ public class MemFeatureTrace implements FeatureTrace {
     @Override
     public Node getNode() {
         return this.node;
+    }
+
+    @Override
+    public void setNode(Node node) {
+        this.node = node;
     }
 
     @Override
@@ -148,7 +153,7 @@ public class MemFeatureTrace implements FeatureTrace {
 
         if (this.node == null){
             if (memFeatureTrace.node != null) { return false; }
-        // the whole tree must be the same in the current implementation
+            // the whole tree must be the same in the current implementation
         } else if (!(Trees.equals(this.node.getRoot(), memFeatureTrace.node.getRoot()))) { return false; }
 
         if (this.userCondition == null){
@@ -161,6 +166,35 @@ public class MemFeatureTrace implements FeatureTrace {
 
         return true;
     }
+
+    /*
+    @Override
+    public boolean equals(Object o){
+        if (this == o) return true;
+        if (!(o instanceof MemFeatureTrace)) return false;
+        MemFeatureTrace memFeatureTrace = (MemFeatureTrace) o;
+
+        if (this.node == null){
+            if (memFeatureTrace.node != null) { return false; }
+        } else if (!(Trees.equalTrunks(this.node.getRoot(), memFeatureTrace.node.getRoot()))) { return false; }
+
+        if (this.userCondition == null){
+            if (memFeatureTrace.userCondition != null) { return false; }
+        } else if (!(this.logicStringsAreEqual(this.userCondition, memFeatureTrace.userCondition))) { return false; }
+
+        if (this.diffCondition == null){
+            if (memFeatureTrace.diffCondition != null) { return false; }
+        } else if (!(this.logicStringsAreEqual(this.diffCondition, memFeatureTrace.diffCondition))) { return false; }
+
+        return true;
+    }
+
+    private boolean logicStringsAreEqual(String string1, String string2){
+        Formula formula1 = this.parseString(string1);
+        Formula formula2 = this.parseString(string2);
+        return formula1.isEquivalentTo(formula2);
+    }
+     */
 
     @Override
     public int hashCode(){

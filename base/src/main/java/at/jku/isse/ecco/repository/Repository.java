@@ -68,6 +68,7 @@ public interface Repository extends Persistable {
 	 */
 	interface Op extends Repository {
 
+		void mergeFeatureTraceTree(Node.Op root);
 
 		@Override
 		Collection<? extends Feature> getFeatures();
@@ -120,8 +121,6 @@ public interface Repository extends Persistable {
 		void setMaxOrder(int maxOrder);
 
 		EntityFactory getEntityFactory();
-
-		void addFeatureTrace(FeatureTrace featureTrace);
 
 		Node.Op fuseAssociationsWithFeatureTraces();
 

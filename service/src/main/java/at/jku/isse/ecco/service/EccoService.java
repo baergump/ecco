@@ -16,6 +16,7 @@ import at.jku.isse.ecco.storage.mem.core.*;
 import at.jku.isse.ecco.storage.mem.dao.*;
 import at.jku.isse.ecco.tree.Node;
 import at.jku.isse.ecco.tree.*;
+import at.jku.isse.ecco.util.Trees;
 import com.google.inject.Module;
 import com.google.inject.*;
 import com.google.inject.name.*;
@@ -1562,6 +1563,9 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
             ConfigInsertionVisitor visitor = new ConfigInsertionVisitor(configuration);
             nodes.forEach(node -> node.traverse(visitor));
 
+            List<Node.Op> featureTraceTrees = nodes.stream().map(Trees::extractFeatureTraceTree).collect(Collectors.toList());
+            featureTraceTrees.forEach(repository::mergeFeatureTraceTree);
+
             ArrayList<Variant> variants = repository.getVariants();
 
             long extractTime = System.currentTimeMillis();
@@ -1854,12 +1858,7 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
     }
 
     public synchronized Set<Node.Op> readFiles(Repository.Op repository) {
-        // TODO: if possible dont include repository in reader
-        this.reader.setRepository(repository);
-        Set<Node.Op> nodes = this.reader.read(this.baseDir, new Path[]{Paths.get("")});
-        // TODO: delete this line
-        System.out.println("No. of feature traces: " + repository.getFeatureTraces().size());
-        return nodes;
+        return this.reader.read(this.baseDir, new Path[]{Paths.get("")});
     }
 
 
