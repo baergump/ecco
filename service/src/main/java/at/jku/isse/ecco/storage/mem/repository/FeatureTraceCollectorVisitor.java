@@ -3,12 +3,14 @@ package at.jku.isse.ecco.storage.mem.repository;
 import at.jku.isse.ecco.featuretrace.FeatureTrace;
 import at.jku.isse.ecco.tree.Node;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 
 public class FeatureTraceCollectorVisitor implements Node.NodeVisitor {
 
-    private Set<FeatureTrace> featureTraces = new HashSet<>();
+    private Collection<FeatureTrace> featureTraces = new LinkedList<>();
 
     @Override
     public void visit(Node node) {
@@ -20,7 +22,7 @@ public class FeatureTraceCollectorVisitor implements Node.NodeVisitor {
         }
     }
 
-    public Set<FeatureTrace> getFeatureTraces() {
+    public Collection<FeatureTrace> getFeatureTraces() {
         return this.featureTraces;
     }
 }

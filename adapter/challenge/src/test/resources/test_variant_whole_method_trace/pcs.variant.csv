@@ -1,0 +1,3 @@
+Path;File Condition;Block Condition;Presence Condition;start;end
+test_product\TestClass.java;True;True;True;1;7
+test_product\TestClass.java;True;FEATUREA;FEATUREA;4;6

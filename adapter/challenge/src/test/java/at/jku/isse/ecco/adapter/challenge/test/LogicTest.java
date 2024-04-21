@@ -23,4 +23,13 @@ public class LogicTest {
         FormulaFactory factory1 = new FormulaFactory();
         Formula formula1 = factory1.parse("FEATUREA_220b5953_c14f_483f_ac25_ffd051f28c9b");
     }
+
+    @Test
+    public void trueFalseTest() throws ParserException {
+        FormulaFactory factory = new FormulaFactory();
+        System.out.println(factory.constant(true).toString());
+        System.out.println(factory.constant(false).toString());
+        Formula trueFormula = factory.parse(factory.constant(true).toString());
+        Formula falseFormula = factory.parse(factory.constant(false).toString());
+    }
 }

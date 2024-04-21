@@ -19,11 +19,13 @@ public class MemNode implements Node, Node.Op {
 
 	private boolean unique = true;
 
-	private List<Op> children = new ArrayList<>();
+	private transient List<Op> children = new ArrayList<>();
+
+	private Integer numberOfChildren = 0;
 
 	private Artifact.Op<?> artifact = null;
 
-	private Op parent = null;
+	private transient Op parent = null;
 
 	private FeatureTrace featureTrace;
 
@@ -59,6 +61,11 @@ public class MemNode implements Node, Node.Op {
 	}
 
 	@Override
+	public void updateNumberOfChildren(){
+		this.numberOfChildren = this.children.size();
+	}
+
+	@Override
 	public FeatureTrace getFeatureTrace() {
 		return this.featureTrace;
 	}
@@ -81,6 +88,14 @@ public class MemNode implements Node, Node.Op {
 	@Override
 	public void setLocation(Location location){
 		this.location = location;
+	}
+
+	@Override
+	public int getNumberOfChildren() {
+		if (this.children == null && this.numberOfChildren == null){
+			return 0;
+		}
+		return this.numberOfChildren;
 	}
 
 	@Deprecated
@@ -145,7 +160,13 @@ public class MemNode implements Node, Node.Op {
 
 	@Override
 	public void addChild(Op child) {
+		this.addChildWithoutNumberUpdate(child);
+		this.numberOfChildren = this.children.size();
+	}
+
+	public void addChildWithoutNumberUpdate(Op child){
 		checkNotNull(child);
+		if (this.children == null){ this.children = new ArrayList<>(); }
 
 		if (this.getArtifact() != null && !this.getArtifact().isOrdered() && this.children.contains(child))
 			throw new EccoException("An equivalent child is already contained. If multiple equivalent children are allowed use an ordered node.");
@@ -178,6 +199,11 @@ public class MemNode implements Node, Node.Op {
 	@Override
 	public List<Op> getChildren() {
 		return this.children;
+	}
+
+	@Override
+	public void setChildren(List<Op> children) {
+		this.children = children;
 	}
 
 	@Override

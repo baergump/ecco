@@ -4,7 +4,6 @@ import at.jku.isse.ecco.featuretrace.evaluation.EvaluationStrategy;
 import at.jku.isse.ecco.featuretrace.evaluation.UserAdditionEvaluation;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.EccoService;
-import at.jku.isse.ecco.tree.Node;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -12,16 +11,16 @@ import java.nio.file.Paths;
 
 public class FTExperiment {
 
-    //private final Path REPOSITORY_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories\\DummyScenario");
-    private final Path REPOSITORY_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Repositories\\DummyScenario");
+    private final Path REPOSITORY_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories\\DummyScenario");
+    //private final Path REPOSITORY_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Repositories\\DummyScenario");
 
 
-    //private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Scenarios\\ScenarioAllVariants");
-    private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Scenarios\\DummyScenario");
+    private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Scenarios\\ScenarioAllVariants");
+    //private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Scenarios\\DummyScenario");
 
 
-    //private final Path RESULT_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Results\\Add\\ScenarioRandom002Variants\\000_Feature_Traces\\000_Faulty_Traces");
-    private final Path RESULT_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Results\\Add\\ScenarioRandom002Variants\\000_Feature_Traces\\000_Faulty_Traces");
+    private final Path RESULT_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Results\\Add\\ScenarioRandom002Variants\\000_Feature_Traces\\000_Faulty_Traces");
+    //private final Path RESULT_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Results\\Add\\ScenarioRandom002Variants\\000_Feature_Traces\\000_Faulty_Traces");
 
 
     // how many feature traces should be used in percent
@@ -48,12 +47,11 @@ public class FTExperiment {
 
     public void runExperiment(){
         this.initService();
-        Repository.Op repository = (Repository.Op) eccoService.getRepository();
         repository.removeFeatureTracePercentage(100 - this.FT_PERCENT);
         // todo: introduce certain amount of mistakes in remaining feature traces
-        Node.Op mainTree = this.repository.fuseAssociationsWithFeatureTraces();
-        MetricsCalculator metricsCalculator = new MetricsCalculator(this.GROUND_TRUTHS, this.ALL_FEATURES);
-        metricsCalculator.calculateMetrics(mainTree, this.EVALUATION_STRATEGY, RESULT_PATH);
+        //Node.Op mainTree = this.repository.fuseAssociationsWithFeatureTraces();
+        //MetricsCalculator metricsCalculator = new MetricsCalculator(this.GROUND_TRUTHS, this.ALL_FEATURES);
+        //metricsCalculator.calculateMetrics(mainTree, this.EVALUATION_STRATEGY, RESULT_PATH);
     }
 
     private void initService(){

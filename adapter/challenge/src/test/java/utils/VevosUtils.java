@@ -1,5 +1,7 @@
 package utils;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,36 +14,21 @@ import java.util.stream.Stream;
 public class VevosUtils {
 
     public static Path getVariantPath(Path variantsBasePath, String configString) {
-        try {
-            // a config-element may be a feature or a feature-revision
-            Collection<String> configElements = configStringToElements(configString);
-            List<Path> variantPaths = getVariantFolders(variantsBasePath);
-            for (Path variantPath : variantPaths) {
-                Path configPath = variantPath.resolve(".config").toAbsolutePath();
-                String variantConfig = Files.readAllLines(configPath).get(0);
-                Collection<String> variantConfigElements = configStringToElements(variantConfig);
-                if (configElementsMatch(configElements, variantConfigElements)) {
-                    return variantPath;
-                }
+        // a config-element may be a feature or a feature-revision
+        Collection<String> configElements = configStringToElements(configString);
+        List<Path> variantPaths = getVariantFolders(variantsBasePath);
+        for (Path variantPath : variantPaths) {
+            Collection<String> variantConfigElements = getConfigElements(variantPath);
+            if (CollectionUtils.isEqualCollection(configElements, variantConfigElements)) {
+                return variantPath;
             }
-            throw new RuntimeException("No matching variant found...");
-        } catch (IOException e){
-            throw new RuntimeException("Exception while reading configuration: " + e.getMessage());
         }
+        throw new RuntimeException("No matching variant found...");
     }
 
-    private static Collection<String> configStringToElements(String configString){
-        String[] configElements = configString.split(",");
-        for (int i = 0; i < configElements.length; i++){ configElements[i] = configElements[i].trim(); }
-        return Arrays.stream(configElements).collect(Collectors.toList());
-    }
-
-    private static boolean configElementsMatch(Collection<String> elementsA, Collection<String> elementsB){
-        if (!(elementsA.size() == elementsB.size())) { return false; }
-        for (String configElement : elementsB){
-            if (!elementsA.contains(configElement)) { return false; }
-        }
-        return true;
+    public static String variantPathToConfigString(Path variantPath){
+            Collection<String> variantConfigElements = getConfigElements(variantPath);
+            return String.join(", ", variantConfigElements);
     }
 
     public static List<Path> getVariantFolders(Path variantsBasePath){
@@ -52,5 +39,21 @@ public class VevosUtils {
         } catch (IOException e){
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    private static Collection<String> getConfigElements(Path variantPath){
+        try {
+            Path configPath = variantPath.resolve(".config").toAbsolutePath();
+            String variantConfig = Files.readAllLines(configPath).get(0);
+            return configStringToElements(variantConfig);
+        } catch (IOException e){
+            throw new RuntimeException("Exception while reading configuration: " + e.getMessage());
+        }
+    }
+
+    private static Collection<String> configStringToElements(String configString){
+        String[] configElements = configString.split(",");
+        for (int i = 0; i < configElements.length; i++){ configElements[i] = configElements[i].trim(); }
+        return Arrays.stream(configElements).sorted().collect(Collectors.toList());
     }
 }

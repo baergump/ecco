@@ -23,8 +23,16 @@ public class AssignmentPowerset {
 
     private static Collection<Assignment> doubleWithAddedLiteral(Collection<Assignment> assignments, Literal literal){
         Collection<Assignment> newAssignments = new LinkedList<>(assignments);
+
+        if (assignments.size() == 0){
+            newAssignments.add(new Assignment());
+            newAssignments.add(new Assignment(literal));
+            return newAssignments;
+        }
+
         for (Assignment assignment : assignments){
             Assignment newAssignment = new Assignment(assignment.literals());
+            newAssignment.addLiteral(literal);
             newAssignments.add(newAssignment);
         }
         return newAssignments;

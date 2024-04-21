@@ -38,7 +38,7 @@ public class Result {
 
     public void save(Path path){
         String resultStart = "TP; FP; TN; FN; Precision; Recall; F1\n";
-        String resultEnd = String.format("%d; %d; %d, %d, %f, %f, %f",
+        String resultEnd = String.format("%d, %d, %d, %d, %f, %f, %f",
                 this.tp, this.fp, this.tn, this.fn, this.precision, this.recall, this.f1);
         String resultString = resultStart + resultEnd;
         byte[] strToBytes = resultString.getBytes();

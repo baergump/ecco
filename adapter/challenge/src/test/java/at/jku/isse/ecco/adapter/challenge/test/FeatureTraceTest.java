@@ -48,6 +48,10 @@ public class FeatureTraceTest {
     // feature traces: FEATUREC-Y
     private final Path TEST_VARIANT2 = Paths.get("src", "test", "resources", "test_variant_2").toAbsolutePath();
 
+    private final Path WHOLE_CLASS_TRACE_VARIANT = Paths.get("src", "test", "resources", "test_variant_whole_class_trace").toAbsolutePath();
+
+    private final Path WHOLE_METHOD_TRACE_VARIANT = Paths.get("src", "test", "resources", "test_variant_whole_method_trace").toAbsolutePath();
+
     private final Path TRACELESS_VARIANT1 = Paths.get("src", "test", "resources", "traceless_variant_1").toAbsolutePath();
     private final Path TRACELESS_VARIANT2 = Paths.get("src", "test", "resources", "traceless_variant_2").toAbsolutePath();
 
@@ -56,14 +60,14 @@ public class FeatureTraceTest {
 
     @BeforeEach
     public void setup() throws IOException {
-        this.cleanupService();
+        //this.cleanupService();
         this.initService();
     }
 
     @AfterEach
     public void teardown() throws IOException {
         if (this.eccoService != null) this.eccoService.close();
-        this.cleanupService();
+        //this.cleanupService();
     }
 
     private void createDir(Path path){
@@ -77,13 +81,17 @@ public class FeatureTraceTest {
         if (dir.exists()) FileUtils.deleteDirectory(dir);
     }
 
+
     private void initService(){
-        this.createDir(this.REPOSITORY_PATH);
+        //this.createDir(this.REPOSITORY_PATH);
         this.eccoService = new EccoService();
         this.eccoService.setRepositoryDir(this.REPOSITORY_PATH.resolve(".ecco"));
-        this.eccoService.init();
+        //this.eccoService.init();
+        this.eccoService.open();
         this.repository = (Repository.Op) this.eccoService.getRepository();
+        System.out.println("test");
     }
+
 
     private void cleanupService() throws IOException {
         this.deleteDir(this.REPOSITORY_PATH.toAbsolutePath());
@@ -241,9 +249,32 @@ public class FeatureTraceTest {
     // ((build tree) remove node with feature trace (commit variant with feature A and B with two nodes; commit variant with feature A and one node and feature trace to A; build tree with B))
 
     @Test
+    public void dummyTest(){
+        System.out.println("");
+    }
+
+    @Test
     public void someFeatureTracesExistAfterCommit(){
         this.commitVariantByPath(this.TEST_VARIANT1);
         assertFalse(this.repository.getFeatureTraces().isEmpty());
+    }
+
+    @Test void wholeClassGetsUserCondition(){
+        this.commitVariantByPath(this.WHOLE_CLASS_TRACE_VARIANT);
+        Collection<FeatureTrace> traces = this.repository.getFeatureTraces();
+        assertTrue(traces.stream().anyMatch(trace -> {
+            ArtifactData classData = trace.getNode().getArtifact().getData();
+            return (classData instanceof ClassArtifactData && trace.containsUserCondition());
+        }));
+    }
+
+    @Test void wholeMethodGetsUserCondition(){
+        this.commitVariantByPath(this.WHOLE_METHOD_TRACE_VARIANT);
+        Collection<FeatureTrace> traces = this.repository.getFeatureTraces();
+        assertTrue(traces.stream().anyMatch(trace -> {
+            ArtifactData methodData = trace.getNode().getArtifact().getData();
+            return (methodData instanceof MethodArtifactData && trace.containsUserCondition());
+        }));
     }
 
     @Test
@@ -283,10 +314,13 @@ public class FeatureTraceTest {
 
     @Test
     public void multipleFeatureTracesExistCompletelyAfterCommit(){
-        /*
-        todo
+
         this.commitVariantByPath(this.TEST_VARIANT1);
         this.commitVariantByPath(this.TEST_VARIANT2);
+        this.repository = (Repository.Op) this.eccoService.getRepository();
+
+
+        /*
         Collection<FeatureTrace> traces = this.repository.getFeatureTraces();
         assertTrue(traces.stream().anyMatch(this::containsFeatureTraceAX));
         assertTrue(traces.stream().anyMatch(this::containsFeatureTraceCY));
@@ -305,7 +339,6 @@ public class FeatureTraceTest {
 
     @Test
     public void fuseAssociationsWithFeatureTraces(){
-        // TODO
         this.commitVariantByPath(this.TEST_VARIANT1);
         this.repository = (Repository.Op) this.eccoService.getRepository();
         Node.Op mainTree = this.repository.fuseAssociationsWithFeatureTraces();
@@ -350,5 +383,7 @@ public class FeatureTraceTest {
         assertTrue(this.findLineArtifactData(lineNodes, "        System.out.println(\"Code line y\");"));
     }
      */
+
+
 
 }

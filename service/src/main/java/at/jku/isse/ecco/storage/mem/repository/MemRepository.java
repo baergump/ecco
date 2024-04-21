@@ -33,7 +33,7 @@ public final class MemRepository implements Repository, Repository.Op {
 
 	private Map<String, MemFeature> features;
 	private Collection<Association.Op> associations;
-	private ArrayList<Variant> variants = new ArrayList<>();;
+	private ArrayList<Variant> variants = new ArrayList<>();
 	private List<Map<MemModule, MemModule>> modules;
 	private Collection<Commit> commits;
 	private int maxOrder;
@@ -214,6 +214,7 @@ public final class MemRepository implements Repository, Repository.Op {
 
 	@Override
 	public Node.Op fuseAssociationsWithFeatureTraces() {
+		// todo: overwrite sopySingleNodeCompletely in MemRootNode
 		Node.Op mainTree = this.featureTraceTree.copySingleNodeCompletely();
 		Trees.treeFusion(mainTree, this.featureTraceTree);
 
@@ -228,20 +229,20 @@ public final class MemRepository implements Repository, Repository.Op {
 
 	@Override
 	public void removeFeatureTracePercentage(int percentage) {
-		// TODO
-		/*
 		if (percentage < 0 || percentage > 100){
 			throw new RuntimeException(String.format("Percentage of feature traces is invalid (%d).", percentage));
 		}
-		int noOfRemovals = (this.featureTraces.size() * percentage) / 100;
-		List<FeatureTrace> featureTraceList = new ArrayList<>(this.featureTraces);
+		Collection<FeatureTrace> traces = this.getFeatureTraces();
+		int noOfRemovals = (traces.size() * percentage) / 100;
+		List<FeatureTrace> featureTraceList = new ArrayList<>(traces);
 		Collections.shuffle(featureTraceList);
 		Iterator<FeatureTrace> iterator = featureTraceList.stream().iterator();
 		for (int i = 1; i <= noOfRemovals; i++){
-			this.featureTraces.remove(iterator.next());
+			FeatureTrace trace = iterator.next();
+			Node.Op traceNode = (Node.Op) trace.getNode();
+			traceNode.removeFeatureTrace();
+			// todo: remove node if it's a leaf? (and all nodes on path to new leaf?)
 		}
-
-		 */
 	}
 
 

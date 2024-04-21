@@ -27,6 +27,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class SerTransactionStrategy implements TransactionStrategy {
 
 	private static final boolean DELETE_OLD_DB_FILES = true;
+
 	private static final boolean REUSE_DB_ACROSS_TRANSACTIONS = true;
 
 	private static final String ID_FILENAME = "id";

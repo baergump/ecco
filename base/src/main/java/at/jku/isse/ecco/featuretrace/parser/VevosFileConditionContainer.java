@@ -9,9 +9,13 @@ public class VevosFileConditionContainer {
 
     public VevosFileConditionContainer(Collection<VevosCondition> conditions){
         this.fileSpecificConditions = conditions;
+        if (conditions == null){
+            System.out.println("this.");
+        }
     }
 
     public Collection<VevosCondition> getMatchingPresenceConditions(int startLine, int endLine){
+        // todo: maybe implement a fast version of this method
         Collection<VevosCondition> matchingConditions = new HashSet<>();
         for (VevosCondition condition : this.fileSpecificConditions){
             this.validateLines(startLine, endLine, condition);

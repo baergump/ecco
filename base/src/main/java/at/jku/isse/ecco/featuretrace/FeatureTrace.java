@@ -27,6 +27,8 @@ public interface FeatureTrace extends Persistable {
      */
     void addUserCondition(String userCondition);
 
+    void addDiffCondition(String diffCondition);
+
     void buildUserConditionConjunction(String newCondition);
 
     String getUserConditionString();
@@ -36,6 +38,8 @@ public interface FeatureTrace extends Persistable {
     void fuseFeatureTrace(FeatureTrace featureTrace);
 
     String getOverallConditionString(EvaluationStrategy evaluationStrategy);
+
+
 
     @Override
     boolean equals(Object obj);

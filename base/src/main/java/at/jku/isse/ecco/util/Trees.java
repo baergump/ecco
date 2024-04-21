@@ -797,10 +797,12 @@ public class Trees {
 			if (mainChild == null) {
 				Node.Op newChild = child.copySingleNode();
 				newChild.getFeatureTrace().fuseFeatureTrace(child.getFeatureTrace());
+				newChild.setUnique(child.isUnique());
 				mainTree.addChild(newChild);
 				treeFusion(newChild, child);
 			} else {
 				mainChild.getFeatureTrace().fuseFeatureTrace(child.getFeatureTrace());
+				mainChild.setUnique(mainChild.isUnique() || child.isUnique());
 				treeFusion(mainChild, child);
 			}
 		}

@@ -13,6 +13,8 @@ import java.util.Objects;
 
 public class MemFeatureTrace implements FeatureTrace {
 
+    // TODO: avoid null for conditions
+
     private Node node;
     private String userCondition;
     private String diffCondition;
@@ -47,15 +49,25 @@ public class MemFeatureTrace implements FeatureTrace {
     @Override
     public void addUserCondition(String userCondition){
         // TODO: validate input
-        if (userCondition == null) { return; }
-        userCondition = this.sanitizeFormulaString(userCondition);
-        if (this.userCondition == null){
-            this.userCondition = userCondition;
+        this.userCondition = this.combineConditions(this.userCondition, userCondition);
+    }
+
+    @Override
+    public void addDiffCondition(String diffCondition){
+        // TODO: validate input
+        this.diffCondition = this.combineConditions(this.diffCondition, diffCondition);
+    }
+
+    private String combineConditions(String currentCondition, String newCondition){
+        if (newCondition == null) { return currentCondition; }
+        newCondition = this.sanitizeFormulaString(newCondition);
+        if (currentCondition == null){
+            return newCondition;
         } else {
-            Formula currentCondition = this.parseString(this.userCondition);
-            Formula additionalCondition = this.parseString(userCondition);
-            Formula newCondition = this.formulaFactory.or(currentCondition, additionalCondition);
-            this.userCondition = newCondition.toString();
+            Formula currentFormula = this.parseString(currentCondition);
+            Formula newFormula = this.parseString(newCondition);
+            Formula combinedFormula = this.formulaFactory.or(currentFormula, newFormula);
+            return combinedFormula.toString();
         }
     }
 
@@ -90,10 +102,7 @@ public class MemFeatureTrace implements FeatureTrace {
             throw new RuntimeException("Cannot fuse MemFeatureTrace with non-MemFeatureTrace.");
         }
         MemFeatureTrace memFeatureTrace = (MemFeatureTrace) featureTrace;
-        if (this.diffCondition != null && memFeatureTrace.diffCondition != null){
-            throw new RuntimeException("There exist multiple diff-based conditions for the same artifact.");
-        }
-        this.diffCondition = memFeatureTrace.diffCondition;
+        this.addDiffCondition(memFeatureTrace.diffCondition);
         this.addUserCondition(memFeatureTrace.userCondition);
     }
 

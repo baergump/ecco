@@ -36,8 +36,9 @@ public interface Node extends Persistable {
 
 	public default void traverse(NodeVisitor visitor) {
 		visitor.visit(this);
-
-		for (Node child : this.getChildren()) {
+		List<? extends Node> children = this.getChildren();
+		if (children == null) { return; }
+		for (Node child : children) {
 			child.traverse(visitor);
 		}
 	}
@@ -257,6 +258,8 @@ public interface Node extends Persistable {
 		@Override
 		public List<? extends Op> getChildren();
 
+		void setChildren(List<Op> children);
+
 		/**
 		 * Adds a new child node to this node.
 		 *
@@ -270,6 +273,8 @@ public interface Node extends Persistable {
 		 * @param children List of child nodes to be added.
 		 */
 		public void addChildren(Op... children);
+
+		void addChildWithoutNumberUpdate(Op child);
 
 		/**
 		 * Removes the given child from the node.
@@ -417,5 +422,8 @@ public interface Node extends Persistable {
 
 		void setLocation(Location location);
 
+		int getNumberOfChildren();
+
+		void updateNumberOfChildren();
 	}
 }
