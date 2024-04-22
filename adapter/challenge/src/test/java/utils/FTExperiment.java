@@ -1,63 +1,153 @@
 package utils;
 
-import at.jku.isse.ecco.featuretrace.evaluation.EvaluationStrategy;
-import at.jku.isse.ecco.featuretrace.evaluation.UserAdditionEvaluation;
+import at.jku.isse.ecco.feature.Feature;
+import at.jku.isse.ecco.feature.FeatureRevision;
+import at.jku.isse.ecco.featuretrace.evaluation.*;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.EccoService;
+import at.jku.isse.ecco.tree.Node;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
 
 public class FTExperiment {
 
-    private final Path REPOSITORY_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories\\DummyScenario");
-    //private final Path REPOSITORY_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Repositories\\DummyScenario");
-
-
+    private final EvaluationStrategy[] STRATEGIES = {
+            new UserAdditionEvaluation(),
+            new UserSubtractionEvaluation(),
+            new UserBasedEvaluation(),
+            new DiffBasedEvaluation()
+    };
+    private final int[] FT_PERCENTAGES = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
+    private final int[] MISTAKE_PERCENTAGES = {0};
+    private final Path REPOSITORY_BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories");
     private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Scenarios\\ScenarioAllVariants");
     //private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Scenarios\\DummyScenario");
 
-
-    private final Path RESULT_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Results\\Add\\ScenarioRandom002Variants\\000_Feature_Traces\\000_Faulty_Traces");
-    //private final Path RESULT_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Results\\Add\\ScenarioRandom002Variants\\000_Feature_Traces\\000_Faulty_Traces");
-
-
-    // how many feature traces should be used in percent
-    private final int FT_PERCENT = 100;
-    // how many faulty feature traces should exist in percent
-    private final int FT_MISTAKES_PERCENT = 0;
-    private final EvaluationStrategy EVALUATION_STRATEGY = new UserAdditionEvaluation();
+    private final Path RESULTS_BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Results");
 
     private EccoService eccoService;
+    private Path repositoryPath;
     private Repository.Op repository;
+    private int ftPercentage;
+    private int mistakePercentage;
+    private EvaluationStrategy strategy;
 
-    private final String[] ALL_FEATURES = {"STATEDIAGRAM", "ACTIVITYDIAGRAM", "USECASEDIAGRAM", "COLLABORATIONDIAGRAM",
+    private final String[] FEATURES = {"STATEDIAGRAM", "ACTIVITYDIAGRAM", "USECASEDIAGRAM", "COLLABORATIONDIAGRAM",
             "DEPLOYMENTDIAGRAM", "SEQUENCEDIAGRAM", "COGNITIVE", "LOGGING"};
 
-
     public static void main(String[] args) {
-        // train a repository before the experiment
-        //EccoTrainer trainer = new EccoTrainer();
-        //trainer.trainScenario();
-        // EccoService eccoService = trainer.getEccoService();
         FTExperiment experiment = new FTExperiment();
-        experiment.runExperiment();
-    }
-
-    public void runExperiment(){
-        this.initService();
-        repository.removeFeatureTracePercentage(100 - this.FT_PERCENT);
-        // todo: introduce certain amount of mistakes in remaining feature traces
-        //Node.Op mainTree = this.repository.fuseAssociationsWithFeatureTraces();
-        //MetricsCalculator metricsCalculator = new MetricsCalculator(this.GROUND_TRUTHS, this.ALL_FEATURES);
-        //metricsCalculator.calculateMetrics(mainTree, this.EVALUATION_STRATEGY, RESULT_PATH);
+        experiment.iterateStrategies();
     }
 
     private void initService(){
         this.eccoService = new EccoService();
-        this.eccoService.setRepositoryDir(this.REPOSITORY_PATH.resolve(".ecco"));
+        this.eccoService.setRepositoryDir(this.repositoryPath.resolve(".ecco"));
         this.eccoService.open();
         this.repository = (Repository.Op) this.eccoService.getRepository();
+    }
+
+    public void runExperiment(Path resultBasePath){
+        this.initService();
+        repository.removeFeatureTracePercentage(100 - this.ftPercentage);
+        Node.Op mainTree = this.repository.fuseAssociationsWithFeatureTraces();
+        CounterVisitor visitor = new CounterVisitor();
+        mainTree.traverse(visitor);
+        this.baseCleanup(mainTree);
+        this.literalNameCleanup(mainTree);
+        // todo: introduce certain amount of mistakes in remaining feature traces
+        MetricsCalculator metricsCalculator = new MetricsCalculator(this.GROUND_TRUTHS, this.FEATURES);
+        metricsCalculator.calculateMetrics(mainTree, this.strategy, resultBasePath);
+    }
+
+    private void iterateStrategies(){
+        for (EvaluationStrategy strategy : STRATEGIES){
+            this.strategy = strategy;
+            String folderName = this.strategyToFolderName(strategy);
+            this.iterateRepositories(RESULTS_BASE_PATH.resolve(folderName));
+        }
+    }
+
+    private void iterateRepositories(Path basePath){
+        try (Stream<Path> pathStream = Files.list(REPOSITORY_BASE_PATH)){
+            pathStream.forEach(path -> {
+                    this.repositoryPath = path;
+                    this.iterateFeatureTracePercentages(basePath.resolve(path.getFileName()));
+            });
+        } catch(IOException e){
+            e.printStackTrace();
+            throw new RuntimeException("Could not access repositories: " + e.getMessage());
+        }
+    }
+
+    private void iterateFeatureTracePercentages(Path basePath){
+        for(int featureTracePercentage : FT_PERCENTAGES){
+            this.ftPercentage = featureTracePercentage;
+            String folderName = this.threeDigitString(featureTracePercentage) + "_FEATURE_TRACES";
+            this.iterateMistakes(basePath.resolve(folderName));
+        }
+    }
+
+    private void iterateMistakes(Path basePath){
+        for (int mistakePercentage : MISTAKE_PERCENTAGES){
+            this.mistakePercentage = mistakePercentage;
+            String folderName = this.threeDigitString(mistakePercentage) + "_FAULTY_TRACES";
+            this.runExperiment(basePath.resolve(folderName));
+        }
+    }
+
+    private String threeDigitString(int i){
+        if (i < 0 || i > 999){
+            throw new RuntimeException();
+        } else if (i < 10){
+            return "00" + i;
+        } else if (i < 100) {
+            return "0" + i;
+        } else {
+            return String.valueOf(i);
+        }
+    }
+
+    private void baseCleanup(Node.Op node){
+        Feature baseFeature = this.repository.getFeaturesByName("BASE").iterator().next();
+        FeatureRevision baseFeatureRevision = baseFeature.getLatestRevision();
+        String baseFeatureName = baseFeatureRevision.getLogicLiteralRepresentation();
+        BaseCleanUpVisitor visitor = new BaseCleanUpVisitor(baseFeatureName);
+        node.traverse(visitor);
+    }
+
+    private void literalNameCleanup(Node.Op node){
+        // necessary for when there are features in the ground-truth without revision-ID
+        Map<String, String> literalNameMap = new HashMap<>();
+        for (String groundTruthName : this.FEATURES){
+            Collection<Feature> features = this.repository.getFeaturesByName(groundTruthName);
+            if (features.size() != 0){
+                String repoName = features.iterator().next().getLatestRevision().getLogicLiteralRepresentation();
+                literalNameMap.put(groundTruthName, repoName);
+            }
+        }
+        LiteralCleanUpVisitor visitor = new LiteralCleanUpVisitor(literalNameMap);
+        node.traverse(visitor);
+    }
+
+    private String strategyToFolderName(EvaluationStrategy strategy){
+        if (strategy instanceof UserAdditionEvaluation){
+            return "Add";
+        } else if (strategy instanceof UserSubtractionEvaluation){
+            return "Remove";
+        } else if (strategy instanceof UserBasedEvaluation){
+            return "AddAndRemove";
+        } else if (strategy instanceof DiffBasedEvaluation){
+            return "Diff";
+        } else {
+            throw new RuntimeException();
+        }
     }
 }
