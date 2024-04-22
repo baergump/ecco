@@ -54,6 +54,16 @@ public class MemNode implements Node, Node.Op {
 		Collection<Node.Op> children = this.getChildren();
 		for (Node.Op child : children){
 			if (child.getArtifact().equals(template.getArtifact())){
+				Location childLocation = child.getLocation();
+				Location templateLocation = template.getLocation();
+				if(childLocation != null
+						&& templateLocation != null
+						&& childLocation.getConfigurationString().equals(templateLocation.getConfigurationString())
+						&& childLocation.getStartLine() != templateLocation.getStartLine()
+						&& childLocation.getEndLine() != templateLocation.getEndLine()){
+					// the same artifact appears twice in the same variant at different places
+					continue;
+				}
 				return child;
 			}
 		}
@@ -93,6 +103,8 @@ public class MemNode implements Node, Node.Op {
 	@Override
 	public int getNumberOfChildren() {
 		if (this.children == null && this.numberOfChildren == null){
+			return 0;
+		} else if (this.numberOfChildren == null){
 			return 0;
 		}
 		return this.numberOfChildren;

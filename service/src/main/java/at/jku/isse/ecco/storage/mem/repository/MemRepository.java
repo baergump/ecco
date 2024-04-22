@@ -22,7 +22,6 @@ import org.logicng.formulas.Literal;
 import org.logicng.io.parsers.ParserException;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Memory implementation of {@link Repository}.

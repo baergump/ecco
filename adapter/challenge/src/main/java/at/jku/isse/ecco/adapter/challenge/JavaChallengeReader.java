@@ -316,12 +316,6 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 		int startLine = astNode.getRange().get().begin.line;
 		int endLine = astNode.getRange().get().end.line;
 		Collection<VevosCondition> matchingConditions = fileConditionContainer.getMatchingPresenceConditions(startLine, endLine);
-		if (matchingConditions.size() > 1){
-			// the conditions must me enclosing
-			// the inner one must implicate the outer one
-			// todo: validate?
-			// todo: choose most specific condition?
-		}
 		for(VevosCondition condition : matchingConditions){
 			FeatureTrace nodeTrace = node.getFeatureTrace();
 			nodeTrace.buildUserConditionConjunction(condition.getConditionString());
@@ -331,17 +325,18 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 	private void checkForFeatureTrace(int lineNumber, VevosFileConditionContainer fileConditionContainer, Node.Op node){
 		if (fileConditionContainer == null){ return; }
 		Collection<VevosCondition> matchingConditions = fileConditionContainer.getMatchingPresenceConditions(lineNumber, lineNumber);
-		// TODO: check this out
-		if (matchingConditions.size() > 1){
-			// the conditions must me enclosing
-			// the inner one must implicate the outer one
-			// todo: validate?
-			// todo: choose most specific condition?
+		for(VevosCondition condition : matchingConditions){
+			FeatureTrace nodeTrace = node.getFeatureTrace();
+			nodeTrace.buildUserConditionConjunction(condition.getConditionString());
 		}
-		for (VevosCondition condition : matchingConditions){
+
+		/*
+		if (!matchingConditions.isEmpty()){
+			VevosCondition condition = VevosCondition.getMostPreciseCondition(matchingConditions);
 			FeatureTrace nodeTrace = node.getFeatureTrace();
 			nodeTrace.addUserCondition(condition.getConditionString());
 		}
+		 */
 	}
 
 	@Override

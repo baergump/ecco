@@ -6,6 +6,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 
+// TODO: Locations may be implemented artifact-dependent (line-number may not suffice)
+// TODO: solution may be sequence-number instead of locations in many cases
 public class Location implements Persistable {
 
     private int startLine;

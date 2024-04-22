@@ -2,6 +2,7 @@ package at.jku.isse.ecco.featuretrace.parser;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Collection;
 
 public class VevosCondition {
     private final Path filePath;
@@ -30,6 +31,24 @@ public class VevosCondition {
         stringCondition = stringCondition.replace("&&", "&");
         return stringCondition;
     }
+
+    /*
+    public static VevosCondition getMostPreciseCondition(Collection<VevosCondition> conditions){
+        if (conditions.size() == 1){
+            return conditions.iterator().next();
+        } else {
+            return conditions.stream().reduce(VevosCondition::getMostPreciseCondition).get();
+        }
+    }
+
+    public static VevosCondition getMostPreciseCondition(VevosCondition condition1, VevosCondition condition2){
+        if (condition1.startLine > condition2.startLine){ return condition1; }
+        if (condition2.startLine > condition2.startLine){ return condition2; }
+        if (condition1.endLine < condition2.endLine){ return condition1; }
+        if (condition2.endLine < condition2.endLine){ return condition2; }
+        throw new RuntimeException("both condition refer to the same lines, which should not be the case");
+    }
+     */
 
     public Path getFilePath(){
         return this.filePath;

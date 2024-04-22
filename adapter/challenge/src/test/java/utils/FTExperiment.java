@@ -7,6 +7,7 @@ import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.EccoService;
 import at.jku.isse.ecco.tree.Node;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,11 +27,11 @@ public class FTExperiment {
     };
     private final int[] FT_PERCENTAGES = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
     private final int[] MISTAKE_PERCENTAGES = {0};
-    private final Path REPOSITORY_BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories");
-    private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Scenarios\\ScenarioAllVariants");
-    //private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Scenarios\\DummyScenario");
+    //private final Path REPOSITORY_BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories");
+    private final Path REPOSITORY_BASE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Repositories");
+    private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Variants");
 
-    private final Path RESULTS_BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Results");
+    private final Path RESULTS_BASE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Results");
 
     private EccoService eccoService;
     private Path repositoryPath;
@@ -43,8 +44,22 @@ public class FTExperiment {
             "DEPLOYMENTDIAGRAM", "SEQUENCEDIAGRAM", "COGNITIVE", "LOGGING"};
 
     public static void main(String[] args) {
-        FTExperiment experiment = new FTExperiment();
-        experiment.iterateStrategies();
+        //FTExperiment experiment = new FTExperiment();
+        //experiment.iterateStrategies();
+
+        //experiment.test();
+
+
+        Path path = VevosUtils.getVariantPath(Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Variants"), "BASE, COGNITIVE, COLLABORATIONDIAGRAM, STATEDIAGRAM");
+    }
+
+    public void test(){
+        this.repositoryPath = Paths.get("C:\\Users\\Bernhard\\Work\\tmp\\ScenarioAllVariants");
+        this.ftPercentage = 100;
+        this.mistakePercentage = 0;
+        this.strategy = new UserBasedEvaluation();
+        this.initService();
+        this.runExperiment(Paths.get("C:\\Users\\Bernhard\\Work\\Test"));
     }
 
     private void initService(){
@@ -55,7 +70,13 @@ public class FTExperiment {
     }
 
     public void runExperiment(Path resultBasePath){
+        this.printExperimentMessage();
+        if (Files.exists(resultBasePath.resolve("results.txt"))){
+            System.out.println("Experiment already done.");
+            return;
+        }
         this.initService();
+        new File(resultBasePath.toAbsolutePath().toString()).mkdirs();
         repository.removeFeatureTracePercentage(100 - this.ftPercentage);
         Node.Op mainTree = this.repository.fuseAssociationsWithFeatureTraces();
         CounterVisitor visitor = new CounterVisitor();
@@ -65,6 +86,7 @@ public class FTExperiment {
         // todo: introduce certain amount of mistakes in remaining feature traces
         MetricsCalculator metricsCalculator = new MetricsCalculator(this.GROUND_TRUTHS, this.FEATURES);
         metricsCalculator.calculateMetrics(mainTree, this.strategy, resultBasePath);
+        System.out.println("");
     }
 
     private void iterateStrategies(){
@@ -149,5 +171,15 @@ public class FTExperiment {
         } else {
             throw new RuntimeException();
         }
+    }
+
+    private void printExperimentMessage(){
+        System.out.println(
+                "Running experiment with following settings:\n" +
+                "Strategy: " + this.strategyToFolderName(this.strategy) + "\n" +
+                "Scenario: " + this.repositoryPath.getFileName() + "\n" +
+                "Feature Trace Percentage: " + this.ftPercentage + "\n" +
+                "Mistake Percentage: " + this.mistakePercentage
+        );
     }
 }

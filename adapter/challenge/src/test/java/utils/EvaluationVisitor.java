@@ -2,9 +2,6 @@ package utils;
 
 import at.jku.isse.ecco.featuretrace.LogicUtils;
 import at.jku.isse.ecco.featuretrace.evaluation.EvaluationStrategy;
-import at.jku.isse.ecco.featuretrace.parser.VevosCondition;
-import at.jku.isse.ecco.featuretrace.parser.VevosConditionHandler;
-import at.jku.isse.ecco.featuretrace.parser.VevosFileConditionContainer;
 import at.jku.isse.ecco.tree.Node;
 import at.jku.isse.ecco.util.Location;
 import org.logicng.datastructures.Assignment;

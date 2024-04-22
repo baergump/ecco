@@ -49,7 +49,11 @@ public class MemFeatureTrace implements FeatureTrace {
     @Override
     public void addUserCondition(String userCondition){
         // TODO: validate input
+        if (userCondition == null){ return; }
         this.userCondition = this.combineConditions(this.userCondition, userCondition);
+        if (this.userCondition.equals("ACTIVITYDIAGRAM | STATEDIAGRAM")){
+            System.out.println("...");
+        }
     }
 
     @Override
@@ -73,7 +77,6 @@ public class MemFeatureTrace implements FeatureTrace {
 
     @Override
     public void buildUserConditionConjunction(String userCondition) {
-        // TODO: validate input
         if (userCondition == null) { return; }
         userCondition = this.sanitizeFormulaString(userCondition);
         if (this.userCondition == null){
@@ -141,6 +144,9 @@ public class MemFeatureTrace implements FeatureTrace {
     public void setUserCondition(String userConditionString) {
         userConditionString = this.sanitizeFormulaString(userConditionString);
         this.userCondition = userConditionString;
+        if (this.userCondition.equals("ACTIVITYDIAGRAM | STATEDIAGRAM")){
+            System.out.println("...");
+        }
     }
 
     private String sanitizeFormulaString(String formulaString){
