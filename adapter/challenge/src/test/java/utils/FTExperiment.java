@@ -25,13 +25,17 @@ public class FTExperiment {
             new UserBasedEvaluation(),
             new DiffBasedEvaluation()
     };
-    private final int[] FT_PERCENTAGES = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
-    private final int[] MISTAKE_PERCENTAGES = {0};
-    //private final Path REPOSITORY_BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories");
-    private final Path REPOSITORY_BASE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Repositories");
-    private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Variants");
+    //private final int[] FT_PERCENTAGES = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
+    private final int[] FT_PERCENTAGES = {100};
+    //private final int[] MISTAKE_PERCENTAGES = {0, 1, 5, 10, 20};
+    private final int[] MISTAKE_PERCENTAGES = {90};
+    //private final Path REPOSITORY_BASE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Repositories");
+    private final Path REPOSITORY_BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories");
+    //private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Variants");
+    private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Scenarios\\ScenarioAllVariants");
 
-    private final Path RESULTS_BASE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Results");
+    //private final Path RESULTS_BASE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Results");
+    private final Path RESULTS_BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Results");
 
     private EccoService eccoService;
     private Path repositoryPath;
@@ -44,22 +48,25 @@ public class FTExperiment {
             "DEPLOYMENTDIAGRAM", "SEQUENCEDIAGRAM", "COGNITIVE", "LOGGING"};
 
     public static void main(String[] args) {
-        //FTExperiment experiment = new FTExperiment();
+        FTExperiment experiment = new FTExperiment();
         //experiment.iterateStrategies();
-
-        //experiment.test();
-
-
-        Path path = VevosUtils.getVariantPath(Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Variants"), "BASE, COGNITIVE, COLLABORATIONDIAGRAM, STATEDIAGRAM");
+        experiment.test();
+        //Path path = VevosUtils.getVariantPath(Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Variants"), "BASE, COGNITIVE, COLLABORATIONDIAGRAM, STATEDIAGRAM");
     }
 
     public void test(){
-        this.repositoryPath = Paths.get("C:\\Users\\Bernhard\\Work\\tmp\\ScenarioAllVariants");
-        this.ftPercentage = 100;
-        this.mistakePercentage = 0;
-        this.strategy = new UserBasedEvaluation();
+        //this.repositoryPath = Paths.get("C:\\Users\\Bernhard\\Work\\tmp\\ScenarioAllVariants");
+        this.repositoryPath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories\\ScenarioAllVariants");
         this.initService();
-        this.runExperiment(Paths.get("C:\\Users\\Bernhard\\Work\\Test"));
+        CounterVisitor visitor = new CounterVisitor();
+        Node.Op mainTree = this.repository.fuseAssociationsWithFeatureTraces();
+        mainTree.traverse(visitor);
+        visitor.printEverything();
+        //this.ftPercentage = 100;
+        //this.mistakePercentage = 10;
+        //this.strategy = new UserBasedEvaluation();
+        //this.initService();
+        //this.runExperiment(Paths.get("C:\\Users\\Berni\\Desktop\\Project\\tmp"));
     }
 
     private void initService(){
@@ -83,7 +90,8 @@ public class FTExperiment {
         mainTree.traverse(visitor);
         this.baseCleanup(mainTree);
         this.literalNameCleanup(mainTree);
-        // todo: introduce certain amount of mistakes in remaining feature traces
+        MistakeCreator mistaker = new MistakeCreator();
+        mistaker.createMistakePercentage(this.repository, this.mistakePercentage);
         MetricsCalculator metricsCalculator = new MetricsCalculator(this.GROUND_TRUTHS, this.FEATURES);
         metricsCalculator.calculateMetrics(mainTree, this.strategy, resultBasePath);
         System.out.println("");

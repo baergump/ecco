@@ -51,9 +51,9 @@ public class MemFeatureTrace implements FeatureTrace {
         // TODO: validate input
         if (userCondition == null){ return; }
         this.userCondition = this.combineConditions(this.userCondition, userCondition);
-        if (this.userCondition.equals("ACTIVITYDIAGRAM | STATEDIAGRAM")){
-            System.out.println("...");
-        }
+        //if (this.userCondition.equals("ACTIVITYDIAGRAM | STATEDIAGRAM")){
+        //    System.out.println("...");
+        //}
     }
 
     @Override
@@ -144,9 +144,9 @@ public class MemFeatureTrace implements FeatureTrace {
     public void setUserCondition(String userConditionString) {
         userConditionString = this.sanitizeFormulaString(userConditionString);
         this.userCondition = userConditionString;
-        if (this.userCondition.equals("ACTIVITYDIAGRAM | STATEDIAGRAM")){
-            System.out.println("...");
-        }
+        //if (this.userCondition.equals("ACTIVITYDIAGRAM | STATEDIAGRAM")){
+        //    System.out.println("...");
+        //}
     }
 
     private String sanitizeFormulaString(String formulaString){

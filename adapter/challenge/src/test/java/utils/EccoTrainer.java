@@ -17,14 +17,14 @@ import java.util.stream.Stream;
 
 public class EccoTrainer {
 
-    //private static final Path BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\");
-    private static final Path BASE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment");
+    private static final Path BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\");
+    //private static final Path BASE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment");
     private static final Path SCENARIOS_PATH = BASE_PATH.resolve("Scenarios");
     private static final Path REPOSITORIES_PATH = BASE_PATH.resolve("Repositories");
-    //private static final Path REFERENCE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\argouml-spl-benchmark\\ArgoUMLSPLBenchmark\\scenarios");
-    private static final Path REFERENCE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Tools\\argouml-spl-benchmark\\ArgoUMLSPLBenchmark\\scenarios");
-    //private static final Path VARIANTS_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\ArgoUMLExtractor\\variants");
-    private static final Path VARIANTS_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Variants");
+    private static final Path REFERENCE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\argouml-spl-benchmark\\ArgoUMLSPLBenchmark\\scenarios");
+    //private static final Path REFERENCE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Tools\\argouml-spl-benchmark\\ArgoUMLSPLBenchmark\\scenarios");
+    private static final Path VARIANTS_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\ArgoUMLExtractor\\variants");
+    //private static final Path VARIANTS_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Variants");
 
     private EccoService eccoService;
     private String scenarioName;

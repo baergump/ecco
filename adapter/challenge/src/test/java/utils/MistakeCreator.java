@@ -24,6 +24,10 @@ public class MistakeCreator {
 
     private FormulaFactory formulaFactory = new FormulaFactory();
 
+    public MistakeCreator(){
+        this.formulaFactory = new FormulaFactory();
+    }
+
     public void createMistakePercentage(Repository repository, int percentage){
         if (percentage < 0 || percentage > 100){
             throw new RuntimeException(String.format("Percentage of feature traces is invalid (%d).", percentage));
@@ -53,9 +57,20 @@ public class MistakeCreator {
         // get a literal(?) / variable(?) that is not "true" and switch it randomly
         String userConditionString = trace.getUserConditionString();
         Formula userCondition = LogicUtils.parseString(this.formulaFactory, userConditionString);
-        SortedSet<Literal> literals = userCondition.literals();
         SortedSet<Variable> variables = userCondition.variables();
+        Variable variable = getRandom(variables);
+        String randomFeature = FEATURES[(int) (FEATURES.length * Math.random())];
+        while (variable.toString().equals(randomFeature)){
+            randomFeature = FEATURES[(int) (FEATURES.length * Math.random())];
+        }
+        trace.setUserCondition(userConditionString.replace(variable.toString(), randomFeature));
         return true;
+    }
+
+    public static <E> E getRandom (Collection<E> e) {
+        return e.stream()
+                .skip((int) (e.size() * Math.random()))
+                .findFirst().get();
     }
 
     private String getRandomOtherFeature(String feature){
