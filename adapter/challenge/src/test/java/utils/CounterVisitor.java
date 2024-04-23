@@ -15,7 +15,16 @@ public class CounterVisitor implements Node.Op.NodeVisitor {
     @Override
     public void visit(Node.Op node) {
         this.nodeCount++;
+
+        Location location = node.getLocation();
+        if (location != null){
+            this.locationCount++;
+        }
+
         FeatureTrace trace = node.getFeatureTrace();
+        if (trace == null){
+            return;
+        }
 
         if (trace.containsUserCondition()){
             this.userConditionCount++;
@@ -28,11 +37,6 @@ public class CounterVisitor implements Node.Op.NodeVisitor {
 
         if (trace.containsUserCondition() || diffCondition != null){
             this.someConditionCount++;
-        }
-
-        Location location = node.getLocation();
-        if (location != null){
-            this.locationCount++;
         }
     }
 

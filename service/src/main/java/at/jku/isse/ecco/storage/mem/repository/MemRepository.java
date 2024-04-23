@@ -341,6 +341,11 @@ public final class MemRepository implements Repository, Repository.Op {
 	}
 
 	@Override
+	public Node.Op getFeatureTree() {
+		return this.featureTraceTree;
+	}
+
+	@Override
 	public Collection<FeatureTrace> getFeatureTraces(){
 		FeatureTraceCollectorVisitor collectorVisitor = new FeatureTraceCollectorVisitor();
 		this.featureTraceTree.traverse(collectorVisitor);

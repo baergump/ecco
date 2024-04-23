@@ -6,15 +6,16 @@ import at.jku.isse.ecco.featuretrace.evaluation.*;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.EccoService;
 import at.jku.isse.ecco.tree.Node;
+import org.apache.commons.io.FileUtils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class FTExperiment {
@@ -50,8 +51,50 @@ public class FTExperiment {
     public static void main(String[] args) {
         FTExperiment experiment = new FTExperiment();
         //experiment.iterateStrategies();
-        experiment.test();
+        //experiment.test();
+        //experiment.summarizeResults();
+        experiment.checkCounts();
         //Path path = VevosUtils.getVariantPath(Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Variants"), "BASE, COGNITIVE, COLLABORATIONDIAGRAM, STATEDIAGRAM");
+    }
+
+    public void checkCounts(){
+        this.repositoryPath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories\\ScenarioAllVariants");
+        this.initService();
+        CounterVisitor ftTreeVisitor = new CounterVisitor();
+        Node.Op ftTree = this.repository.getFeatureTree();
+        ftTree.traverse(ftTreeVisitor);
+        ftTreeVisitor.printEverything();
+        System.out.println();
+
+        CounterVisitor assocVisitor = new CounterVisitor();
+        Node.Op assoc = this.repository.getAssociations().iterator().next().getRootNode();
+        assoc.traverse(assocVisitor);
+        assocVisitor.printEverything();
+        System.out.println();
+
+        CounterVisitor mainVisitor = new CounterVisitor();
+        Node.Op mainTree = this.repository.fuseAssociationsWithFeatureTraces();
+        mainTree.traverse(mainVisitor);
+        mainVisitor.printEverything();
+    }
+
+    public void summarizeResults() {
+        //Path basePath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Results\\Remove\\ScenarioRandom010Variants");
+        Path basePath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Results\\Remove\\ScenarioAllVariants");
+        Path summaryPath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Results\\Summaries\\allvariants.txt");
+        String summary = "";
+        try(Stream<Path> pathStream = Files.list(basePath)) {
+            for (Path path : pathStream.collect(Collectors.toList())){
+                Path resultFile = path.resolve("000_FAULTY_TRACES\\results.txt");
+                summary = summary + "\n" + FileUtils.readFileToString(resultFile.toFile());
+            }
+            FileWriter fileWriter = new FileWriter(summaryPath.toString());
+            PrintWriter printWriter = new PrintWriter(fileWriter);
+            printWriter.print(summary);
+            printWriter.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void test(){

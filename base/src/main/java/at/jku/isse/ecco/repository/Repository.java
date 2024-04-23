@@ -1325,6 +1325,8 @@ public interface Repository extends Persistable {
 			throw new UnsupportedOperationException("Not yet implemented.");
 		}
 
+		Node.Op getFeatureTree();
+
 	}
 
 
