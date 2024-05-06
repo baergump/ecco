@@ -1,31 +1,20 @@
-package utils;
+package mistake;
 
 import at.jku.isse.ecco.featuretrace.FeatureTrace;
-import at.jku.isse.ecco.featuretrace.LogicUtils;
 import at.jku.isse.ecco.repository.Repository;
-import at.jku.isse.ecco.tree.Node;
-import org.logicng.formulas.Formula;
-import org.logicng.formulas.FormulaFactory;
-import org.logicng.formulas.Literal;
-import org.logicng.formulas.Variable;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class MistakeCreator {
 
-    // Swap a Feature
-    // FA & FB --> FA (and vice versa)
-    // Swap with the Condition of another Artifact
-    // Change Operands
     private static final String[] FEATURES = {"STATEDIAGRAM", "ACTIVITYDIAGRAM", "USECASEDIAGRAM", "COLLABORATIONDIAGRAM",
             "DEPLOYMENTDIAGRAM", "SEQUENCEDIAGRAM", "COGNITIVE", "LOGGING"};
 
+    private MistakeStrategy mistakeStrategy;
 
-    private FormulaFactory formulaFactory = new FormulaFactory();
-
-    public MistakeCreator(){
-        this.formulaFactory = new FormulaFactory();
+    public MistakeCreator(MistakeStrategy mistakeStrategy) {
+        this.mistakeStrategy = mistakeStrategy;
     }
 
     public void createMistakePercentage(Repository repository, int percentage){
@@ -43,34 +32,10 @@ public class MistakeCreator {
                 throw new RuntimeException("Failed to create enough mistakes!");
             }
             FeatureTrace trace = iterator.next();
-            if (!this.createMistake(trace)){
+            if (!this.mistakeStrategy.createMistake(trace)){
                 attempts++;
             }
         }
-    }
-
-    public boolean createMistake(FeatureTrace trace){
-        return this.switchFeature(trace);
-    }
-
-    private boolean switchFeature(FeatureTrace trace){
-        // get a literal(?) / variable(?) that is not "true" and switch it randomly
-        String userConditionString = trace.getUserConditionString();
-        Formula userCondition = LogicUtils.parseString(this.formulaFactory, userConditionString);
-        SortedSet<Variable> variables = userCondition.variables();
-        Variable variable = getRandom(variables);
-        String randomFeature = FEATURES[(int) (FEATURES.length * Math.random())];
-        while (variable.toString().equals(randomFeature)){
-            randomFeature = FEATURES[(int) (FEATURES.length * Math.random())];
-        }
-        trace.setUserCondition(userConditionString.replace(variable.toString(), randomFeature));
-        return true;
-    }
-
-    public static <E> E getRandom (Collection<E> e) {
-        return e.stream()
-                .skip((int) (e.size() * Math.random()))
-                .findFirst().get();
     }
 
     private String getRandomOtherFeature(String feature){

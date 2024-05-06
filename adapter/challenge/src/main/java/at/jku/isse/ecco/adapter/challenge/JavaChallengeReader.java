@@ -80,17 +80,6 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 		long totalJavaParserTime = 0;
 
 		for (Path path : input) {
-			// Using comments by Couto et al. would mean looking at line numbers in VEVOS files, looking at
-			// Couto et al. comment and connecting granularity to adapter artifact
-			// Couto et al.: Package, Class, ClassSignature, InterfaceMethod, Method, MethodBody, Attribute, Statement, Expression
-
-			// Should be possible without using Couto et al. comments.
-			// parser results seem to offer the possibility to get the respective line numbers in the source code
-			// -> connect vevos line numbers to parser result line numbers to recognize feature traces
-
-			// todo: delete
-			System.out.println(path);
-
 			VevosFileConditionContainer fileConditionContainer = vevosConditionHandler.getFileSpecificPresenceConditions(path);
 
 			Path resolvedPath = base.resolve(path);
@@ -329,14 +318,6 @@ public class JavaChallengeReader implements ArtifactReader<Path, Set<Node.Op>>{
 			FeatureTrace nodeTrace = node.getFeatureTrace();
 			nodeTrace.buildUserConditionConjunction(condition.getConditionString());
 		}
-
-		/*
-		if (!matchingConditions.isEmpty()){
-			VevosCondition condition = VevosCondition.getMostPreciseCondition(matchingConditions);
-			FeatureTrace nodeTrace = node.getFeatureTrace();
-			nodeTrace.addUserCondition(condition.getConditionString());
-		}
-		 */
 	}
 
 	@Override

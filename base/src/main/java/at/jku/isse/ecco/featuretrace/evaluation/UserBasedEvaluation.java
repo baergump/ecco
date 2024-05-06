@@ -24,9 +24,11 @@ public class UserBasedEvaluation implements EvaluationStrategy{
 
     @Override
     public String getOverallConditionString(String userCondition, String diffCondition) {
-        if (userCondition == null){
+        if (userCondition == null && diffCondition == null){
             Formula falseFormula = this.formulaFactory.constant(false);
             return falseFormula.toString();
+        } else if (userCondition == null) {
+            return diffCondition;
         } else {
             return userCondition;
         }

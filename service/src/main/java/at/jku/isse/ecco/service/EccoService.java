@@ -1557,11 +1557,15 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
 
             Repository.Op repository = this.repositoryDao.load();
             repository.addFeatureRevisions(configuration.getFeatureRevisions());
-            Set<Node.Op> nodes = readFiles(repository);
+            Set<Node.Op> nodes = readFiles();
 
-            // TODO: sequence trees using sequence-visitor
+            nodes.forEach(Trees::sequence);
+
             // TODO: POGs must be merged before a comparison
             // TODO: test if POG-merge while FT-Tree-Merge does the trick
+
+
+
 
             // TODO: this is done for paper-purposes in regard to feature traces
             ConfigInsertionVisitor visitor = new ConfigInsertionVisitor(configuration);
@@ -1865,7 +1869,7 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
         }
     }
 
-    public synchronized Set<Node.Op> readFiles(Repository.Op repository) {
+    public synchronized Set<Node.Op> readFiles() {
         return this.reader.read(this.baseDir, new Path[]{Paths.get("")});
     }
 

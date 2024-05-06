@@ -54,6 +54,8 @@ public class MemNode implements Node, Node.Op {
 		Collection<Node.Op> children = this.getChildren();
 		for (Node.Op child : children){
 			if (child.getArtifact().equals(template.getArtifact())){
+				// TODO: remove the location-check if sequencing does the trick!
+				/*
 				Location childLocation = child.getLocation();
 				Location templateLocation = template.getLocation();
 				if(childLocation != null
@@ -64,6 +66,7 @@ public class MemNode implements Node, Node.Op {
 					// the same artifact appears twice in the same variant at different places
 					continue;
 				}
+				 */
 				return child;
 			}
 		}

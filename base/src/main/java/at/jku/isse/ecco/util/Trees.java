@@ -178,9 +178,6 @@ public class Trees {
 	}
 
 	public static void mergePartialOrderGraphs(Node.Op left, Node.Op right) {
-		if (!left.equals(right))
-			throw new EccoException("Merging partial order graphs of non-equal nodes is not allowed!");
-
 		if (left.getArtifact() != null && right.getArtifact() != null) {
 			if (left.getArtifact().isOrdered()) {
 				if (left.getArtifact().isSequenced() && right.getArtifact().isSequenced() && left.getArtifact().getPartialOrderGraph() != right.getArtifact().getPartialOrderGraph()) {
@@ -201,6 +198,7 @@ public class Trees {
 			}
 		}
 
+		/*
 		for (Node.Op leftChild : left.getChildren()) {
 			int ri = right.getChildren().indexOf(leftChild);
 			if (ri == -1)
@@ -208,6 +206,8 @@ public class Trees {
 			Node.Op rightChild = right.getChildren().get(ri);
 			mergePartialOrderGraphs(leftChild, rightChild);
 		}
+
+		 */
 	}
 
 
@@ -786,6 +786,7 @@ public class Trees {
 		// TODO: containing node of artifacts? (either copy artifact or remove containing node as field)
 
 		if (fusionNode == null){ return mainTree; }
+		// new node will contain pog because same artifact is set in new node and pog is set in artifact
 		if (mainTree == null){ mainTree = fusionNode.copySingleNode(); }
 		if (!Objects.equals(mainTree.getArtifact(), fusionNode.getArtifact())) {
 			throw new EccoException("Fusing feature trace (sub-)trees with different root nodes is not possible.");
@@ -803,6 +804,7 @@ public class Trees {
 			} else {
 				mainChild.getFeatureTrace().fuseFeatureTrace(child.getFeatureTrace());
 				mainChild.setUnique(mainChild.isUnique() || child.isUnique());
+				Trees.mergePartialOrderGraphs(mainChild, child);
 				treeFusion(mainChild, child);
 			}
 		}
