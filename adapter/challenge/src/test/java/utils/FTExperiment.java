@@ -26,17 +26,17 @@ public class FTExperiment {
             new UserBasedEvaluation(),
             new DiffBasedEvaluation()
     };
-    //private final int[] FT_PERCENTAGES = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
-    private final int[] FT_PERCENTAGES = {100};
+    private final int[] FT_PERCENTAGES = {0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
+    //private final int[] FT_PERCENTAGES = {100};
     //private final int[] MISTAKE_PERCENTAGES = {0, 1, 5, 10, 20};
-    private final int[] MISTAKE_PERCENTAGES = {90};
-    //private final Path REPOSITORY_BASE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Repositories");
-    private final Path REPOSITORY_BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories");
-    //private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Variants");
-    private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Scenarios\\ScenarioAllVariants");
+    private final int[] MISTAKE_PERCENTAGES = {0};
+    private final Path REPOSITORY_BASE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Repositories");
+    //private final Path REPOSITORY_BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories");
+    private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Variants");
+    //private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Scenarios\\ScenarioAllVariants");
 
-    //private final Path RESULTS_BASE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Results");
-    private final Path RESULTS_BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Results");
+    private final Path RESULTS_BASE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Results");
+    //private final Path RESULTS_BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Results");
 
     private EccoService eccoService;
     private Path repositoryPath;
@@ -51,10 +51,19 @@ public class FTExperiment {
     public static void main(String[] args) {
         FTExperiment experiment = new FTExperiment();
         //experiment.iterateStrategies();
+        //experiment.runSpecificTest();
         //experiment.test();
-        //experiment.summarizeResults();
-        experiment.checkCounts();
+        experiment.summarizeResults();
+        //experiment.checkCounts();
         //Path path = VevosUtils.getVariantPath(Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Variants"), "BASE, COGNITIVE, COLLABORATIONDIAGRAM, STATEDIAGRAM");
+    }
+
+    public void runSpecificTest(){
+        this.strategy = new UserBasedEvaluation();
+        this.repositoryPath = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Repositories\\ScenarioRandom002Variants");
+        this.ftPercentage = 0;
+        this.mistakePercentage = 0;
+        this.runExperiment(Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Results\\AddAndRemove\\ScenarioRandom002Variants\\000_FEATURE_TRACES\\000_FAULTY_TRACES"));
     }
 
     public void checkCounts(){
@@ -79,9 +88,9 @@ public class FTExperiment {
     }
 
     public void summarizeResults() {
-        //Path basePath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Results\\Remove\\ScenarioRandom010Variants");
-        Path basePath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Results\\Remove\\ScenarioAllVariants");
-        Path summaryPath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Results\\Summaries\\allvariants.txt");
+        //Path basePath = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Results\\AddAndRemove\\ScenarioRandom010Variants");
+        Path basePath = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Results\\AddAndRemove\\ScenarioAllVariants");
+        Path summaryPath = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Results\\Summaries\\allvariants.txt");
         String summary = "";
         try(Stream<Path> pathStream = Files.list(basePath)) {
             for (Path path : pathStream.collect(Collectors.toList())){

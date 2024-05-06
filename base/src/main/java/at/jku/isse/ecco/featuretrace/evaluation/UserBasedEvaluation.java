@@ -4,7 +4,6 @@ import at.jku.isse.ecco.feature.Configuration;
 import at.jku.isse.ecco.featuretrace.LogicUtils;
 import org.logicng.datastructures.Assignment;
 import org.logicng.formulas.Formula;
-import org.logicng.formulas.FormulaFactory;
 
 /**
  * The user-based condition of a feature trace determines the overall condition.
@@ -24,9 +23,11 @@ public class UserBasedEvaluation implements EvaluationStrategy{
 
     @Override
     public String getOverallConditionString(String userCondition, String diffCondition) {
-        if (userCondition == null){
+        if (userCondition == null && diffCondition == null){
             Formula falseFormula = this.formulaFactory.constant(false);
             return falseFormula.toString();
+        } else if (userCondition == null){
+            return diffCondition;
         } else {
             return userCondition;
         }
