@@ -7,6 +7,10 @@ import at.jku.isse.ecco.adapter.dispatch.DispatchWriter;
 import at.jku.isse.ecco.adapter.dispatch.PluginArtifactData;
 import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.dao.EntityFactory;
+import at.jku.isse.ecco.featuretrace.FeatureTrace;
+import at.jku.isse.ecco.featuretrace.parser.VevosCondition;
+import at.jku.isse.ecco.featuretrace.parser.VevosConditionHandler;
+import at.jku.isse.ecco.featuretrace.parser.VevosFileConditionContainer;
 import at.jku.isse.ecco.service.listener.ReadListener;
 import at.jku.isse.ecco.tree.Node;
 import com.google.inject.Inject;
@@ -30,6 +34,8 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+
+// TODO: lineNumbersSwitchCase?
 
 public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
 
@@ -67,9 +73,11 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
 
     @Override
     public Set<Node.Op> read(Path base, Path[] input) {
+        VevosConditionHandler vevosConditionHandler = new VevosConditionHandler(base);
         Set<Node.Op> nodes = new HashSet<>();
-        final List<String> headerFiles = new ArrayList<String>();
+        final List<String> headerFiles = new ArrayList<>();
         for (Path path : input) {
+            VevosFileConditionContainer fileConditionContainer = vevosConditionHandler.getFileSpecificPresenceConditions(path);
             Path resolvedPath = base.resolve(path);
             File file = resolvedPath.toFile();
             //System.out.println(file.getName());
@@ -166,8 +174,10 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                     }
                 }
 
+                // TODO: What is lineNumbers? What does it do?
 
-                traverseAST(macrosInsideFunctions, translationUnit.getOriginalNode(), pluginNode, functionsGroupNode, fieldsGroupNode, true, "", lines, lineNumbers, lineNumbersSwitchCase, errorStatements);
+                traverseAST(macrosInsideFunctions, translationUnit.getOriginalNode(), functionsGroupNode, fieldsGroupNode, lines, lineNumbers, lineNumbersSwitchCase, errorStatements, fileConditionContainer);
+
 
                 for (Map.Entry<String, Integer> macro : macroPosition.entrySet()) {
                     for (int i = 0; i < lineNumbers.size() - 1; i += 2) {
@@ -234,21 +244,21 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
     }
 
 
-    private void traverseAST(ArrayList<String> macrosInsideFunctions, IASTNode astNode, Node.Op classnode, Node.Op functions, Node.Op fields, final boolean saveLocationInfromtation, String indent, String[] lines, ArrayList<Integer> lineNumbers, ArrayList<Integer> lineNumbersSwitchCase, Map<String, Integer> errorStatements) {
-
+    private void traverseAST(ArrayList<String> macrosInsideFunctions, IASTNode astNode, Node.Op functions, Node.Op fields, String[] lines, ArrayList<Integer> lineNumbers, ArrayList<Integer> lineNumbersSwitchCase, Map<String, Integer> errorStatements, VevosFileConditionContainer vevosContainer) {
         for (IASTNode child : astNode.getChildren()) {
             if (child != null && child.getContainingFilename().equals(astNode.getContainingFilename())) {
-                getIdentifier(macrosInsideFunctions, child, classnode, functions, fields, lines, lineNumbers, lineNumbersSwitchCase, errorStatements);
+                getIdentifier(macrosInsideFunctions, child, functions, fields, lines, lineNumbers, lineNumbersSwitchCase, errorStatements, vevosContainer);
             }
         }
     }
 
 
-    public void getIdentifier(ArrayList<String> macrosInsideFunctions, IASTNode node, Node.Op parentNode, Node.Op functionsNode, Node.Op fieldsNode, String[] lines, ArrayList<Integer> lineNumbers, ArrayList<Integer> lineNumbersSwitchCase, Map<String, Integer> errorStatements) {
+    public void getIdentifier(ArrayList<String> macrosInsideFunctions, IASTNode node, Node.Op functionsNode, Node.Op fieldsNode, String[] lines, ArrayList<Integer> lineNumbers, ArrayList<Integer> lineNumbersSwitchCase, Map<String, Integer> errorStatements, VevosFileConditionContainer vevosContainer) {
         if (node instanceof IASTFieldDeclarator) {
             Artifact.Op<FieldArtifactData> fieldArtifact = this.entityFactory.createArtifact(new FieldArtifactData(node.getRawSignature()));
             Node.Op fieldNode = this.entityFactory.createOrderedNode(fieldArtifact);
             fieldsNode.addChild(fieldNode);
+            this.checkForFeatureTrace(node.getFileLocation().getStartingLineNumber(), node.getFileLocation().getEndingLineNumber(), vevosContainer, fieldNode);
             lineNumbers.add(node.getFileLocation().getStartingLineNumber());
             lineNumbers.add(node.getFileLocation().getEndingLineNumber());
         } else if (node instanceof IASTProblemDeclaration) {
@@ -266,9 +276,10 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                     Artifact.Op<ProblemBlockArtifactData> blockArtifact = this.entityFactory.createArtifact(new ProblemBlockArtifactData(line));
                     Node.Op blockNode = this.entityFactory.createOrderedNode(blockArtifact);
                     fieldsNode.addChild(blockNode);
+                    this.checkForFeatureTrace(node.getFileLocation().getStartingLineNumber(), node.getFileLocation().getEndingLineNumber(), vevosContainer, blockNode);
                 } else {
-                    Artifact.Op<ProblemBlockArtifactData> blockArtifact = null;
-                    Node.Op blockNode = null;
+                    Artifact.Op<ProblemBlockArtifactData> blockArtifact;
+                    Node.Op blockNode;
                     for (int i = init; i <= end; i++) {
                         if (!lineNumbersSwitchCase.contains(i + 1)) {
                             String line = lines[i] + "\n";
@@ -277,10 +288,12 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                                 blockArtifact = this.entityFactory.createArtifact(new ProblemBlockArtifactData(line));
                                 blockNode = this.entityFactory.createOrderedNode(blockArtifact);
                                 functionsNode.addChild(blockNode);
+                                this.checkForFeatureTrace(node.getFileLocation().getStartingLineNumber(), node.getFileLocation().getEndingLineNumber(), vevosContainer, blockNode);
                             } else {
                                 Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(line));
                                 Node.Op lineNode = this.entityFactory.createOrderedNode(lineArtifact);
                                 functionsNode.addChild(lineNode);
+                                this.checkForFeatureTrace(i, i, vevosContainer, lineNode);
                             }
                         }
                     }
@@ -339,6 +352,7 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                 Artifact.Op<FieldArtifactData> fieldArtifact = this.entityFactory.createArtifact(new FieldArtifactData(node.getRawSignature()));
                 Node.Op fieldNode = this.entityFactory.createOrderedNode(fieldArtifact);
                 fieldsNode.addChild(fieldNode);
+                this.checkForFeatureTrace(node.getFileLocation().getStartingLineNumber(), node.getFileLocation().getEndingLineNumber(), vevosContainer, fieldNode);
                 lineNumbers.add(node.getFileLocation().getStartingLineNumber());
                 lineNumbers.add(node.getFileLocation().getEndingLineNumber());
             } else if (((IASTSimpleDeclaration) node).getDeclarators().length == 1) {
@@ -355,6 +369,7 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                     Artifact.Op<FieldArtifactData> fieldArtifact = this.entityFactory.createArtifact(new FieldArtifactData(field));
                     Node.Op fieldNode = this.entityFactory.createOrderedNode(fieldArtifact);
                     fieldsNode.addChild(fieldNode);
+                    this.checkForFeatureTrace(node.getFileLocation().getStartingLineNumber(), node.getFileLocation().getEndingLineNumber(), vevosContainer, fieldNode);
                 }
                 lineNumbers.add(node.getFileLocation().getStartingLineNumber());
                 lineNumbers.add(node.getFileLocation().getEndingLineNumber());
@@ -364,6 +379,7 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                     Artifact.Op<FieldArtifactData> fieldArtifact = this.entityFactory.createArtifact(new FieldArtifactData(node.getRawSignature()));
                     Node.Op fieldNode = this.entityFactory.createOrderedNode(fieldArtifact);
                     fieldsNode.addChild(fieldNode);
+                    this.checkForFeatureTrace(node.getFileLocation().getStartingLineNumber(), node.getFileLocation().getEndingLineNumber(), vevosContainer, fieldNode);
                     lineNumbers.add(node.getFileLocation().getStartingLineNumber());
                     lineNumbers.add(node.getFileLocation().getEndingLineNumber());
                 }
@@ -380,6 +396,7 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
             Artifact.Op<FunctionArtifactData> functionsArtifact = this.entityFactory.createArtifact(new FunctionArtifactData(function));
             Node.Op functionNode = this.entityFactory.createOrderedNode(functionsArtifact);
             functionsNode.addChild(functionNode);
+            this.checkForFeatureTrace(node.getFileLocation().getStartingLineNumber(), node.getFileLocation().getEndingLineNumber(), vevosContainer, functionNode);
             lineNumbers.add(node.getFileLocation().getStartingLineNumber());
             lineNumbers.add(node.getFileLocation().getEndingLineNumber());
             if (node.getTranslationUnit().getMacroDefinitions().length > 0) {
@@ -388,6 +405,7 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                         Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(macro.getRawSignature()));
                         Node.Op lineNode = this.entityFactory.createOrderedNode(lineArtifact);
                         functionNode.addChild(lineNode);
+                        this.checkForFeatureTrace(macro.getFileLocation().getStartingLineNumber(), macro.getFileLocation().getEndingLineNumber(), vevosContainer, lineNode);
                         macrosInsideFunctions.add(macro.getRawSignature());
                     }
                 }
@@ -401,12 +419,13 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                                 Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(errorst.getKey()));
                                 Node.Op lineNode = this.entityFactory.createOrderedNode(lineArtifact);
                                 functionNode.addChild(lineNode);
+                                this.checkForFeatureTrace(errorst.getValue(), errorst.getValue(), vevosContainer, lineNode);
                                 errorStatements.computeIfPresent(errorst.getKey(), (k, v) -> -1);
                             }
 
                         }
                     }
-                    addChildFunction(child, functionNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase);
+                    addChildFunction(child, functionNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase, vevosContainer);
                 }
             } else {
                 for (Map.Entry<String, Integer> errorst : errorStatements.entrySet()) {
@@ -414,6 +433,7 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                         Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(errorst.getKey()));
                         Node.Op lineNode = this.entityFactory.createOrderedNode(lineArtifact);
                         functionNode.addChild(lineNode);
+                        this.checkForFeatureTrace(errorst.getValue(), errorst.getValue(), vevosContainer, lineNode);
                         errorStatements.computeIfPresent(errorst.getKey(), (k, v) -> -1);
                     }
                 }
@@ -421,6 +441,7 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
             Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData("}"));
             Node.Op lineNode = this.entityFactory.createOrderedNode(lineArtifact);
             functionNode.addChild(lineNode);
+            this.checkForFeatureTrace(end + 1, end + 1, vevosContainer, lineNode);
         } else if (node instanceof ICPPASTFunctionDeclarator) {
             String name = ((IASTFunctionDeclarator) node).getName().getRawSignature();
             String parameters = "";
@@ -441,6 +462,7 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
             Artifact.Op<FunctionArtifactData> functionsArtifact = this.entityFactory.createArtifact(new FunctionArtifactData(functionName));
             Node.Op functionNode = this.entityFactory.createOrderedNode(functionsArtifact);
             functionsNode.addChild(functionNode);
+            this.checkForFeatureTrace(init + 1, end + 1, vevosContainer, functionNode);
             lineNumbers.add(node.getFileLocation().getStartingLineNumber());
             lineNumbers.add(node.getFileLocation().getEndingLineNumber());
             if (node.getTranslationUnit().getMacroDefinitions().length > 0) {
@@ -449,6 +471,7 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                         Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(macro.getRawSignature()));
                         Node.Op lineNode = this.entityFactory.createOrderedNode(lineArtifact);
                         functionNode.addChild(lineNode);
+                        this.checkForFeatureTrace(macro.getFileLocation().getStartingLineNumber(), macro.getFileLocation().getEndingLineNumber(), vevosContainer, lineNode);
                     }
                 }
             }
@@ -460,12 +483,13 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                                 Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(errorst.getKey()));
                                 Node.Op lineNode = this.entityFactory.createOrderedNode(lineArtifact);
                                 functionNode.addChild(lineNode);
+                                this.checkForFeatureTrace(errorst.getValue(), errorst.getValue(), vevosContainer, lineNode);
                                 errorStatements.computeIfPresent(errorst.getKey(), (k, v) -> -1);
                             }
 
                         }
                     }
-                    addChildFunction(nodechild, functionNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase);
+                    addChildFunction(nodechild, functionNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase, vevosContainer);
                 }
             } else {
                 for (Map.Entry<String, Integer> errorst : errorStatements.entrySet()) {
@@ -473,6 +497,7 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                         Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(errorst.getKey()));
                         Node.Op lineNode = this.entityFactory.createOrderedNode(lineArtifact);
                         functionNode.addChild(lineNode);
+                        this.checkForFeatureTrace(errorst.getValue(), errorst.getValue(), vevosContainer, lineNode);
                         errorStatements.computeIfPresent(errorst.getKey(), (k, v) -> -1);
                     }
                 }
@@ -480,16 +505,18 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
             Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData("}"));
             Node.Op lineNode = this.entityFactory.createOrderedNode(lineArtifact);
             functionNode.addChild(lineNode);
+            this.checkForFeatureTrace(end + 1, end + 1, vevosContainer, lineNode);
         } else if (node instanceof ICPPASTLinkageSpecification) {
             Artifact.Op<BlockArtifactData> blockArtifact = this.entityFactory.createArtifact(new BlockArtifactData(lines[node.getFileLocation().getStartingLineNumber() - 1]));
             Node.Op blockNode = this.entityFactory.createOrderedNode(blockArtifact);
             functionsNode.addChild(blockNode);
-            Node.Op lineNode = null;
+            this.checkForFeatureTrace(node.getFileLocation().getStartingLineNumber() - 1, node.getFileLocation().getStartingLineNumber() - 1, vevosContainer, blockNode);
+            Node.Op lineNode;
             for (int i = node.getFileLocation().getStartingLineNumber(); i <= node.getFileLocation().getEndingLineNumber() - 1; i++) {
-                String line = lines[i];
                 Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(lines[i]));
                 lineNode = this.entityFactory.createOrderedNode(lineArtifact);
                 blockNode.addChild(lineNode);
+                this.checkForFeatureTrace(i, i, vevosContainer, lineNode);
             }
             lineNumbers.add(node.getFileLocation().getStartingLineNumber());
             lineNumbers.add(node.getFileLocation().getEndingLineNumber());
@@ -498,6 +525,7 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                 Artifact.Op<ProblemBlockArtifactData> blockArtifact = this.entityFactory.createArtifact(new ProblemBlockArtifactData(node.getRawSignature()));
                 Node.Op blockNode = this.entityFactory.createOrderedNode(blockArtifact);
                 fieldsNode.addChild(blockNode);
+                this.checkForFeatureTrace(node.getFileLocation().getStartingLineNumber(), node.getFileLocation().getEndingLineNumber(), vevosContainer, blockNode);
                 lineNumbers.add(node.getFileLocation().getStartingLineNumber());
                 lineNumbers.add(node.getFileLocation().getEndingLineNumber());
             }
@@ -509,6 +537,7 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
             Artifact.Op<FunctionArtifactData> functionsArtifact = this.entityFactory.createArtifact(new FunctionArtifactData(name));
             Node.Op functionNode = this.entityFactory.createOrderedNode(functionsArtifact);
             functionsNode.addChild(functionNode);
+            this.checkForFeatureTrace(node.getFileLocation().getStartingLineNumber(), node.getFileLocation().getEndingLineNumber(), vevosContainer, functionNode);
             lineNumbers.add(node.getFileLocation().getStartingLineNumber());
             lineNumbers.add(node.getFileLocation().getEndingLineNumber());
             if (node.getTranslationUnit().getMacroDefinitions().length > 0) {
@@ -517,26 +546,28 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                         Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(macro.getRawSignature()));
                         Node.Op lineNode = this.entityFactory.createOrderedNode(lineArtifact);
                         functionNode.addChild(lineNode);
+                        this.checkForFeatureTrace(macro.getFileLocation().getStartingLineNumber(), macro.getFileLocation().getEndingLineNumber(), vevosContainer, lineNode);
                     }
                 }
             }
             for (IASTNode nodechild : ((CPPASTTemplateDeclaration) node).getDeclaration().getChildren()) {
                 if (nodechild instanceof CPPASTCompoundStatement) {
                     for (IASTNode nodechild2 : nodechild.getChildren()) {
-                        addChildFunction(nodechild2, functionNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase);
+                        addChildFunction(nodechild2, functionNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase, vevosContainer);
                     }
                 }
             }
             Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData("}"));
             Node.Op lineNode = this.entityFactory.createOrderedNode(lineArtifact);
             functionNode.addChild(lineNode);
+            this.checkForFeatureTrace(node.getFileLocation().getEndingLineNumber(), node.getFileLocation().getEndingLineNumber(), vevosContainer, lineNode);
         } else {
             System.out.println("+++++++++++++++++++++ corner case +++++++++++ " + node.getRawSignature() + " " + node.getFileLocation().getFileName() + " " + node.getFileLocation().getStartingLineNumber());
         }
 
     }
 
-    public void addChildFunction(IASTNode node, Node.Op parentNode, Node.Op functionsNode, Node.Op fieldsNode, String[] lines, ArrayList<Integer> lineNumbers, ArrayList<Integer> lineNumbersSwitchCase) {
+    public void addChildFunction(IASTNode node, Node.Op parentNode, Node.Op functionsNode, Node.Op fieldsNode, String[] lines, ArrayList<Integer> lineNumbers, ArrayList<Integer> lineNumbersSwitchCase, VevosFileConditionContainer vevosContainer) {
         if (node instanceof IASTExpressionStatement || node instanceof CPPASTContinueStatement || node instanceof IASTDeclarationStatement || node instanceof CPPASTReturnStatement || node instanceof IASTReturnStatement || node instanceof IASTLabelStatement || node instanceof IASTGotoStatement || node instanceof CPPASTGotoStatement || node instanceof IASTBinaryExpression || node instanceof IASTFunctionCallExpression || node instanceof CPPASTBinaryExpression || node instanceof CPPASTBreakStatement || node instanceof CPPASTFieldReference || node instanceof CPPASTLiteralExpression) {
             Artifact.Op<LineArtifactData> lineArtifact;
             Node.Op lineNode;
@@ -569,18 +600,21 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                 Artifact.Op<BlockArtifactData> blockArtifactDataOp = this.entityFactory.createArtifact(new BlockArtifactData(node.getRawSignature()));
                 Node.Op blocknode = this.entityFactory.createOrderedNode(blockArtifactDataOp);
                 parentNode.addChild(blocknode);
+                this.checkForFeatureTrace(node.getFileLocation().getEndingLineNumber(), node.getFileLocation().getEndingLineNumber(), vevosContainer, blocknode);
             } else {
                 if (node.getFileLocation().getStartingLineNumber() != node.getFileLocation().getEndingLineNumber()) {
                     for (int o = node.getFileLocation().getStartingLineNumber() - 1; o <= node.getFileLocation().getEndingLineNumber() - 1; o++) {
                         lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(lines[o]));
                         lineNode = this.entityFactory.createOrderedNode(lineArtifact);
                         parentNode.addChild(lineNode);
+                        this.checkForFeatureTrace(o - 1, o - 1, vevosContainer, lineNode);
                         lineNumbersSwitchCase.add(o);
                     }
                 } else if (!lineNumbersSwitchCase.contains(node.getFileLocation().getStartingLineNumber() - 1)) {
                     lineNumbersSwitchCase.add(node.getFileLocation().getStartingLineNumber() - 1);
                     lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(lines[node.getFileLocation().getStartingLineNumber() - 1]));
                     lineNode = this.entityFactory.createOrderedNode(lineArtifact);
+                    this.checkForFeatureTrace(node.getFileLocation().getStartingLineNumber() - 1, node.getFileLocation().getStartingLineNumber() - 1, vevosContainer, lineNode);
                     parentNode.addChild(lineNode);
                 }
             }
@@ -595,6 +629,7 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                         blockArtifact = this.entityFactory.createArtifact(new IfBlockArtifactData(lines[node.getFileLocation().getStartingLineNumber() - 1]));
                         blockNode = this.entityFactory.createOrderedNode(blockArtifact);
                         parentNode.addChild(blockNode);
+                        this.checkForFeatureTrace(node.getFileLocation().getStartingLineNumber() - 1, node.getFileLocation().getStartingLineNumber() - 1, vevosContainer, blockNode);
                         lineNumbersSwitchCase.add(node.getFileLocation().getStartingLineNumber() - 1);
                     }
                 } else {
@@ -615,12 +650,11 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                         blockArtifact = this.entityFactory.createArtifact(new IfBlockArtifactData(ifexpression));
                         blockNode = this.entityFactory.createOrderedNode(blockArtifact);
                         parentNode.addChild(blockNode);
-                        ifexpression = "";
-
+                        this.checkForFeatureTrace(node.getFileLocation().getStartingLineNumber(), node.getFileLocation().getEndingLineNumber(), vevosContainer, blockNode);
                         if (((ICPPASTIfStatement) node).getThenClause().getFileLocation().getEndingLineNumber() != node.getFileLocation().getStartingLineNumber()) {
                             if (((ICPPASTIfStatement) node).getConditionExpression().getFileLocation().getEndingLineNumber() == ((ICPPASTIfStatement) node).getThenClause().getFileLocation().getStartingLineNumber())
                                 lineNumbersSwitchCase.add(((ICPPASTIfStatement) node).getThenClause().getFileLocation().getStartingLineNumber() - 1);
-                            addChildFunction(((ICPPASTIfStatement) node).getThenClause(), blockNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase);
+                            addChildFunction(((ICPPASTIfStatement) node).getThenClause(), blockNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase, vevosContainer);
                         }
                     }
                     //means if does not have anything
@@ -674,7 +708,7 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                     blockNode = this.entityFactory.createOrderedNode(blockArtifact);
                     parentNode.addChild(blockNode);
                     for (IASTNode child : ((ICPPASTIfStatement) node).getThenClause().getChildren()) {
-                        addChildFunction(child, blockNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase);
+                        addChildFunction(child, blockNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase, vevosContainer);
                     }
                     Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(("}")));
                     Node.Op lineNodeChild = this.entityFactory.createOrderedNode(lineArtifact);
@@ -685,7 +719,7 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                     blockNode = this.entityFactory.createOrderedNode(blockArtifact);
                     parentNode.addChild(blockNode);
                     for (IASTNode child : ((ICPPASTIfStatement) node).getThenClause().getChildren()) {
-                        addChildFunction(child, blockNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase);
+                        addChildFunction(child, blockNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase, vevosContainer);
                     }
                 }
                 if (((ICPPASTIfStatement) node).getElseClause() != null) {
@@ -724,10 +758,10 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
 
                     for (IASTNode child : ((ICPPASTWhileStatement) node).getBody().getChildren()) {
                         if (((IASTWhileStatement) node).getBody() instanceof CPPASTIfStatement) {
-                            addChildFunction(((ICPPASTWhileStatement) node).getBody(), blockNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase);
+                            addChildFunction(((ICPPASTWhileStatement) node).getBody(), blockNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase, vevosContainer);
                             break;
                         } else {
-                            addChildFunction(child, blockNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase);
+                            addChildFunction(child, blockNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase, vevosContainer);
                         }
                     }
                     if (whileaux.contains("{")) {
@@ -747,7 +781,7 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                     Node.Op blockNode = this.entityFactory.createOrderedNode(blockArtifact);
                     parentNode.addChild(blockNode);
                     for (IASTNode child : ((ICPPASTWhileStatement) node).getBody().getChildren()) {
-                        addChildFunction(child, blockNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase);
+                        addChildFunction(child, blockNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase, vevosContainer);
                     }
                     Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(("}")));
                     Node.Op lineNodeChild = this.entityFactory.createOrderedNode(lineArtifact);
@@ -795,13 +829,13 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                 parentNode.addChild(blockNode);
                 for (IASTNode child : ((IASTForStatement) node).getBody().getChildren()) {
                     if (((IASTForStatement) node).getBody() != null && ((IASTForStatement) node).getBody() instanceof CPPASTIfStatement || ((IASTForStatement) node).getBody() instanceof CPPASTForStatement) {
-                        addChildFunction(((IASTForStatement) node).getBody(), blockNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase);
+                        addChildFunction(((IASTForStatement) node).getBody(), blockNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase, vevosContainer);
                         break;
                     }
                     if (child instanceof CPPASTArraySubscriptExpression)
-                        addChildFunction(child.getParent(), blockNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase);
+                        addChildFunction(child.getParent(), blockNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase, vevosContainer);
                     else
-                        addChildFunction(child, blockNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase);
+                        addChildFunction(child, blockNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase, vevosContainer);
                 }
                 if (foraux.lastIndexOf("{") != -1) {
                     Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(("}")));
@@ -860,11 +894,11 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                             }
                         }
                     } else if (!lineNumbersSwitchCase.contains(Integer.valueOf(child.getFileLocation().getStartingLineNumber() - 1))) {
-                        addChildFunction(child, blockChildNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase);
+                        addChildFunction(child, blockChildNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase, vevosContainer);
                     } else if (child.getChildren().length > 1) {
-                        addChildFunction(child, blockChildNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase);
+                        addChildFunction(child, blockChildNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase, vevosContainer);
                     } else if (child instanceof CPPASTCompoundStatement) {
-                        addChildFunction(child, blockChildNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase);
+                        addChildFunction(child, blockChildNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase, vevosContainer);
                     }
                 }
                 Artifact.Op<LineArtifactData> lineArtifact = this.entityFactory.createArtifact(new LineArtifactData(("}")));
@@ -911,17 +945,17 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                             }
                         }
                     } else if (!lineNumbersSwitchCase.contains(Integer.valueOf(child.getFileLocation().getStartingLineNumber() - 1))) {
-                        addChildFunction(child, blockChildNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase);
+                        addChildFunction(child, blockChildNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase, vevosContainer);
                     } else if (child.getChildren().length > 1) {
-                        addChildFunction(child, blockChildNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase);
+                        addChildFunction(child, blockChildNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase, vevosContainer);
                     } else if (child instanceof CPPASTCompoundStatement) {
-                        addChildFunction(child, blockChildNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase);
+                        addChildFunction(child, blockChildNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase, vevosContainer);
                     }
                 }
             }
         } else if (node instanceof CPPASTCompoundStatement) {
             for (IASTNode child : node.getChildren()) {
-                addChildFunction(child, parentNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase);
+                addChildFunction(child, parentNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase, vevosContainer);
             }
             if (parentNode.getArtifact().getData().toString().contains("{") && !parentNode.getArtifact().getData().toString().contains("do")) {
                 if (node.getParent() instanceof CPPASTIfStatement && ((CPPASTIfStatement) node.getParent()).getElseClause() != null) {
@@ -935,7 +969,6 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                     Node.Op lineNodeChild = this.entityFactory.createOrderedNode(lineArtifact);
                     parentNode.addChild(lineNodeChild);
                 }
-
             }
         } else if (node instanceof CPPASTDefaultStatement) {
             Artifact.Op<BlockArtifactData> blockArtifact = this.entityFactory.createArtifact(new BlockArtifactData(((CPPASTDefaultStatement) node).getRawSignature() + " {"));
@@ -947,7 +980,7 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
                 Node.Op blockNode = this.entityFactory.createOrderedNode(blockArtifact);
                 parentNode.addChild(blockNode);
                 for (IASTNode child : node.getChildren()) {
-                    addChildFunction(child, blockNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase);
+                    addChildFunction(child, blockNode, functionsNode, fieldsNode, lines, lineNumbers, lineNumbersSwitchCase, vevosContainer);
                 }
             } else if (!lineNumbersSwitchCase.contains(node.getFileLocation().getStartingLineNumber() - 1)) {
                 String doblock = "do" + ((IASTDoStatement) node).getBody().getRawSignature() + "while(" + ((IASTDoStatement) node).getCondition().getRawSignature() + ");";
@@ -1047,6 +1080,15 @@ public class CppReader implements ArtifactReader<Path, Set<Node.Op>> {
         reader.close();
 
         return content.toString();
+    }
+
+    private void checkForFeatureTrace(int startLine, int endLine, VevosFileConditionContainer fileConditionContainer, Node.Op node){
+        if (fileConditionContainer == null){ return; }
+        Collection<VevosCondition> matchingConditions = fileConditionContainer.getMatchingPresenceConditions(startLine, endLine);
+        for(VevosCondition condition : matchingConditions){
+            FeatureTrace nodeTrace = node.getFeatureTrace();
+            nodeTrace.buildUserConditionConjunction(condition.getConditionString());
+        }
     }
 
     private Collection<ReadListener> listeners = new ArrayList<>();

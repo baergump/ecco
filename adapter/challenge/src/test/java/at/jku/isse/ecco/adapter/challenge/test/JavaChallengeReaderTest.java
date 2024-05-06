@@ -84,7 +84,7 @@ public class JavaChallengeReaderTest {
     @Test
     public void parseFileTest(){
         long start = System.currentTimeMillis();
-        Set<Node.Op> nodes = this.eccoService.readFiles(this.repository);
+        Set<Node.Op> nodes = this.eccoService.readFiles();
         long finish = System.currentTimeMillis();
 
         long timeElapsed = finish - start;
@@ -97,7 +97,7 @@ public class JavaChallengeReaderTest {
             Path variantPath = Paths.get("C:\\Users\\Bernhard\\Work\\Tools\\ArgoUMLExtractor\\variants\\Variant_" + i);
             this.setup(variantPath);
             long start = System.currentTimeMillis();
-            Set<Node.Op> nodes = this.eccoService.readFiles(this.repository);
+            Set<Node.Op> nodes = this.eccoService.readFiles();
             long finish = System.currentTimeMillis();
             long timeElapsed = finish - start;
             System.out.printf("took %d milliseconds (%d seconds).%n", timeElapsed, timeElapsed / 1000);
@@ -130,4 +130,7 @@ public class JavaChallengeReaderTest {
     public void trainAllVariants(){
 
     }
+
+    // TODO: Trees.treeFusion: multiple nodes with equal artifacts in the same variant will be fused correctly
+    // TODO: (the correct "same" node must be chosen during fusion -> same sequence number)
 }

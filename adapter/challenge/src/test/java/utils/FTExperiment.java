@@ -2,10 +2,12 @@ package utils;
 
 import at.jku.isse.ecco.feature.Feature;
 import at.jku.isse.ecco.feature.FeatureRevision;
+import at.jku.isse.ecco.featuretrace.FeatureTrace;
 import at.jku.isse.ecco.featuretrace.evaluation.*;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.EccoService;
 import at.jku.isse.ecco.tree.Node;
+import mistake.*;
 import org.apache.commons.io.FileUtils;
 
 import java.io.*;
@@ -53,17 +55,20 @@ public class FTExperiment {
         //experiment.iterateStrategies();
         //experiment.runSpecificTest();
         //experiment.test();
+        //experiment.summarizeResults();
+        //experiment.checkCounts();
+        //Path path = VevosUtils.getVariantPath(Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Scenarios\\ScenarioAllVariants"), "ACTIVITYDIAGRAM, BASE, COGNITIVE, COLLABORATIONDIAGRAM, DEPLOYMENTDIAGRAM, LOGGING, SEQUENCEDIAGRAM, STATEDIAGRAM, USECASEDIAGRAM");
+    }
+
+    public void runSpecificExperiment(){
+        this.repositoryPath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories\\ScenarioRandom002Variants");
+        this.ftPercentage = 100;
+        this.mistakePercentage = 10;
+        this.strategy = new UserBasedEvaluation();
+        this.runExperiment(Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge"));
         experiment.summarizeResults();
         //experiment.checkCounts();
         //Path path = VevosUtils.getVariantPath(Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Variants"), "BASE, COGNITIVE, COLLABORATIONDIAGRAM, STATEDIAGRAM");
-    }
-
-    public void runSpecificTest(){
-        this.strategy = new UserBasedEvaluation();
-        this.repositoryPath = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Repositories\\ScenarioRandom002Variants");
-        this.ftPercentage = 0;
-        this.mistakePercentage = 0;
-        this.runExperiment(Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Results\\AddAndRemove\\ScenarioRandom002Variants\\000_FEATURE_TRACES\\000_FAULTY_TRACES"));
     }
 
     public void checkCounts(){
@@ -137,16 +142,25 @@ public class FTExperiment {
         this.initService();
         new File(resultBasePath.toAbsolutePath().toString()).mkdirs();
         repository.removeFeatureTracePercentage(100 - this.ftPercentage);
+        MistakeCreator mistaker = this.createMistakeCreator(repository.getFeatureTraces());
+        mistaker.createMistakePercentage(this.repository, this.mistakePercentage);
         Node.Op mainTree = this.repository.fuseAssociationsWithFeatureTraces();
         CounterVisitor visitor = new CounterVisitor();
         mainTree.traverse(visitor);
         this.baseCleanup(mainTree);
         this.literalNameCleanup(mainTree);
-        MistakeCreator mistaker = new MistakeCreator();
-        mistaker.createMistakePercentage(this.repository, this.mistakePercentage);
         MetricsCalculator metricsCalculator = new MetricsCalculator(this.GROUND_TRUTHS, this.FEATURES);
         metricsCalculator.calculateMetrics(mainTree, this.strategy, resultBasePath);
         System.out.println("");
+    }
+
+    private MistakeCreator createMistakeCreator(Collection<FeatureTrace> traces){
+        //MistakeStrategy mistakeStrategy = new ConditionSwapper(traces);
+        //MistakeStrategy mistakeStrategy = new Conjugator(this.FEATURES);
+        //MistakeStrategy mistakeStrategy = new Unconjugator(this.FEATURES);
+        //MistakeStrategy mistakeStrategy = new OperatorSwapper();
+        MistakeStrategy mistakeStrategy = new FeatureSwitcher(this.FEATURES);
+        return new MistakeCreator(mistakeStrategy);
     }
 
     private void iterateStrategies(){
