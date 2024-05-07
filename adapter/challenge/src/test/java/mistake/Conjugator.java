@@ -2,6 +2,7 @@ package mistake;
 
 import at.jku.isse.ecco.featuretrace.FeatureTrace;
 import at.jku.isse.ecco.featuretrace.LogicUtils;
+import at.jku.isse.ecco.repository.Repository;
 import org.logicng.formulas.Formula;
 import org.logicng.formulas.FormulaFactory;
 import org.logicng.formulas.Variable;
@@ -31,5 +32,10 @@ public class Conjugator implements MistakeStrategy{
         String conjugation = variable + " & " + randomFeature;
         trace.setUserCondition(userConditionString.replace(variable.toString(), conjugation));
         return true;
+    }
+
+    @Override
+    public void init(Repository.Op repository) {
+
     }
 }

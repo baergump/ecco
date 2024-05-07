@@ -2,6 +2,7 @@ package mistake;
 
 import at.jku.isse.ecco.featuretrace.FeatureTrace;
 import at.jku.isse.ecco.featuretrace.LogicUtils;
+import at.jku.isse.ecco.repository.Repository;
 import org.logicng.formulas.Formula;
 import org.logicng.formulas.FormulaFactory;
 import org.logicng.formulas.Variable;
@@ -10,13 +11,8 @@ import java.util.SortedSet;
 
 
 public class Unconjugator implements MistakeStrategy{
-    private String[] features;
 
     private FormulaFactory formulaFactory = new FormulaFactory();
-
-    public Unconjugator(String[] features){
-        this.features = features;
-    }
 
     @Override
     public boolean createMistake(FeatureTrace trace) {
@@ -30,9 +26,13 @@ public class Unconjugator implements MistakeStrategy{
         }
         Variable toBeSwitched = this.getRandom(variables);
         String cnfString = cnf.toString();
-        // TODO: true-constant?
-        String newCondition = cnfString.replace(toBeSwitched.name(), "true");
+        String newCondition = cnfString.replace(toBeSwitched.name(), formulaFactory.verum().toString());
         trace.setUserCondition(newCondition);
         return true;
+    }
+
+    @Override
+    public void init(Repository.Op repository) {
+
     }
 }

@@ -17,7 +17,8 @@ public class MistakeCreator {
         this.mistakeStrategy = mistakeStrategy;
     }
 
-    public void createMistakePercentage(Repository repository, int percentage){
+    public void createMistakePercentage(Repository.Op repository, int percentage){
+        this.mistakeStrategy.init(repository);
         if (percentage < 0 || percentage > 100){
             throw new RuntimeException(String.format("Percentage of feature traces is invalid (%d).", percentage));
         }
@@ -36,6 +37,10 @@ public class MistakeCreator {
                 attempts++;
             }
         }
+    }
+
+    public MistakeStrategy getMistakeStrategy(){
+        return this.mistakeStrategy;
     }
 
     private String getRandomOtherFeature(String feature){
