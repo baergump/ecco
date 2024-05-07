@@ -27,6 +27,8 @@ public class UserBasedEvaluation implements EvaluationStrategy{
         if (userCondition == null && diffCondition == null){
             Formula falseFormula = this.formulaFactory.constant(false);
             return falseFormula.toString();
+        } else if (userCondition == null){
+            return diffCondition;
         } else {
             return userCondition;
         }
