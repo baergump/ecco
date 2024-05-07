@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class CppReaderTest {
 
     private final Path REPOSITORY_PATH = Paths.get("src", "integrationTest","resources", "test_repository");
-    private final Path VARIANT_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Repositories\\BusyBox\\busybox");
+    private final Path VARIANT_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\CRepos\\busybox");
     private EccoService eccoService;
     private Repository.Op repository;
     //private CppReader reader;
