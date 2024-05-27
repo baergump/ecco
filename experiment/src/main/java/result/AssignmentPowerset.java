@@ -1,4 +1,4 @@
-package utils;
+package result;
 
 import org.logicng.datastructures.Assignment;
 import org.logicng.formulas.FormulaFactory;

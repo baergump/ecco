@@ -20,8 +20,11 @@ public class VevosCondition {
 
         this.filePath = Paths.get(lineParts[0]);
         this.conditionString = this.prepareConditionString(lineParts[3]);
-        this.startLine = Integer.parseInt(lineParts[4]);
-        this.endLine = Integer.parseInt(lineParts[5]);
+        // TODO: make multiple formats possible via interface
+        //this.startLine = Integer.parseInt(lineParts[4]);
+        //this.endLine = Integer.parseInt(lineParts[5]);
+        this.startLine = Integer.parseInt(lineParts[5]);
+        this.endLine = Integer.parseInt(lineParts[6]);
     }
 
     private String prepareConditionString(String stringCondition){

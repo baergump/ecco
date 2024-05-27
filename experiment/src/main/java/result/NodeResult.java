@@ -1,4 +1,4 @@
-package utils;
+package result;
 
 import at.jku.isse.ecco.tree.Node;
 import org.logicng.datastructures.Assignment;

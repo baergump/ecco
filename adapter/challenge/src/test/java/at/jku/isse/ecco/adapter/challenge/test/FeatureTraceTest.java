@@ -11,13 +11,13 @@ import at.jku.isse.ecco.featuretrace.FeatureTrace;
 import at.jku.isse.ecco.repository.Repository;
 import at.jku.isse.ecco.service.EccoService;
 import at.jku.isse.ecco.storage.mem.featuretrace.MemFeatureTrace;
+import at.jku.isse.ecco.tree.EmptyVisitor;
 import at.jku.isse.ecco.tree.Node;
 import at.jku.isse.ecco.tree.RootNode;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import utils.EmptyVisitor;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FeatureTraceTest {
+
 
     // TODO: put this test class in another module? service?
     // TODO: test tree builds with feature traces including order

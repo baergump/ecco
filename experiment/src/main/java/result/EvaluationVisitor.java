@@ -1,4 +1,4 @@
-package utils;
+package result;
 
 import at.jku.isse.ecco.featuretrace.LogicUtils;
 import at.jku.isse.ecco.featuretrace.evaluation.EvaluationStrategy;
@@ -7,6 +7,8 @@ import at.jku.isse.ecco.util.Location;
 import org.logicng.datastructures.Assignment;
 import org.logicng.formulas.Formula;
 import org.logicng.formulas.FormulaFactory;
+import result.NodeResult;
+import utils.vevos.GroundTruth;
 
 import java.nio.file.Path;
 import java.util.Collection;

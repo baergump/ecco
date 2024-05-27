@@ -62,12 +62,9 @@ public class CppReaderTest {
      */
 
     private void deleteRepository() throws IOException {
-        Path repositoryFolderPath = this.REPOSITORY_PATH.resolve(".ecco");
-        File repositoryFolder = repositoryFolderPath.toFile();
-        if (repositoryFolder.exists()) {
-            FileUtils.deleteDirectory(repositoryFolder);
+        if (this.REPOSITORY_PATH.toFile().exists()) {
+            FileUtils.deleteDirectory(this.REPOSITORY_PATH.toFile());
         }
-        //FileUtils.cleanDirectory(this.REPOSITORY_PATH.toFile());
     }
 
     private void createDir(Path path){

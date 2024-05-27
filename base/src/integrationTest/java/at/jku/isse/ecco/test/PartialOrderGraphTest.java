@@ -85,7 +85,7 @@ public class PartialOrderGraphTest {
 
 		pog1.merge(artifacts3);
 
-		displayPOG(pog1);
+		//displayPOG(pog1);
 
 		pog1.merge(artifacts3);
 	}
@@ -667,6 +667,7 @@ public class PartialOrderGraphTest {
 	}
 
 
+
 	private void displayPOG(PartialOrderGraph pog) {
 //		Utility.launchApp((app, stage) -> {
 //			PartialOrderGraphView partialOrderGraphView = new PartialOrderGraphView();
@@ -758,6 +759,7 @@ public class PartialOrderGraphTest {
 		return artifact;
 	}
 
+	/*
 	@BeforeAll
 	public void setup() throws InterruptedException {
 		JavaFxLauncher.initialize();
@@ -772,6 +774,7 @@ public class PartialOrderGraphTest {
 	public void afterTest() {
 		System.out.println("AFTER");
 	}
+	 */
 
 }
 

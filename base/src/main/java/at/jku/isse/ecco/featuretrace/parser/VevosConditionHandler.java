@@ -40,7 +40,7 @@ public class VevosConditionHandler {
         try {
             for (String line : vevosFileLines) {
                 // ignore file conditions
-                if(line.contains(";True;True;True;1")){ continue; }
+                if(line.contains(";True;True;True;")){ continue; }
                 this.addConditionToMap(new VevosCondition(line));
             }
         } catch(IllegalArgumentException e){

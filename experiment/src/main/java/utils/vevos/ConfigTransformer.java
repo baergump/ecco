@@ -1,4 +1,4 @@
-package utils;
+package utils.vevos;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -17,7 +17,8 @@ import java.util.stream.Stream;
 public class ConfigTransformer {
 
     public static void main(String[] args) {
-        final Path VARIANTS_BASE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\ArgoUML_Challenge\\ScenarioAllVariants");
+        //final Path VARIANTS_BASE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\ArgoUML_Challenge\\ScenarioAllVariants");
+        final Path VARIANTS_BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\VEVOS_Simulation_Sampling\\simulated_variants\\busybox\\0180e82ecebe14abfe9a19ba7a297c12d064cc5c");
         transformConfigurations(VARIANTS_BASE_PATH);
     }
 

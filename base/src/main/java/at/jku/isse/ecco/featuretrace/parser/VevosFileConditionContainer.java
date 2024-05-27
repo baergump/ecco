@@ -27,10 +27,10 @@ public class VevosFileConditionContainer {
     }
 
     private void validateLines(int startLine, int endLine, VevosCondition condition){
-        if (this.rangesAreOverlapping(startLine, endLine, condition.getStartLine(), condition.getEndLine())){
-            throw new RuntimeException(String.format("Line ranges of ast node and condition are overlapping. node: %d - %d; condition: %d - %d"
-                    , startLine, endLine, condition.getStartLine(), condition.getEndLine()));
-        }
+        //if (this.rangesAreOverlapping(startLine, endLine, condition.getStartLine(), condition.getEndLine())){
+        //    throw new RuntimeException(String.format("Line ranges of ast node and condition are overlapping. node: %d - %d; condition: %d - %d"
+        //            , startLine, endLine, condition.getStartLine(), condition.getEndLine()));
+        //}
     }
 
     private boolean rangesAreOverlapping(int start1, int end1, int start2, int end2){

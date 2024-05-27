@@ -1,14 +1,10 @@
-package utils;
+package result;
 
 
 import at.jku.isse.ecco.featuretrace.evaluation.EvaluationStrategy;
 import at.jku.isse.ecco.tree.Node;
 import org.logicng.datastructures.Assignment;
 import org.logicng.formulas.FormulaFactory;
-import utils.AssignmentPowerset;
-import utils.EvaluationVisitor;
-import utils.NodeResult;
-import utils.Result;
 
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -16,12 +12,12 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 
-public class MetricsCalculator {
+public class ResultCalculator {
 
     private final Path groundTruths;
     private final Collection<String> allFeatures;
 
-    public MetricsCalculator(Path groundTruths, String[] allFeatures){
+    public ResultCalculator(Path groundTruths, String[] allFeatures){
         this.groundTruths = groundTruths;
         this.allFeatures = Arrays.stream(allFeatures).collect(Collectors.toList());
     }

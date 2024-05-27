@@ -3,6 +3,7 @@ package at.jku.isse.ecco.util;
 import at.jku.isse.ecco.EccoException;
 import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.artifact.ArtifactReference;
+import at.jku.isse.ecco.pog.PartialOrderGraph;
 import at.jku.isse.ecco.tree.Node;
 import at.jku.isse.ecco.tree.RootNode;
 
@@ -178,6 +179,17 @@ public class Trees {
 	}
 
 	public static void mergePartialOrderGraphs(Node.Op left, Node.Op right) {
+		PartialOrderGraph leftGraph = left.getArtifact().getPartialOrderGraph();
+		PartialOrderGraph rightGraph = right.getArtifact().getPartialOrderGraph();
+		if (leftGraph != null) {
+			System.out.println();
+			System.out.println("POG number of nodes left: " + leftGraph.collectNodes().size());
+		}
+		if (rightGraph != null) {
+			System.out.println("POG number of nodes right: " + rightGraph.collectNodes().size());
+			System.out.println();
+		}
+
 		if (left.getArtifact() != null && right.getArtifact() != null) {
 			if (left.getArtifact().isOrdered()) {
 				if (left.getArtifact().isSequenced() && right.getArtifact().isSequenced() && left.getArtifact().getPartialOrderGraph() != right.getArtifact().getPartialOrderGraph()) {
@@ -198,7 +210,7 @@ public class Trees {
 			}
 		}
 
-		/*
+        /*
 		for (Node.Op leftChild : left.getChildren()) {
 			int ri = right.getChildren().indexOf(leftChild);
 			if (ri == -1)

@@ -1,4 +1,4 @@
-package utils;
+package utils.vevos;
 
 import at.jku.isse.ecco.featuretrace.LogicUtils;
 import at.jku.isse.ecco.featuretrace.parser.VevosCondition;
@@ -7,6 +7,7 @@ import at.jku.isse.ecco.featuretrace.parser.VevosFileConditionContainer;
 import at.jku.isse.ecco.util.Location;
 import org.logicng.formulas.Formula;
 import org.logicng.formulas.FormulaFactory;
+import utils.vevos.VevosUtils;
 
 import java.nio.file.Path;
 import java.util.Collection;

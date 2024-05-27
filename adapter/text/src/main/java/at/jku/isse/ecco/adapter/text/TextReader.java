@@ -4,6 +4,10 @@ import at.jku.isse.ecco.adapter.ArtifactReader;
 import at.jku.isse.ecco.adapter.dispatch.PluginArtifactData;
 import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.dao.EntityFactory;
+import at.jku.isse.ecco.featuretrace.FeatureTrace;
+import at.jku.isse.ecco.featuretrace.parser.VevosCondition;
+import at.jku.isse.ecco.featuretrace.parser.VevosConditionHandler;
+import at.jku.isse.ecco.featuretrace.parser.VevosFileConditionContainer;
 import at.jku.isse.ecco.service.listener.ReadListener;
 import at.jku.isse.ecco.tree.Node;
 import com.google.inject.Inject;
@@ -40,7 +44,7 @@ public class TextReader implements ArtifactReader<Path, Set<Node.Op>> {
 
 	static {
 		prioritizedPatterns = new HashMap<>();
-		prioritizedPatterns.put(1, new String[]{"**.txt", "**.md", "**.xml", "**.html", "**.css", "**.js", "**.java"});//, "**.c", "**.h", "**.cpp", "**.hpp"});
+		prioritizedPatterns.put(1, new String[]{"**.txt", "**.md", "**.xml", "**.html", "**.css", "**.js", "**.java", "**.c", "**.h", "**.cpp", "**.hpp"});
 	}
 
 	@Override
@@ -55,8 +59,10 @@ public class TextReader implements ArtifactReader<Path, Set<Node.Op>> {
 
 	@Override
 	public Set<Node.Op> read(Path base, Path[] input) {
+		VevosConditionHandler vevosConditionHandler = new VevosConditionHandler(base);
 		Set<Node.Op> nodes = new HashSet<>();
 		for (Path path : input) {
+			VevosFileConditionContainer fileConditionContainer = vevosConditionHandler.getFileSpecificPresenceConditions(path);
 			Path resolvedPath = base.resolve(path);
 			Artifact.Op<PluginArtifactData> pluginArtifact = this.entityFactory.createArtifact(new PluginArtifactData(this.getPluginId(), path));
 			Node.Op pluginNode = this.entityFactory.createOrderedNode(pluginArtifact);
@@ -71,6 +77,7 @@ public class TextReader implements ArtifactReader<Path, Set<Node.Op>> {
 					Node.Op lineNode = this.entityFactory.createNode(lineArtifact);
 					lineNode.putProperty(PROPERTY_LINE_START, i);
 					lineNode.putProperty(PROPERTY_LINE_END, i);
+					this.checkForFeatureTrace(i, fileConditionContainer, lineNode);
 					pluginNode.addChild(lineNode);
 				}
 			} catch (IOException e) {
@@ -81,6 +88,14 @@ public class TextReader implements ArtifactReader<Path, Set<Node.Op>> {
 		return nodes;
 	}
 
+	private void checkForFeatureTrace(int line, VevosFileConditionContainer fileConditionContainer, Node.Op node){
+		if (fileConditionContainer == null){ return; }
+		Collection<VevosCondition> matchingConditions = fileConditionContainer.getMatchingPresenceConditions(line, line);
+		for(VevosCondition condition : matchingConditions){
+			FeatureTrace nodeTrace = node.getFeatureTrace();
+			nodeTrace.buildUserConditionConjunction(condition.getConditionString());
+		}
+	}
 
 	private Collection<ReadListener> listeners = new ArrayList<>();
 

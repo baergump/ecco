@@ -34,3 +34,6 @@ project(':adapter-runtime').projectDir = file('adapter/runtime')
 project(':adapter-golang').projectDir = file('adapter/golang')
 
 rootProject.children.each { it.name = rootProject.name + '-' + it.name }
+include 'experiment'
+include 'experiment'
+

@@ -27,7 +27,6 @@ public class MemRootNode extends MemNode implements RootNode, RootNode.Op {
 
 	private void writeObject(ObjectOutputStream out) throws IOException {
 		out.defaultWriteObject();
-
 		// breadth first
 		Queue<Node.Op> currentLevel = new LinkedList<>(this.getChildren());
 		Queue<Node.Op> nextLevel = new LinkedList<>();

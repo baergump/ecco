@@ -1,8 +1,12 @@
-package utils;
+package trainer;
 
 import at.jku.isse.ecco.service.EccoService;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import utils.vevos.ConfigTransformer;
+import utils.DirUtils;
+import utils.vevos.VevosUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,9 +33,11 @@ public class EccoTrainer {
     private Path scenarioPath;
     private Path repoPath;
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // specific for ArgoUML
         //EccoTrainer.prepareScenarios();
+        File fileToDeletePath = new File("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\CRepos\\busybox\\Repositories\\005Variants");
+        FileUtils.deleteDirectory(fileToDeletePath);
         EccoTrainer trainer = new EccoTrainer();
         trainer.trainScenarios();
     }
@@ -52,18 +58,6 @@ public class EccoTrainer {
         }
     }
 
-    public void trainScenario(){
-        System.out.println("Training scenario " + this.scenarioName + ".");
-        if (this.repoPath.toFile().exists()){
-            System.out.println("Scenario already trained.");
-        } else {
-            DirUtils.createDir(this.repoPath);
-            this.createRepository();
-            //this.commitVariants();
-            this.eccoService.close();
-        }
-    }
-
     private List<Path> getScenarioPaths(){
         try (Stream<Path> pathStream = Files.list(SCENARIOS_PATH)){
             return pathStream.collect(Collectors.toList());
@@ -72,7 +66,7 @@ public class EccoTrainer {
         }
     }
 
-    /*private static void prepareScenarios(){
+    private static void prepareScenarios(){
         List<Path> scenarioReferences = VevosUtils.getVariantFolders(REFERENCE_PATH);
         for (Path scenarioReference : scenarioReferences){
             String scenarioName = FilenameUtils.getName(scenarioReference.toString());
@@ -112,7 +106,7 @@ public class EccoTrainer {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }*/
+    }
 
     private void cleanupService() {
         if (this.eccoService != null){
@@ -131,7 +125,17 @@ public class EccoTrainer {
         }
     }
 
-    /*
+    public void trainScenario(){
+        System.out.println("Training scenario " + this.scenarioName + ".");
+        if (this.repoPath.toFile().exists()){
+            System.out.println("Scenario already trained.");
+        } else {
+            DirUtils.createDir(this.repoPath);
+            this.createRepository();
+            this.commitVariants();
+            this.eccoService.close();
+        }
+    }
 
     private void commitVariants(){
         List<Path> variantPaths = VevosUtils.getVariantFolders(this.scenarioPath);
@@ -142,7 +146,7 @@ public class EccoTrainer {
             System.out.println(variantPath);
             this.train(variantPath);
         }
-    }*/
+    }
 
     private void createRepository(){
         this.eccoService = new EccoService();

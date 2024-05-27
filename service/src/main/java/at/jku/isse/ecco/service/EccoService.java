@@ -1561,12 +1561,6 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
 
             nodes.forEach(Trees::sequence);
 
-            // TODO: POGs must be merged before a comparison
-            // TODO: test if POG-merge while FT-Tree-Merge does the trick
-
-
-
-
             // TODO: this is done for paper-purposes in regard to feature traces
             ConfigInsertionVisitor visitor = new ConfigInsertionVisitor(configuration);
             nodes.forEach(node -> node.traverse(visitor));
