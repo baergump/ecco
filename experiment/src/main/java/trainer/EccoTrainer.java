@@ -20,13 +20,13 @@ import java.util.stream.Stream;
 
 public class EccoTrainer {
 
-    private static final Path BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\CRepos\\busybox");
+    private static final Path BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\CRepos\\openvpn");
     //private static final Path BASE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment");
     private static final Path SCENARIOS_PATH = BASE_PATH.resolve("Scenarios");
     private static final Path REPOSITORIES_PATH = BASE_PATH.resolve("Repositories");
     private static final Path REFERENCE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\argouml-spl-benchmark\\ArgoUMLSPLBenchmark\\scenarios");
     //private static final Path VARIANTS_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\ArgoUMLExtractor\\variants");
-    private static final Path VARIANTS_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\VEVOS_Simulation_Sampling\\simulated_variants\\busybox\\0180e82ecebe14abfe9a19ba7a297c12d064cc5c");
+    private static final Path VARIANTS_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\VEVOS_Simulation_Sampling\\simulated_variants\\openvpn\\0bdcfb99e1425cb6a73362f5462a7293ddfd699b");
 
     private EccoService eccoService;
     private String scenarioName;
@@ -36,7 +36,7 @@ public class EccoTrainer {
     public static void main(String[] args) throws IOException {
         // specific for ArgoUML
         //EccoTrainer.prepareScenarios();
-        File fileToDeletePath = new File("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\CRepos\\busybox\\Repositories\\005Variants");
+        File fileToDeletePath = new File("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\CRepos\\openvpn\\Repositories\\005Variants");
         FileUtils.deleteDirectory(fileToDeletePath);
         EccoTrainer trainer = new EccoTrainer();
         trainer.trainScenarios();

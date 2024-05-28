@@ -7,7 +7,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -18,7 +21,7 @@ public class ConfigTransformer {
 
     public static void main(String[] args) {
         //final Path VARIANTS_BASE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\ArgoUML_Challenge\\ScenarioAllVariants");
-        final Path VARIANTS_BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\VEVOS_Simulation_Sampling\\simulated_variants\\busybox\\0180e82ecebe14abfe9a19ba7a297c12d064cc5c");
+        final Path VARIANTS_BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\VEVOS_Simulation_Sampling\\simulated_variants\\openvpn\\0bdcfb99e1425cb6a73362f5462a7293ddfd699b");
         transformConfigurations(VARIANTS_BASE_PATH);
     }
 
@@ -59,10 +62,42 @@ public class ConfigTransformer {
     }
 
     public static String vevosConfigFileToConfig(Path configFile){
+        List<String> features = readVevosConfigFile(configFile);
+        return String.join(", ", features);
+    }
+
+    public static String[] gatherConfigFeatures(Path vevosVariantConfigsFolder, int maxFeatureNumber){
+        Set<String> features = new HashSet<>();
+        Set<String> vevosConfigFiles = listFilesUsingFilesList(vevosVariantConfigsFolder);
+        Iterator<String> vevosConfigFileIterator = vevosConfigFiles.iterator();
+
+        while (features.size() < maxFeatureNumber && vevosConfigFileIterator.hasNext()){
+            String vevosConfigFileName = vevosConfigFileIterator.next();
+            Path vevosConfigFilePath = vevosVariantConfigsFolder.resolve(vevosConfigFileName);
+            List<String> vevosConfigFeatures = readVevosConfigFile(vevosConfigFilePath);
+            features.addAll(vevosConfigFeatures);
+        }
+
+        return features.toArray(new String[features.size()]);
+    }
+
+    public static Set<String> listFilesUsingFilesList(Path dir) {
+        try (Stream<Path> stream = Files.list(dir)) {
+            return stream
+                    .filter(file -> !Files.isDirectory(file))
+                    .map(Path::getFileName)
+                    .map(Path::toString)
+                    .collect(Collectors.toSet());
+        } catch (IOException e){
+            throw new RuntimeException(String.format("Listing files in directory %s failed.", dir));
+        }
+    }
+
+    public static List<String> readVevosConfigFile(Path filePath){
         try {
-            List<String> allLines = Files.readAllLines(configFile);
-            allLines = allLines.stream().filter(f -> !f.isEmpty()).collect(Collectors.toList());
-            return String.join(", ", allLines);
+            List<String> features = Files.readAllLines(filePath);
+            features = features.stream().filter(f -> !f.isEmpty()).collect(Collectors.toList());
+            return features;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

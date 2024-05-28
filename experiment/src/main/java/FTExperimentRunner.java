@@ -11,6 +11,7 @@ import utils.BaseCleanUpVisitor;
 import utils.CounterVisitor;
 import utils.LiteralCleanUpVisitor;
 import result.ResultCalculator;
+import utils.vevos.ConfigTransformer;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -55,11 +56,10 @@ public class FTExperimentRunner {
     private EvaluationStrategy strategy;
     private MistakeStrategy mistakeStrategy;
 
-    // TODO: gather all features from ground-truth!
     //private final String[] FEATURES = {"STATEDIAGRAM", "ACTIVITYDIAGRAM", "USECASEDIAGRAM", "COLLABORATIONDIAGRAM",
     //        "DEPLOYMENTDIAGRAM", "SEQUENCEDIAGRAM", "COGNITIVE", "LOGGING"};
 
-    private final String[] FEATURES = {"ENABLE_BUSYBOX",
+    /*private final String[] FEATURES = {"ENABLE_BUSYBOX",
             "LZO1Y",
             "ETH_P_ATMFATE",
             "ENABLE_FEATURE_FDISK_WRITABLE",
@@ -69,9 +69,14 @@ public class FTExperimentRunner {
             "UCLIBC_VERSION__GEQ__KERNEL_VERSION___LB__0__9__34__RB__",
             "ENABLE_FEATURE_FIND_GROUP",
             "ENABLE_FEATURE_INDIVIDUAL"};
+     */
+    private String[] features;
+    private final int MAX_FEATURE_NUMBER = 10;
 
     public static void main(String[] args) {
         FTExperimentRunner experiment = new FTExperimentRunner();
+        experiment.features = ConfigTransformer.gatherConfigFeatures(experiment.GROUND_TRUTHS.resolve("configs"), experiment.MAX_FEATURE_NUMBER);
+
         //experiment.summarizeSpecificResults();
         experiment.createMistakeCreators();
         //experiment.iterateStrategies();
@@ -202,16 +207,16 @@ public class FTExperimentRunner {
         mainTree.traverse(visitor);
         this.baseCleanup(mainTree);
         this.literalNameCleanup(mainTree);
-        ResultCalculator metricsCalculator = new ResultCalculator(this.GROUND_TRUTHS, this.FEATURES);
+        ResultCalculator metricsCalculator = new ResultCalculator(this.GROUND_TRUTHS, this.features);
         metricsCalculator.calculateMetrics(mainTree, this.strategy, resultBasePath);
     }
 
     private MistakeCreator createMistakeCreator(Collection<FeatureTrace> traces){
         //MistakeStrategy mistakeStrategy = new ConditionSwapper(traces);
-        //MistakeStrategy mistakeStrategy = new Conjugator(this.FEATURES);
-        //MistakeStrategy mistakeStrategy = new Unconjugator(this.FEATURES);
+        //MistakeStrategy mistakeStrategy = new Conjugator(this.features);
+        //MistakeStrategy mistakeStrategy = new Unconjugator(this.features);
         //MistakeStrategy mistakeStrategy = new OperatorSwapper();
-        MistakeStrategy mistakeStrategy = new FeatureSwitcher(this.FEATURES);
+        MistakeStrategy mistakeStrategy = new FeatureSwitcher(this.features);
         return new MistakeCreator(mistakeStrategy);
     }
 
@@ -256,11 +261,11 @@ public class FTExperimentRunner {
         MistakeCreator conditionSwapCreator = new MistakeCreator(conditionSwapper);
         this.mistakeCreators.add(conditionSwapCreator);
 
-        Conjugator conjugator = new Conjugator(this.FEATURES);
+        Conjugator conjugator = new Conjugator(this.features);
         MistakeCreator conjugatorCreator = new MistakeCreator(conjugator);
         this.mistakeCreators.add(conjugatorCreator);
 
-        FeatureSwitcher featureSwitcher = new FeatureSwitcher(this.FEATURES);
+        FeatureSwitcher featureSwitcher = new FeatureSwitcher(this.features);
         MistakeCreator featureSwitchCreator = new MistakeCreator(featureSwitcher);
         this.mistakeCreators.add(featureSwitchCreator);
 
@@ -307,7 +312,7 @@ public class FTExperimentRunner {
     private void literalNameCleanup(Node.Op node){
         // necessary for when there are features in the ground-truth without revision-ID
         Map<String, String> literalNameMap = new HashMap<>();
-        for (String groundTruthName : this.FEATURES){
+        for (String groundTruthName : this.features){
             Collection<Feature> features = this.repository.getFeaturesByName(groundTruthName);
             if (features.size() != 0){
                 String repoName = features.iterator().next().getLatestRevision().getLogicLiteralRepresentation();
