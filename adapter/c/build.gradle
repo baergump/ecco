@@ -1,0 +1,6 @@
+ecco.adapter = true
+
+dependencies {
+    implementation project(':ecco-service')
+
+}
