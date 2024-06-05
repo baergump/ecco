@@ -1,12 +1,20 @@
 package at.jku.isse.ecco.adapter.c;
 
 import at.jku.isse.ecco.adapter.ArtifactReader;
+import at.jku.isse.ecco.adapter.c.parser.CEccoTranslator;
+import at.jku.isse.ecco.adapter.c.parser.CLexer;
+import at.jku.isse.ecco.adapter.c.parser.CParser;
 import at.jku.isse.ecco.adapter.dispatch.DispatchWriter;
 import at.jku.isse.ecco.dao.EntityFactory;
 import at.jku.isse.ecco.service.listener.ReadListener;
 import at.jku.isse.ecco.tree.Node;
 import com.google.inject.Inject;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -43,7 +51,34 @@ public class CReader implements ArtifactReader<Path, Set<Node.Op>> {
 
     @Override
     public Set<Node.Op> read(Path base, Path[] input) {
-        return null;
+        Set<Node.Op> nodes = new HashSet<>();
+        for (Path path : input) {
+            try{
+                Path absolutePath = base.resolve(path);
+                String absolutePathString = String.valueOf(absolutePath);
+                CharStream contentStream = CharStreams.fromFileName(absolutePathString);
+                List<String> lineList = Files.readAllLines(absolutePath);
+                String[] lines = lineList.toArray(new String[0]);
+
+                CLexer lexer = new CLexer(contentStream);
+                CommonTokenStream tokens = new CommonTokenStream(lexer);
+                CParser parser = new CParser(tokens);
+
+                CEccoTranslator translator = new CEccoTranslator(lines, this.entityFactory);
+                ParseTree tree = parser.translationUnit();
+
+                Node.Op node = translator.translate(tree);
+
+
+
+
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        return nodes;
     }
 
     @Override

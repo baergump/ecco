@@ -2,5 +2,7 @@ ecco.adapter = true
 
 dependencies {
     implementation project(':ecco-service')
-
+    implementation 'org.antlr:antlr4:4.13.1'
+    testImplementation 'junit:junit:4.13.1'
+    testImplementation 'junit:junit:4.13.1'
 }
