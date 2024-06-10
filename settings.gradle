@@ -13,6 +13,7 @@ include 'adapter-image'
 include 'adapter-challenge'
 include 'adapter-java'
 include 'adapter-python'
+include 'adapter-c'
 include 'adapter-cpp'
 include 'adapter-runtime'
 include 'adapter-golang'
@@ -32,8 +33,8 @@ project(':adapter-python').projectDir = file('adapter/python')
 project(':adapter-cpp').projectDir = file('adapter/cpp')
 project(':adapter-runtime').projectDir = file('adapter/runtime')
 project(':adapter-golang').projectDir = file('adapter/golang')
+project(':adapter-c').projectDir = file('adapter/c')
 
 rootProject.children.each { it.name = rootProject.name + '-' + it.name }
-include 'experiment'
 include 'experiment'
 

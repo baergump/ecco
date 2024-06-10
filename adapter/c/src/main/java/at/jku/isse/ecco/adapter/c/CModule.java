@@ -15,11 +15,12 @@ public class CModule extends AbstractModule {
     @Override
     protected void configure() {
         final Multibinder<ArtifactReader<Path, Set<Node.Op>>> readerMultibinder = Multibinder.newSetBinder(binder(),
-                new TypeLiteral<>() {});
+                new TypeLiteral<ArtifactReader<Path, Set<Node.Op>>>() {});
         readerMultibinder.addBinding().to(CReader.class);
 
         final Multibinder<ArtifactWriter<Set<Node>, Path>> writerMultibinder = Multibinder.newSetBinder(binder(),
-                new TypeLiteral<>() {});
+                new TypeLiteral<ArtifactWriter<Set<Node>, Path>>() {});
         writerMultibinder.addBinding().to(CWriter.class);
     }
+
 }

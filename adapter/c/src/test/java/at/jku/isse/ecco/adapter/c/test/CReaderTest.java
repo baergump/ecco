@@ -1,9 +1,8 @@
 package at.jku.isse.ecco.adapter.c.test;
 
-import org.junit.jupiter.api.Test;
+public class CReaderTest {
 
-public class CEccoTranslatorTest {
-    // test createProgramNode:
+    // test with files:
 
     // empty program (zero codeLines) (no FTs)
     // single line (no FTs)
@@ -20,5 +19,5 @@ public class CEccoTranslatorTest {
     // line with FT
     // function with FT
 
-
+    // multiple of these files
 }

@@ -7,10 +7,10 @@ import at.jku.isse.ecco.service.EccoService;
 import at.jku.isse.ecco.tree.Node;
 import mistake.*;
 import org.apache.commons.io.FileUtils;
+import result.ResultCalculator;
 import utils.BaseCleanUpVisitor;
 import utils.CounterVisitor;
 import utils.LiteralCleanUpVisitor;
-import result.ResultCalculator;
 import utils.vevos.ConfigTransformer;
 
 import java.io.File;
@@ -27,7 +27,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class FTExperimentRunner {
+public class ArgoumlExperimentRunner implements ExperimentRunner {
+
     private final EvaluationStrategy[] STRATEGIES = {
             new UserAdditionEvaluation(),
             new UserSubtractionEvaluation(),
@@ -41,12 +42,12 @@ public class FTExperimentRunner {
     //private final int[] MISTAKE_PERCENTAGES = {0, 1, 5, 10, 20};
     private final int[] MISTAKE_PERCENTAGES = {5};
     //private final Path REPOSITORY_BASE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Repositories");
-    private final Path REPOSITORY_BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\CRepos\\busybox\\Repositories");
+    private final Path REPOSITORY_BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\CRepos\\openvpn\\Repositories");
     //private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Variants");
-    private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\VEVOS_Simulation_Sampling\\simulated_variants\\busybox\\0180e82ecebe14abfe9a19ba7a297c12d064cc5c");
+    private final Path GROUND_TRUTHS = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\VEVOS_Simulation_Sampling\\simulated_variants\\openvpn\\0bdcfb99e1425cb6a73362f5462a7293ddfd699b");
 
     //private final Path RESULTS_BASE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Results");
-    private final Path RESULTS_BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\CRepos\\busybox\\Results");
+    private final Path RESULTS_BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\CRepos\\openvpn\\Results");
 
     private EccoService eccoService;
     private Path repositoryPath;
@@ -74,7 +75,7 @@ public class FTExperimentRunner {
     private final int MAX_FEATURE_NUMBER = 10;
 
     public static void main(String[] args) {
-        FTExperimentRunner experiment = new FTExperimentRunner();
+        ArgoumlExperimentRunner experiment = new ArgoumlExperimentRunner();
         experiment.features = ConfigTransformer.gatherConfigFeatures(experiment.GROUND_TRUTHS.resolve("configs"), experiment.MAX_FEATURE_NUMBER);
 
         //experiment.summarizeSpecificResults();
@@ -90,7 +91,7 @@ public class FTExperimentRunner {
     public void runSpecificExperiment(){
         //this.repositoryPath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\Repositories\\ScenarioRandom005Variants");
         //this.repositoryPath = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Repositories\\ScenarioRandom005Variants");
-        this.repositoryPath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\CRepos\\busybox\\Repositories\\005Variants");
+        this.repositoryPath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\CRepos\\openvpn\\Repositories\\005Variants");
         this.ftPercentage = 100;
         this.mistakePercentage = 10;
         this.strategy = new UserBasedEvaluation();
@@ -99,7 +100,7 @@ public class FTExperimentRunner {
         this.mistakeStrategy = conditionSwapper;
         MistakeCreator conditionSwapCreator = new MistakeCreator(conditionSwapper);
 
-        this.runExperiment(Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\CRepos\\busybox\\Results"), conditionSwapCreator);
+        this.runExperiment(Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\CRepos\\openvpn\\Results"), conditionSwapCreator);
         //summarizeResults();
         //experiment.checkCounts();
         //Path path = VevosUtils.getVariantPath(Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\Variants"), "BASE, COGNITIVE, COLLABORATIONDIAGRAM, STATEDIAGRAM");

@@ -1,5 +1,5 @@
-// Generated from C:/Users/Bernhard/Work/Projects/ecco/adapter/c/src/main/resources/grammar/C.g4 by ANTLR 4.13.1
-package at.jku.isse.ecco.adapter.c.parser;
+// Generated from .\ecco\adapter\c\src\main\resources\grammar\C.g4 by ANTLR 4.9.3
+package at.jku.isse.ecco.adapter.c.parser.generated;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**

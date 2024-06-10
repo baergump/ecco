@@ -8,12 +8,14 @@ repositories {
 }
 
 dependencies {
-    implementation project(path: ':ecco-adapter-challenge')
+    //implementation project(path: ':ecco-adapter-challenge')
     //implementation project(path: ':ecco-adapter-text')
-    implementation project(path: ':ecco-adapter-cpp')
+    //implementation project(path: ':ecco-adapter-cpp')
+    implementation project(path: ':ecco-adapter-c')
     implementation project(path: ':ecco-base')
     implementation project(path: ':ecco-service')
 
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.0.1'
     implementation 'commons-io:commons-io:2.15.1'
     implementation 'org.apache.commons:commons-collections4:4.4'
     implementation 'org.logicng:logicng:2.4.0'

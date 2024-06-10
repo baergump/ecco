@@ -30,13 +30,13 @@ public final class MemRepository implements Repository, Repository.Op {
 
 	public static final long serialVersionUID = 1L;
 
-	private transient Map<String, MemFeature> features;
-	private transient Collection<Association.Op> associations;
-	private transient ArrayList<Variant> variants = new ArrayList<>();
-	private transient List<Map<MemModule, MemModule>> modules;
-	private transient Collection<Commit> commits;
-	private transient int maxOrder;
-	private transient Node.Op featureTraceTree;
+	private Map<String, MemFeature> features;
+	private Collection<Association.Op> associations;
+	private ArrayList<Variant> variants = new ArrayList<>();
+	private List<Map<MemModule, MemModule>> modules;
+	private Collection<Commit> commits;
+	private int maxOrder;
+	private Node.Op featureTraceTree;
 	private transient FormulaFactory formulaFactory = new FormulaFactory();
 
 

@@ -1,6 +1,7 @@
 package utils.vevos;
 
 import org.apache.commons.io.FilenameUtils;
+import utils.DirUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,20 +22,24 @@ public class ConfigTransformer {
 
     public static void main(String[] args) {
         //final Path VARIANTS_BASE_PATH = Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\ArgoUML_Challenge\\ScenarioAllVariants");
-        final Path VARIANTS_BASE_PATH = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\VEVOS_Simulation_Sampling\\simulated_variants\\openvpn\\0bdcfb99e1425cb6a73362f5462a7293ddfd699b");
-        transformConfigurations(VARIANTS_BASE_PATH);
+        final Path sampleBasePath = Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\VEVOS_Simulation_Sampling\\simulated_variants\\openvpn");
+        iterateSamplings(sampleBasePath);
+    }
+
+    public static void iterateSamplings(Path sampleBasePath){
+        List<Path> samplePaths = DirUtils.getSubDirectoryPaths(sampleBasePath);
+        List<Path> resolvedSamplePaths = VevosUtils.extendSamplePathsByCommitFolder(samplePaths);
+        resolvedSamplePaths.forEach(ConfigTransformer::transformConfigurations);
     }
 
     public static void transformConfigurations(Path variantsBasePath){
         try (Stream<Path> stream = Files.list(variantsBasePath.resolve("configs"))) {
-            List <Path> paths = stream.filter(file -> !Files.isDirectory(file))
+            List<Path> paths = stream.filter(file -> !Files.isDirectory(file))
                     .filter(file -> file.getFileName().toString().contains(".config"))
-                    .collect(Collectors.toList());
-            for (Path path : paths){
-                transformConfiguration(path);
-            }
+                    .toList();
+            paths.forEach(ConfigTransformer::transformConfiguration);
         } catch (IOException e){
-            System.out.printf(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -78,7 +83,7 @@ public class ConfigTransformer {
             features.addAll(vevosConfigFeatures);
         }
 
-        return features.toArray(new String[features.size()]);
+        return features.toArray(new String[0]);
     }
 
     public static Set<String> listFilesUsingFilesList(Path dir) {

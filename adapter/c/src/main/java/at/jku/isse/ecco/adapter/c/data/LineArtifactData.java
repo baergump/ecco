@@ -28,7 +28,12 @@ public class LineArtifactData implements ArtifactData {
 
     @Override
     public boolean equals(Object obj) {
-        // TODO
-        return false;
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        LineArtifactData other = (LineArtifactData) obj;
+        if (this.line == null) {
+            return other.line == null;
+        } else return this.line.equals(other.line);
     }
 }

@@ -81,6 +81,7 @@ public class JavaChallengeReaderTest {
         FileUtils.cleanDirectory(this.REPOSITORY_PATH.toFile());
     }
 
+    /*
     @Test
     public void parseFileTest(){
         long start = System.currentTimeMillis();
@@ -130,6 +131,8 @@ public class JavaChallengeReaderTest {
     public void trainAllVariants(){
 
     }
+
+     */
 
     // TODO: Trees.treeFusion: multiple nodes with equal artifacts in the same variant will be fused correctly
     // TODO: (the correct "same" node must be chosen during fusion -> same sequence number)

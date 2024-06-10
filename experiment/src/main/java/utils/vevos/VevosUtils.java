@@ -1,6 +1,7 @@
 package utils.vevos;
 
 import org.apache.commons.collections4.CollectionUtils;
+import utils.DirUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -55,5 +56,24 @@ public class VevosUtils {
         String[] configElements = configString.split(",");
         for (int i = 0; i < configElements.length; i++){ configElements[i] = configElements[i].trim(); }
         return Arrays.stream(configElements).sorted().collect(Collectors.toList());
+    }
+
+    public static Path extendPathByCommitFolder(Path path){
+        List<Path> subPaths = DirUtils.getSubDirectoryPaths(path);
+        if (subPaths.size() != 1){
+            throw new RuntimeException("More than one commit-has subfolder for variant: " + path);
+        }
+        Path subPath = subPaths.iterator().next();
+        return path.resolve(subPath);
+    }
+
+    public static List<Path> extendSamplePathsByCommitFolder(List<Path> samplePaths){
+        Path randomSamplePath = samplePaths.iterator().next();
+        List<Path> subPaths = DirUtils.getSubDirectoryPaths(randomSamplePath);
+        if (subPaths.size() != 1){
+            throw new RuntimeException("More than one commit-has subfolder for variant: " + randomSamplePath);
+        }
+        Path subPath = subPaths.iterator().next();
+        return samplePaths.stream().map(p -> p.resolve(subPath)).toList();
     }
 }
