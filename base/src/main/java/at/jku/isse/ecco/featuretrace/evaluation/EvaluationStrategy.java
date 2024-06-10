@@ -14,4 +14,6 @@ public interface EvaluationStrategy {
                   String diffCondition);
 
     String getOverallConditionString(String userCondition, String diffCondition);
+
+    String getStrategyName();
 }

@@ -12,6 +12,8 @@ import org.logicng.formulas.FormulaFactory;
  */
 public class UserBasedEvaluation implements EvaluationStrategy{
 
+    private final String STRATEGY_NAME = "USER-BASED";
+
     @Override
     public boolean holds(Configuration configuration,
                          String userCondition,
@@ -32,5 +34,10 @@ public class UserBasedEvaluation implements EvaluationStrategy{
         } else {
             return userCondition;
         }
+    }
+
+    @Override
+    public String getStrategyName(){
+        return this.STRATEGY_NAME;
     }
 }

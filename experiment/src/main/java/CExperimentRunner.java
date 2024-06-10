@@ -1,27 +1,19 @@
 import at.jku.isse.ecco.feature.Feature;
 import at.jku.isse.ecco.feature.FeatureRevision;
-import at.jku.isse.ecco.featuretrace.FeatureTrace;
 import at.jku.isse.ecco.featuretrace.evaluation.*;
 import at.jku.isse.ecco.repository.Repository;
-import at.jku.isse.ecco.service.EccoService;
 import at.jku.isse.ecco.tree.Node;
 import mistake.*;
-import org.apache.commons.io.FileUtils;
+import result.persister.ResultDatabasePersister;
+import result.persister.ResultPersister;
 import utils.*;
 import result.ResultCalculator;
 import utils.vevos.ConfigTransformer;
 import utils.vevos.VevosUtils;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 
 public class CExperimentRunner implements ExperimentRunner {
@@ -119,9 +111,13 @@ public class CExperimentRunner implements ExperimentRunner {
         Node.Op mainTree = this.repository.fuseAssociationsWithFeatureTraces();
         this.baseCleanup(mainTree);
         this.literalNameCleanup(mainTree);
-        ResultCalculator metricsCalculator = new ResultCalculator(this.groundTruthPath, this.features);
-        // TODO
+        ResultPersister resultPersister = this.prepareResultPersister();
+        ResultCalculator metricsCalculator = new ResultCalculator(this.groundTruthPath, this.features, resultPersister);
         metricsCalculator.calculateMetrics(mainTree, this.strategy);
+    }
+
+    private ResultPersister prepareResultPersister(){
+        return new ResultDatabasePersister();
     }
 
     private void prepareExperiment(){
@@ -183,45 +179,11 @@ public class CExperimentRunner implements ExperimentRunner {
     private void printExperimentMessage(){
         System.out.println(
                 "Running experiment with following settings:\n" +
-                        "Strategy: " + this.strategyToFolderName(this.strategy) + "\n" +
+                        "Strategy: " + this.strategy.getStrategyName() + "\n" +
                         "Scenario: " + this.eccoRepositoryPath.getFileName() + "\n" +
                         "Feature Trace Percentage: " + this.ftPercentage + "\n" +
                         "Mistake Percentage: " + this.mistakePercentage + "\n" +
                         "Mistake Strategy: " + this.mistakeCreator.getMistakeStrategy().getClass().getSimpleName()
         );
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    // TODO
-    private String strategyToFolderName(EvaluationStrategy strategy){
-        if (strategy instanceof UserAdditionEvaluation){
-            return "Add";
-        } else if (strategy instanceof UserSubtractionEvaluation){
-            return "Remove";
-        } else if (strategy instanceof UserBasedEvaluation){
-            return "AddAndRemove";
-        } else if (strategy instanceof DiffBasedEvaluation){
-            return "Diff";
-        } else {
-            throw new RuntimeException();
-        }
-    }
-
-
 }

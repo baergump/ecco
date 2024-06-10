@@ -12,6 +12,8 @@ import org.logicng.formulas.FormulaFactory;
  */
 public class DiffBasedEvaluation implements EvaluationStrategy{
 
+    private final String STRATEGY_NAME = "DIFF-BASED";
+
     @Override
     public boolean holds(Configuration configuration,
                          String userCondition,
@@ -30,5 +32,10 @@ public class DiffBasedEvaluation implements EvaluationStrategy{
         } else {
             return diffCondition;
         }
+    }
+
+    @Override
+    public String getStrategyName(){
+        return this.STRATEGY_NAME;
     }
 }

@@ -23,11 +23,11 @@ public class EccoCRepoTrainer implements EccoTrainer {
     private static final int[] NUM_VARIANTS = {3, 5};
     private static final int NUM_SAMPLED_FEATURES = 10;
     private static final int NUM_VARIANT_PICKS = 5;
-    private static final String REPO_NAME = "openvpn";
+    private static final String REPO_NAME = "busybox";
     private static final Path[] REPO_SAMPLING_BASE_PATHS = {
-            Paths.get("C:\\Users\\Berni\\Desktop\\Project\\Tools\\VEVOS_Simulation_Sampling\\simulated_variants\\" + REPO_NAME)};
+            Paths.get("C:\\Users\\Bernhard\\Work\\Tools\\VEVOS_Simulation_Sampling\\simulated_variants\\" + REPO_NAME)};
     private static final Path REPOSITORIES_PATH =
-            Paths.get("C:\\Users\\Berni\\Desktop\\Project\\FeatureTraceChallenge\\CRepos\\" + REPO_NAME + "\\Repositories");
+            Paths.get("C:\\Users\\Bernhard\\Work\\Projects\\Experiment\\CRepos\\" + REPO_NAME + "\\Repositories");
 
     private int pickNumber;
     private int sampleNumber = 0;

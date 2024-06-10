@@ -13,6 +13,8 @@ import org.logicng.formulas.FormulaFactory;
  */
 public class UserSubtractionEvaluation implements EvaluationStrategy{
 
+    private final String STRATEGY_NAME = "USER-SUBTRACTION";
+
     @Override
     public boolean holds (Configuration configuration,
                           String userCondition,
@@ -41,5 +43,10 @@ public class UserSubtractionEvaluation implements EvaluationStrategy{
     public String getOverallConditionString(String userCondition, String diffCondition) {
         Formula overallFormula = this.getOverallFormula(userCondition, diffCondition);
         return overallFormula.toString();
+    }
+
+    @Override
+    public String getStrategyName(){
+        return this.STRATEGY_NAME;
     }
 }

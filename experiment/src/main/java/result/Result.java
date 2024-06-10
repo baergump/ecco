@@ -15,6 +15,14 @@ public class Result {
     private double recall;
     private double f1;
 
+    public int getTp(){ return this.tp; }
+    public int getFp(){ return this.fp; }
+    public int getTn(){ return this.tn; }
+    public int getFn(){ return this.fn; }
+    public double getPrecision(){ return this.precision;}
+    public double getRecall(){ return this.recall; }
+    public double getF1(){ return this.f1; }
+
     public void incTP(){this.tp++;}
     public void incFP(){this.fp++;}
     public void incTN(){this.tn++;}

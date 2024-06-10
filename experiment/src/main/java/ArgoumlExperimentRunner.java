@@ -208,8 +208,8 @@ public class ArgoumlExperimentRunner implements ExperimentRunner {
         mainTree.traverse(visitor);
         this.baseCleanup(mainTree);
         this.literalNameCleanup(mainTree);
-        ResultCalculator metricsCalculator = new ResultCalculator(this.GROUND_TRUTHS, this.features);
-        metricsCalculator.calculateMetrics(mainTree, this.strategy, resultBasePath);
+        //ResultCalculator metricsCalculator = new ResultCalculator(this.GROUND_TRUTHS, this.features);
+        //metricsCalculator.calculateMetrics(mainTree, this.strategy, resultBasePath);
     }
 
     private MistakeCreator createMistakeCreator(Collection<FeatureTrace> traces){

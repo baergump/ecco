@@ -12,6 +12,8 @@ import org.logicng.formulas.FormulaFactory;
  */
 public class UserAdditionEvaluation implements EvaluationStrategy{
 
+    private final String STRATEGY_NAME = "USER-ADDITION";
+
     @Override
     public boolean holds (Configuration configuration,
                           String userCondition,
@@ -41,5 +43,10 @@ public class UserAdditionEvaluation implements EvaluationStrategy{
         } else {
             return diffFormula;
         }
+    }
+
+    @Override
+    public String getStrategyName(){
+        return this.STRATEGY_NAME;
     }
 }
