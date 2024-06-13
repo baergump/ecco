@@ -30,7 +30,10 @@ public class MistakeCreator {
         int attempts = noOfMistakes;
         for (int i = 1; i <= attempts; i++){
             if (!iterator.hasNext()){
-                throw new RuntimeException("Failed to create enough mistakes!");
+                //throw new RuntimeException("Failed to create enough mistakes!");
+                // TODO
+                System.out.println("Failed to create enough mistakes!");
+                break;
             }
             FeatureTrace trace = iterator.next();
             if (!this.mistakeStrategy.createMistake(trace)){

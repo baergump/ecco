@@ -21,16 +21,21 @@ public class FeatureSwitcher implements MistakeStrategy{
 
     @Override
     public boolean createMistake(FeatureTrace trace){
-        String userConditionString = trace.getUserConditionString();
-        Formula userCondition = LogicUtils.parseString(this.formulaFactory, userConditionString);
-        SortedSet<Variable> variables = userCondition.variables();
-        Variable variable = this.getRandom(variables);
-        String randomFeature = this.features[(int) (this.features.length * Math.random())];
-        while (variable.toString().equals(randomFeature)){
-            randomFeature = this.features[(int) (this.features.length * Math.random())];
+        try {
+            String userConditionString = trace.getUserConditionString();
+            Formula userCondition = LogicUtils.parseString(this.formulaFactory, userConditionString);
+            SortedSet<Variable> variables = userCondition.variables();
+            Variable variable = this.getRandom(variables);
+            String randomFeature = this.features[(int) (this.features.length * Math.random())];
+            while (variable.toString().equals(randomFeature)) {
+                randomFeature = this.features[(int) (this.features.length * Math.random())];
+            }
+            trace.setUserCondition(userConditionString.replace(variable.toString(), randomFeature));
+            return true;
+        } catch (Exception e){
+            System.out.println("FeatureSwitcher failed to create mistake.");
+            return false;
         }
-        trace.setUserCondition(userConditionString.replace(variable.toString(), randomFeature));
-        return true;
     }
 
     @Override

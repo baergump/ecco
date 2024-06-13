@@ -6,17 +6,22 @@ import at.jku.isse.ecco.repository.Repository;
 public class OperatorSwapper implements MistakeStrategy{
     @Override
     public boolean createMistake(FeatureTrace trace) {
-        String oldCondition = trace.getUserConditionString();
-        String newCondition;
-        if (oldCondition.contains("|")){
-            newCondition = oldCondition.replaceFirst("\\|", "&");
-        } else if (oldCondition.contains("&")){
-            newCondition = oldCondition.replaceFirst("&", "|");
-        } else {
+        try {
+            String oldCondition = trace.getUserConditionString();
+            String newCondition;
+            if (oldCondition.contains("|")) {
+                newCondition = oldCondition.replaceFirst("\\|", "&");
+            } else if (oldCondition.contains("&")) {
+                newCondition = oldCondition.replaceFirst("&", "|");
+            } else {
+                return false;
+            }
+            trace.setUserCondition(newCondition);
+            return true;
+        } catch (Exception e){
+            System.out.println("OperatorSwapper failed to create mistake.");
             return false;
         }
-        trace.setUserCondition(newCondition);
-        return true;
     }
 
     @Override

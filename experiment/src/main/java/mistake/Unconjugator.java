@@ -16,19 +16,24 @@ public class Unconjugator implements MistakeStrategy{
 
     @Override
     public boolean createMistake(FeatureTrace trace) {
-        String userCondition = trace.getUserConditionString();
-        Formula conditionFormula = LogicUtils.parseString(this.formulaFactory, userCondition);
-        Formula cnf = conditionFormula.cnf();
-        SortedSet<Variable> variables = cnf.variables();
-        if (variables.size() < 2){
-            // there is no conjunction in the formula
+        try {
+            String userCondition = trace.getUserConditionString();
+            Formula conditionFormula = LogicUtils.parseString(this.formulaFactory, userCondition);
+            Formula cnf = conditionFormula.cnf();
+            SortedSet<Variable> variables = cnf.variables();
+            if (variables.size() < 2) {
+                // there is no conjunction in the formula
+                return false;
+            }
+            Variable toBeSwitched = this.getRandom(variables);
+            String cnfString = cnf.toString();
+            String newCondition = cnfString.replace(toBeSwitched.name(), formulaFactory.verum().toString());
+            trace.setUserCondition(newCondition);
+            return true;
+        } catch (Exception e){
+            System.out.println("Unconjugator failed to create mistake.");
             return false;
         }
-        Variable toBeSwitched = this.getRandom(variables);
-        String cnfString = cnf.toString();
-        String newCondition = cnfString.replace(toBeSwitched.name(), formulaFactory.verum().toString());
-        trace.setUserCondition(newCondition);
-        return true;
     }
 
     @Override

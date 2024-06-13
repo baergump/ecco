@@ -1,6 +1,7 @@
 package result.persister;
 
 import result.Result;
+import result.ResultContext;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,6 +10,7 @@ import java.nio.file.Path;
 public class ResultFilePersister implements ResultPersister {
 
     private Path filePath;
+    private ResultContext resultContext;
 
     public ResultFilePersister(Path filePath){
         this.filePath = filePath;
@@ -26,5 +28,15 @@ public class ResultFilePersister implements ResultPersister {
         } catch (IOException e){
             throw new RuntimeException("Could not write result: " + e.getMessage());
         }
+    }
+
+    @Override
+    public void setResultContext(ResultContext resultContext) {
+        this.resultContext = resultContext;
+    }
+
+    @Override
+    public ResultContext getResultContext() {
+        return this.resultContext;
     }
 }

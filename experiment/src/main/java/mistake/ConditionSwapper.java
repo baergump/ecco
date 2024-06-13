@@ -12,12 +12,17 @@ public class ConditionSwapper implements MistakeStrategy{
 
     @Override
     public boolean createMistake(FeatureTrace trace) {
-        String newCondition = this.getRandom(this.originalConditions);
-        while(newCondition.equals(trace.getUserConditionString())){
-            newCondition = this.getRandom(this.originalConditions);
+        try {
+            String newCondition = this.getRandom(this.originalConditions);
+            while (newCondition.equals(trace.getUserConditionString())) {
+                newCondition = this.getRandom(this.originalConditions);
+            }
+            trace.setUserCondition(newCondition);
+            return true;
+        } catch (Exception e){
+            System.out.println("ConditionSwapper failed to create mistake.");
+            return false;
         }
-        trace.setUserCondition(newCondition);
-        return true;
     }
 
     @Override

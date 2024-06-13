@@ -26,7 +26,6 @@ public class ResultCalculator {
     }
 
     public void calculateMetrics(Node.Op mainTree, EvaluationStrategy evaluationStrategy){
-        // TODO: make multiple revisions of the same feature possible
         FormulaFactory formulaFactory = new FormulaFactory();
         Collection<Assignment> assignments = AssignmentPowerset.getAssignmentPowerset(formulaFactory, allFeatures);
         EvaluationVisitor visitor = new EvaluationVisitor(formulaFactory, assignments, groundTruths, evaluationStrategy);

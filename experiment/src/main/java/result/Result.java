@@ -14,6 +14,7 @@ public class Result {
     private double precision;
     private double recall;
     private double f1;
+    private ResultContext resultContext;
 
     public int getTp(){ return this.tp; }
     public int getFp(){ return this.fp; }
@@ -55,5 +56,13 @@ public class Result {
         } catch (IOException e){
             throw new RuntimeException("Could not write result: " + e.getMessage());
         }
+    }
+
+    public void setResultContext(ResultContext resultContext){
+        this.resultContext = resultContext;
+    }
+
+    public ResultContext getResultContext(){
+        return this.resultContext;
     }
 }

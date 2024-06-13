@@ -21,17 +21,22 @@ public class Conjugator implements MistakeStrategy{
 
     @Override
     public boolean createMistake(FeatureTrace trace) {
-        String userConditionString = trace.getUserConditionString();
-        Formula userCondition = LogicUtils.parseString(this.formulaFactory, userConditionString);
-        SortedSet<Variable> variables = userCondition.variables();
-        Variable variable = this.getRandom(variables);
-        String randomFeature = this.features[(int) (this.features.length * Math.random())];
-        while (variable.toString().equals(randomFeature)){
-            randomFeature = this.features[(int) (this.features.length * Math.random())];
+        try {
+            String userConditionString = trace.getUserConditionString();
+            Formula userCondition = LogicUtils.parseString(this.formulaFactory, userConditionString);
+            SortedSet<Variable> variables = userCondition.variables();
+            Variable variable = this.getRandom(variables);
+            String randomFeature = this.features[(int) (this.features.length * Math.random())];
+            while (variable.toString().equals(randomFeature)) {
+                randomFeature = this.features[(int) (this.features.length * Math.random())];
+            }
+            String conjugation = variable + " & " + randomFeature;
+            trace.setUserCondition(userConditionString.replace(variable.toString(), conjugation));
+            return true;
+        } catch (Exception e){
+            System.out.println("Conjugator failed to make mistake.");
+            return false;
         }
-        String conjugation = variable + " & " + randomFeature;
-        trace.setUserCondition(userConditionString.replace(variable.toString(), conjugation));
-        return true;
     }
 
     @Override

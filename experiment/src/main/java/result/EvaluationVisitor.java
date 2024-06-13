@@ -40,7 +40,6 @@ public class EvaluationVisitor implements Node.Op.NodeVisitor {
         Formula groundTruth = this.getGroundTruth(location);
         // ignore "BASE"-ground-truths
         if (groundTruth.toString().equals("$true")){ return; }
-        // todo: ignore nodes with no user-condition and diff-condition of every
         String resultConditionString = node.getFeatureTrace().getOverallConditionString(this.evaluationStrategy);
         Formula resultCondition = LogicUtils.parseString(this.formulaFactory, resultConditionString);
         this.createResult(node, resultCondition, groundTruth);

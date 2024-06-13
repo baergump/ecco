@@ -23,7 +23,7 @@ public class EccoCRepoTrainer implements EccoTrainer {
     private static final int[] NUM_VARIANTS = {3, 5};
     private static final int NUM_SAMPLED_FEATURES = 10;
     private static final int NUM_VARIANT_PICKS = 5;
-    private static final String REPO_NAME = "busybox";
+    private static final String REPO_NAME = "openvpn";
     private static final Path[] REPO_SAMPLING_BASE_PATHS = {
             Paths.get("C:\\Users\\Bernhard\\Work\\Tools\\VEVOS_Simulation_Sampling\\simulated_variants\\" + REPO_NAME)};
     private static final Path REPOSITORIES_PATH =
@@ -116,7 +116,8 @@ public class EccoCRepoTrainer implements EccoTrainer {
         System.out.println("Writing repository information...");
         String[] sampledFeatures = ConfigTransformer.gatherConfigFeatures(this.samplePath.resolve("configs"), NUM_SAMPLED_FEATURES);
         List<String> variantConfigurations = this.createVariantConfigurationList();
-        RepositoryInformation info = new RepositoryInformation(REPO_NAME, sampledFeatures, variantConfigurations);
+        String sampleName = this.samplePath.getName(this.samplePath.getNameCount() - 2).toString();
+        RepositoryInformation info = new RepositoryInformation(REPO_NAME, sampledFeatures, variantConfigurations, sampleName);
         ObjectMapper objectMapper = new ObjectMapper();
         File file = new File(this.repositoryPath.resolve("repositoryInformation.json").toUri());
         try {
