@@ -2,7 +2,6 @@ package at.jku.isse.ecco.featuretrace.parser;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
 
 public class VevosCondition {
     private final Path filePath;

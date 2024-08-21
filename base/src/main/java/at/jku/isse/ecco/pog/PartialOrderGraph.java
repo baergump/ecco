@@ -17,7 +17,6 @@ public interface PartialOrderGraph extends Persistable {
 	int HEAD_SEQUENCE_NUMBER = -3;
 	int TAIL_SEQUENCE_NUMBER = -4;
 
-
 	Node getHead();
 
 	Collection<? extends Node> collectNodes();
@@ -34,6 +33,15 @@ public interface PartialOrderGraph extends Persistable {
 		void setMaxIdentifier(int value);
 
 		void incMaxIdentifier();
+
+
+
+
+
+
+
+
+
 
 		default List<Node.Op> collectNodes() {
 			List<Node.Op> nodes = new ArrayList<>();
@@ -122,7 +130,6 @@ public interface PartialOrderGraph extends Persistable {
 
 		//private
 		class State {
-			// todo: (delete again) nodes that must be aligned next?
 			public Map<Node.Op, Integer> counters;
 
 			public State() {
@@ -195,6 +202,11 @@ public interface PartialOrderGraph extends Persistable {
 			// matrix that stores the maps of matching nodes (sequence numbers to matching right nodes)
 			Map<Pair, Cell> matrix = Maps.mutable.empty();
 
+			if (this.getMaxIdentifier() > 100 && other.getMaxIdentifier() > 100){
+				System.out.println("found it");
+			}
+
+
 			// recursive memoized lcs
 			State leftState = new State();
 			leftState.counters.put(this.getTail(), 0);
@@ -202,7 +214,7 @@ public interface PartialOrderGraph extends Persistable {
 			rightState.counters.put(other.getTail(), 0);
 			//this.alignMemoizedBacktrackingRec(leftState, rightState, matrix);
 			this.alignMemoizedBacktrackingIter(leftState, rightState, matrix);
-			//System.out.println(matrix.size());
+
 			//IntObjectMap<Node.Op> result = this.backtrackingRec(leftState, rightState, matrix);
 			IntObjectMap<Node.Op> result = this.backtrackingIter(leftState, rightState, matrix);
 
@@ -362,23 +374,17 @@ public interface PartialOrderGraph extends Persistable {
 						matrix.put(methodState.pair, methodState.value);
 					}
 					lastResult = methodState.value;
-				}
-
-				else if (methodState.position == 1){
+				} else if (methodState.position == 1){
 					methodState.value = lastResult;
 					matrix.put(methodState.pair, methodState.value);
 					lastResult = methodState.value;
-				}
-
-				else if (methodState.position == 2){
+				} else if (methodState.position == 2){
 					methodState.previousValue = lastResult;
 					methodState.value = new Cell(methodState.previousValue);
 					methodState.value.score += 1;
 					matrix.put(methodState.pair, methodState.value);
 					lastResult = methodState.value;
-				}
-
-				else if (methodState.position == 3){
+				} else if (methodState.position == 3){
 					methodState.previousValue = lastResult;
 
 					if (methodState.localBest == null || methodState.previousValue.isBetterThan(methodState.localBest)) {
@@ -427,9 +433,7 @@ public interface PartialOrderGraph extends Persistable {
 						methodState.value = methodState.localBest;
 					matrix.put(methodState.pair, methodState.value);
 					lastResult = methodState.value;
-				}
-
-				else if (methodState.position == 4){
+				} else if (methodState.position == 4){
 					methodState.previousValue = lastResult;
 
 					if (methodState.localBest == null || methodState.previousValue.isBetterThan(methodState.localBest)) {
@@ -693,9 +697,7 @@ public interface PartialOrderGraph extends Persistable {
 						}
 						methodStack.push(new BacktrackingState(bestLeftState, bestRightState));
 					}
-				}
-
-				else if (methodState.position == 1){
+				} else if (methodState.position == 1){
 					lastResult.put(methodState.leftNode.getArtifact().getSequenceNumber(), methodState.rightNode);
 				}
 			}

@@ -187,6 +187,12 @@ public class MemNode implements Node, Node.Op {
 			throw new EccoException("An equivalent child is already contained. If multiple equivalent children are allowed use an ordered node.");
 
 		this.children.add(child);
+
+		/*// TODO: test this
+		if (this.getArtifact() != null && this.getArtifact().isOrdered()){
+			this.children.sort(Comparator.comparingInt(n -> n.getArtifact().getSequenceNumber()));
+		}*/
+
 		child.setParent(this);
 	}
 

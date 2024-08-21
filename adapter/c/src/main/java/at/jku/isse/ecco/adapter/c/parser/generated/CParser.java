@@ -926,7 +926,7 @@ public class CParser extends Parser {
 			setState(278);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,12,_ctx);
-			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
+			while ( _alt!=2 && _alt!= ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					{
 					{
@@ -2406,7 +2406,7 @@ public class CParser extends Parser {
 				setState(428); 
 				_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,31,_ctx);
-			} while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER );
+			} while ( _alt!=2 && _alt!= ATN.INVALID_ALT_NUMBER );
 			}
 		}
 		catch (RecognitionException re) {
@@ -3607,7 +3607,7 @@ public class CParser extends Parser {
 			setState(559);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,49,_ctx);
-			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
+			while ( _alt!=2 && _alt!= ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					{
 					{
@@ -4068,7 +4068,7 @@ public class CParser extends Parser {
 			setState(602);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,54,_ctx);
-			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
+			while ( _alt!=2 && _alt!= ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					{
 					{
@@ -4214,7 +4214,7 @@ public class CParser extends Parser {
 			setState(669);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,62,_ctx);
-			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
+			while ( _alt!=2 && _alt!= ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					if ( _parseListeners!=null ) triggerExitRuleEvent();
 					_prevctx = _localctx;
@@ -5200,7 +5200,7 @@ public class CParser extends Parser {
 			setState(745);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,76,_ctx);
-			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
+			while ( _alt!=2 && _alt!= ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					{
 					{
@@ -5599,7 +5599,7 @@ public class CParser extends Parser {
 				setState(789);
 				_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,84,_ctx);
-				while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
+				while ( _alt!=2 && _alt!= ATN.INVALID_ALT_NUMBER ) {
 					if ( _alt==1 ) {
 						{
 						{
@@ -5707,7 +5707,7 @@ public class CParser extends Parser {
 				setState(825);
 				_errHandler.sync(this);
 				_alt = getInterpreter().adaptivePredict(_input,89,_ctx);
-				while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
+				while ( _alt!=2 && _alt!= ATN.INVALID_ALT_NUMBER ) {
 					if ( _alt==1 ) {
 						{
 						{
@@ -5727,7 +5727,7 @@ public class CParser extends Parser {
 			setState(873);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,97,_ctx);
-			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
+			while ( _alt!=2 && _alt!= ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					if ( _parseListeners!=null ) triggerExitRuleEvent();
 					_prevctx = _localctx;
@@ -5848,7 +5848,7 @@ public class CParser extends Parser {
 						setState(868);
 						_errHandler.sync(this);
 						_alt = getInterpreter().adaptivePredict(_input,95,_ctx);
-						while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
+						while ( _alt!=2 && _alt!= ATN.INVALID_ALT_NUMBER ) {
 							if ( _alt==1 ) {
 								{
 								{
@@ -6083,7 +6083,7 @@ public class CParser extends Parser {
 			setState(899);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,102,_ctx);
-			while ( _alt!=2 && _alt!=org.antlr.v4.runtime.atn.ATN.INVALID_ALT_NUMBER ) {
+			while ( _alt!=2 && _alt!= ATN.INVALID_ALT_NUMBER ) {
 				if ( _alt==1 ) {
 					{
 					{

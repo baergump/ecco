@@ -15,6 +15,9 @@ dependencies {
     implementation project(path: ':ecco-base')
     implementation project(path: ':ecco-service')
 
+    implementation files('src/main/resources/lib/simulation-2.0.0-jar-with-dependencies.jar')
+
+    implementation 'org.tinylog:tinylog-api:2.7.0'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.0.1'
     implementation 'commons-io:commons-io:2.15.1'
     implementation 'org.apache.commons:commons-collections4:4.4'

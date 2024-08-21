@@ -41,8 +41,9 @@ public class CEccoTranslator {
         this.sortFunctionStructures();
 
         // this node is necessary to make the functions and lines ordered
-        AbstractArtifactData artifactData = new AbstractArtifactData("Ordering Placeholder Artifact");
+        AbstractArtifactData artifactData = new AbstractArtifactData("Ordering Artifact");
         Node.Op orderingNode = this.entityFactory.createOrderedNode(artifactData);
+
 
         int startLine = 1;
         for(FunctionStructure functionStructure : this.functionStructures){
@@ -67,6 +68,11 @@ public class CEccoTranslator {
     private void addLineNodes(Node.Op parentNode, int startLine, int endLine){
         for(int i = startLine; i <= endLine; i++){
             String codeLine = this.codeLines[i - 1];
+
+            if (codeLine.isEmpty()){
+                continue;
+            }
+
             Artifact.Op<LineArtifactData> lineArtifactData = this.entityFactory.createArtifact(new LineArtifactData(codeLine));
 
             // TODO: delete (only used for experiment)
@@ -82,14 +88,12 @@ public class CEccoTranslator {
     private Node.Op createFunctionNode(FunctionStructure functionStructure){
         Artifact.Op<FunctionArtifactData> data = this.entityFactory.createArtifact(new FunctionArtifactData(functionStructure.functionSignature()));
 
-        // TODO: delete (only used for experiment)
-        Location location = new Location(functionStructure.startLine(), functionStructure.endLine(), this.path);
-        Node.Op functionNode = this.createOrderedNodeWithLocation((Artifact.Op) data, location);
-        //Node.Op functionNode = this.entityFactory.createOrderedNode(data);
+        //Location location = new Location(functionStructure.startLine(), functionStructure.endLine(), this.path);
+        //Node.Op functionNode = this.createOrderedNodeWithLocation((Artifact.Op) data, location);
+        Node.Op functionNode = this.entityFactory.createOrderedNode(data);
 
         this.addLineNodes(functionNode, functionStructure.startLine(), functionStructure.endLine());
-        // todo: give conditions only to lines
-        this.checkForFeatureTrace(functionStructure, functionNode);
+        //this.checkForFeatureTrace(functionStructure, functionNode);
         return functionNode;
     }
 
@@ -113,8 +117,6 @@ public class CEccoTranslator {
             FeatureTrace nodeTrace = node.getFeatureTrace();
             nodeTrace.buildUserConditionConjunction(condition.getConditionString());
         }
-
-        // TODO: give
     }
 
     private void checkForFeatureTrace(int lineNumber, Node.Op node){

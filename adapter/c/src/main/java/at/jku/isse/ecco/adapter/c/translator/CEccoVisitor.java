@@ -52,9 +52,6 @@ public class CEccoVisitor extends CBaseVisitor<Node.Op> {
             if (this.checkFunction(ctx)) {
                 String functionSignature = this.getFunctionSignature(ctx);
                 programStructure.addFunctionStructure(ctx.start.getLine(), ctx.stop.getLine(), functionSignature);
-            } else {
-                // TODO: delete this else-branch
-                //System.out.println();
             }
         }
     }

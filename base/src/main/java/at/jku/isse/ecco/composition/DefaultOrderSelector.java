@@ -25,6 +25,7 @@ public class DefaultOrderSelector implements OrderSelector {
 	}
 
 
+
 	/**
 	 * Selects and sets the first valid order that is found.
 	 *

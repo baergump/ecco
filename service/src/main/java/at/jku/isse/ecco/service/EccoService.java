@@ -681,7 +681,7 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
         checkNotNull(configurationString);
 
         if (!configurationString.matches(Configuration.CONFIGURATION_STRING_REGULAR_EXPRESSION))
-            throw new EccoException("Invalid configuration string provided.");
+            throw new EccoException("Invalid configuration string provided: " + configurationString);
 
         if (configurationString.isEmpty()) {
             return this.entityFactory.createConfiguration(new FeatureRevision[0]);
@@ -1559,18 +1559,19 @@ public class EccoService implements ProgressInputStream.ProgressListener, Progre
             repository.addFeatureRevisions(configuration.getFeatureRevisions());
             Set<Node.Op> nodes = readFiles();
 
-            nodes.forEach(Trees::sequence);
+            //nodes.forEach(Trees::sequence);
 
             // TODO: this is done for paper-purposes in regard to feature traces
             ConfigInsertionVisitor visitor = new ConfigInsertionVisitor(configuration);
             nodes.forEach(node -> node.traverse(visitor));
 
-            List<Node.Op> featureTraceTrees = nodes.stream().map(Trees::extractFeatureTraceTree).collect(Collectors.toList());
-            featureTraceTrees.forEach(node -> {
-                        Node.Op root = this.entityFactory.createRootNode();
-                        root.addChild(node);
-                        repository.mergeFeatureTraceTree(root);
-            });
+            // TODO: uncomment?
+            //List<Node.Op> featureTraceTrees = nodes.stream().map(Trees::extractFeatureTraceTree).toList();
+            //featureTraceTrees.forEach(node -> {
+            //            Node.Op root = this.entityFactory.createRootNode();
+            //            root.addChild(node);
+            //            repository.mergeFeatureTraceTree(root);
+            //});
 
             ArrayList<Variant> variants = repository.getVariants();
 

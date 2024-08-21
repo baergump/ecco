@@ -15,7 +15,6 @@ public class VevosFileConditionContainer {
     }
 
     public Collection<VevosCondition> getMatchingPresenceConditions(int startLine, int endLine){
-        // todo: maybe implement a fast version of this method
         Collection<VevosCondition> matchingConditions = new HashSet<>();
         for (VevosCondition condition : this.fileSpecificConditions){
             this.validateLines(startLine, endLine, condition);

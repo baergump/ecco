@@ -5,7 +5,7 @@ import at.jku.isse.ecco.artifact.Artifact;
 import at.jku.isse.ecco.artifact.ArtifactData;
 import at.jku.isse.ecco.artifact.ArtifactReference;
 import at.jku.isse.ecco.pog.PartialOrderGraph;
-import at.jku.isse.ecco.storage.mem.pog.MemPartialOrderGraph;
+import at.jku.isse.ecco.storage.mem.pog.fullfledged.MemPartialOrderGraph;
 import at.jku.isse.ecco.tree.Node;
 import org.eclipse.collections.impl.factory.Maps;
 
@@ -192,6 +192,7 @@ public class MemArtifact<DataType extends ArtifactData> implements Artifact<Data
 	}
 
 
+	// TODO: use guice?
 	@Override
 	public PartialOrderGraph.Op createSequenceGraph() {
 		return new MemPartialOrderGraph();

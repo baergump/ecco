@@ -214,9 +214,12 @@ public final class MemRepository implements Repository, Repository.Op {
 	@Override
 	public Node.Op fuseAssociationsWithFeatureTraces() {
 		// todo: overwrite copySingleNodeCompletely in MemRootNode
-		Node.Op mainTree = this.featureTraceTree.copySingleNodeCompletely();
-		Trees.treeFusion(mainTree, this.featureTraceTree);
 
+		// TODO: uncomment?
+		//Node.Op mainTree = this.featureTraceTree.copySingleNodeCompletely();
+		//Trees.treeFusion(mainTree, this.featureTraceTree);
+
+		Node.Op mainTree = null;
 		for (Association.Op association : this.associations){
 			Node.Op associationTree = association.getTraceTree();
 			Trees.treeFusion(mainTree, associationTree);

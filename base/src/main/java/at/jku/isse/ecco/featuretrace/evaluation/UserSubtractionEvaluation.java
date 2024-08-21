@@ -49,4 +49,9 @@ public class UserSubtractionEvaluation implements EvaluationStrategy{
     public String getStrategyName(){
         return this.STRATEGY_NAME;
     }
+
+    @Override
+    public String toString(){
+        return this.getStrategyName();
+    }
 }

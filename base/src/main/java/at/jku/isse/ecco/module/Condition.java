@@ -78,7 +78,14 @@ public interface Condition extends Persistable {
 					.collect(Collectors.toList());
 			moduleFormulas.add(formulaFactory.or(moduleRevisionFormulas));
 		}
-		Formula conditionFormula = formulaFactory.and(moduleFormulas);
+
+		Formula conditionFormula;
+		if (this.getType().equals(TYPE.AND)){
+			conditionFormula = formulaFactory.and(moduleFormulas);
+		} else {
+			conditionFormula = formulaFactory.or(moduleFormulas);
+		}
+
 		return conditionFormula.toString();
 	}
 

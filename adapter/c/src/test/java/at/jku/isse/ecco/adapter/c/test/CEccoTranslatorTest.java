@@ -19,6 +19,4 @@ public class CEccoTranslatorTest {
 
     // line with FT
     // function with FT
-
-
 }
