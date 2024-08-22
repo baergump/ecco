@@ -38,7 +38,7 @@ public class Experiment {
         Logger.info("Running the following configuration:\n" + config.toString());
         for (int i = 1; i <= config.getNumberOfRuns(); i++) {
             VevosFeatureSampler sampler = new VevosFeatureSampler(config);
-            EccoTrainer trainer;
+            EccoTrainer trainer = null;
             try {
                 sampler.sample();
                 config.pickVariants();
@@ -51,10 +51,10 @@ public class Experiment {
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException(e.getMessage());
+            } finally {
+                trainer.cleanUp();
+                sampler.cleanUp();
             }
-
-            trainer.cleanUp();
-            sampler.cleanUp();
         }
     }
 

@@ -28,7 +28,7 @@ public class SimplePogMerger {
 
         // create pog
         // add collection by adding nodes one by one
-
+        return null;
     }
 
     private static PartialOrderGraph.Op checkOverlappingNode(MemPartialOrderGraphNode.Op left, MemPartialOrderGraphNode.Op right){
@@ -37,9 +37,7 @@ public class SimplePogMerger {
         // if yes, add to pog
 
         // if not return null
-
+        return null;
     }
-
-
 
 }

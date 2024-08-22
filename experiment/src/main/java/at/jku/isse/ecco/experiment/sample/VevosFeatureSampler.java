@@ -63,7 +63,8 @@ public class VevosFeatureSampler {
                 return;
             } else {
                 Logger.error("VEVOS Sampling failed to sample features with valid names: " + features);
-                Logger.info(String.format("Attempting sampling after invalid sample (try number %d)...", i));
+                Logger.info(String.format("Attempting sampling after invalid sample (try number %d)...", i + 1));
+                this.cleanUp();
             }
         }
         Logger.error("VEVOS Sampling failed 5 times in a row to sample features with valid names!");
@@ -159,6 +160,7 @@ public class VevosFeatureSampler {
 
     public void cleanUp(){
         DirUtils.deleteDir(this.config.getVariantsDir());
+        DirUtils.createDir(this.config.getVariantsDir());
     }
 }
 
