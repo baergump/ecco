@@ -52,12 +52,12 @@ public class Experiment {
             } catch (Exception e) {
                 e.printStackTrace();
                 // throw new RuntimeException(e.getMessage());
+            } finally {
+                if (trainer != null) {
+                    trainer.cleanUp();
+                }
+                sampler.cleanUp();
             }
-
-            if (trainer != null) {
-                trainer.cleanUp();
-            }
-            sampler.cleanUp();
         }
     }
 

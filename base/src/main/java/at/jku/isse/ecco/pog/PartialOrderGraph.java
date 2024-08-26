@@ -202,11 +202,6 @@ public interface PartialOrderGraph extends Persistable {
 			// matrix that stores the maps of matching nodes (sequence numbers to matching right nodes)
 			Map<Pair, Cell> matrix = Maps.mutable.empty();
 
-			if (this.getMaxIdentifier() > 100 && other.getMaxIdentifier() > 100){
-				System.out.println("found it");
-			}
-
-
 			// recursive memoized lcs
 			State leftState = new State();
 			leftState.counters.put(this.getTail(), 0);
