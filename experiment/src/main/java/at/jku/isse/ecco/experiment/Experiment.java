@@ -26,6 +26,7 @@ public class Experiment {
     }
 
     public static void runExperimentSet(ExperimentConfiguration experimentConfig){
+        Logger.info("Number of runs left to do: " + experimentConfig.getNumberOfRunsLeft());
         Logger.info("Running experiment with the following configuration:\n" + experimentConfig.toString());
         ExperimentRunConfiguration config = experimentConfig.getNextRunConfiguration();
         while(config != null){
@@ -38,7 +39,7 @@ public class Experiment {
         Logger.info("Running the following configuration:\n" + config.toString());
         for (int i = 1; i <= config.getNumberOfRuns(); i++) {
             VevosFeatureSampler sampler = new VevosFeatureSampler(config);
-            EccoTrainer trainer;
+            EccoTrainer trainer = null;
             try {
                 sampler.sample();
                 config.pickVariants();
@@ -50,10 +51,12 @@ public class Experiment {
                 runner.runExperiment();
             } catch (Exception e) {
                 e.printStackTrace();
-                throw new RuntimeException(e.getMessage());
+                // throw new RuntimeException(e.getMessage());
             }
 
-            trainer.cleanUp();
+            if (trainer != null) {
+                trainer.cleanUp();
+            }
             sampler.cleanUp();
         }
     }

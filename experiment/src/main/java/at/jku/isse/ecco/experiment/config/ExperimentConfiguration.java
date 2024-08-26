@@ -136,6 +136,14 @@ public class ExperimentConfiguration{
         }
     }
 
+    public int getNumberOfRunsLeft(){
+        if (this.runConfigurations.isEmpty()){
+            throw new RuntimeException("Configurations for experiments are not yet deduced.");
+        } else {
+            return this.runConfigurations.size();
+        }
+    }
+
     public String toString(){
         return "Experiment Configuration:\n" +
                 "Repositories: " + this.repositoryNames + "\n" +
